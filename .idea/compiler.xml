@@ -8,19 +8,27 @@
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-configuration-processor/4.0.6/85a814e8afbc6c5a6637489760028688bb77860/spring-boot-configuration-processor-4.0.6.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.46/a5cfe99fdf320e84955ef653f2ce1bf789d11385/lombok-1.18.46.jar" />
         </processorPath>
-        <module name="com.example.bugbug.main" />
+        <module name="com.bug.bugbug.main" />
       </profile>
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.46/a5cfe99fdf320e84955ef653f2ce1bf789d11385/lombok-1.18.46.jar" />
         </processorPath>
-        <module name="com.example.bugbug.test" />
+        <module name="com.bug.bugbug.test" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="com.example.bugbug" target="21" />
+      <module name="com.example.bugbug.main" target="21" />
+      <module name="com.example.bugbug.test" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="com.bug.bugbug" options="-parameters" />
+      <module name="com.bug.bugbug.main" options="-parameters" />
+      <module name="com.bug.bugbug.test" options="-parameters" />
       <module name="com.example.bugbug" options="-parameters" />
       <module name="com.example.bugbug.main" options="-parameters" />
       <module name="com.example.bugbug.test" options="-parameters" />
