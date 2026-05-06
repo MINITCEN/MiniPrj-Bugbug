@@ -17,32 +17,48 @@ public class ChatMessage {
     @Column(name = "message_id")
     private Long id;
 
-    // 1. 어떤 채팅방에서 오간 메시지인지
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private ChatRoom chatRoom;
 
-    // 2. 메시지를 보낸 사람 (헌터도 결국 User이므로 User를 참조합니다)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
-    // 3. 메시지 내용 (길이가 길 수 있으므로 TEXT 타입 사용)
+    // --- 멀티미디어 지원을 위한 추가 필드 ---
+    
+    // 메시지 종류 (텍스트, 사진, 동영상, 음성)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "message_type", nullable = false, length = 20)
+    private MessageType messageType;
+
+    // 사진, 영상, 음성 파일이 저장된 S3/로컬 URL 주소 (텍스트일 때는 null)
+    @Column(name = "file_url", length = 1000)
+    private String fileUrl;
+
+    // ---------------------------------------
+
+    // 메시지 내용 (사진/영상을 보냈을 땐 "사진을 보냈습니다" 등의 안내 텍스트로 활용 가능)
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    // 4. 읽음 여부 (기본값: false 안 읽음)
     @Column(name = "is_read", nullable = false)
     @Builder.Default
     private boolean isRead = false;
 
-    // 5. 메시지 발송 시간
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // DB에 저장되기 전에 자동으로 현재 시간을 세팅합니다.
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    // 메시지 타입을 구분하기 위한 Enum
+    public enum MessageType {
+        TEXT,   // 일반 텍스트
+        IMAGE,  // 사진
+        VIDEO,  // 동영상
+        AUDIO   // 음성(녹음)
     }
 }
