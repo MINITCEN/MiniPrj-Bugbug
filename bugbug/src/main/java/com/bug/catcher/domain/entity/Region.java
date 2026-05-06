@@ -17,20 +17,19 @@ public class Region {
 
   @Id
   @Column(name = "region_id")
-  private Long id; // 행정구역코드
+  private Long id;
 
   @Column(nullable = false, unique = true)
-  private String name; // 자치구명
+  private String name;
 
-  // 토지 이용 비율 (0.0 ~ 1.0, 세 컬럼의 합은 1.0이어야 함)
   @Column(name = "water_ratio", nullable = false)
-  private Double waterRatio; // 수변부 비율
+  private Double waterRatio;
 
   @Column(name = "residential_ratio", nullable = false)
-  private Double residentialRatio; // 주거지 비율
+  private Double residentialRatio;
 
   @Column(name = "park_ratio", nullable = false)
-  private Double parkRatio; // 공원 비율
+  private Double parkRatio;
 
   @Builder
   public Region(Long id, String name, Double waterRatio, Double residentialRatio, Double parkRatio) {
@@ -39,23 +38,5 @@ public class Region {
     this.waterRatio = waterRatio;
     this.residentialRatio = residentialRatio;
     this.parkRatio = parkRatio;
-  }
-
-  /**
-   * 자치구별 모기 지수 계산 로직
-   * @param seoulWaterIndex 서울시 수변부 모기 지수
-   * @param seoulResIndex 서울시 주거지 모기 지수
-   * @param seoulParkIndex 서울시 공원 모기 지수
-   * @return 해당 자치구의 최종 보정 지수
-   */
-  public double calculateDistrictIndex(double seoulWaterIndex, double seoulResIndex, double seoulParkIndex) {
-    double idx = (seoulWaterIndex * this.waterRatio) +
-        (seoulResIndex * this.residentialRatio) +
-        (seoulParkIndex * this.parkRatio);
-    if(idx>100){
-      return 100;
-    }else{
-      return idx;
-    }
   }
 }
