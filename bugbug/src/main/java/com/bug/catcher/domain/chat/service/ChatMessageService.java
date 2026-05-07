@@ -39,4 +39,32 @@ public class ChatMessageService {
         
         return ChatMessageDto.Response.fromEntity(savedMessage);
     }
+
+    /**
+     * 업로드된 파일을 메시지로 DB에 저장하고 반환합니다.
+     */
+    @Transactional
+    public ChatMessageDto.Response saveFileMessage(Long roomId, Long senderId, String fileUrl, ChatMessage.MessageType type) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
+
+        User sender = User.builder().id(senderId).nickname("임시 닉네임").build();
+
+        String content = "파일을 보냈습니다.";
+        if (type == ChatMessage.MessageType.IMAGE) content = "(사진)";
+        if (type == ChatMessage.MessageType.VIDEO) content = "(동영상)";
+        if (type == ChatMessage.MessageType.AUDIO) content = "(음성 메시지)";
+
+        ChatMessage chatMessage = ChatMessage.builder()
+                .chatRoom(chatRoom)
+                .sender(sender)
+                .content(content)
+                .fileUrl(fileUrl)
+                .messageType(type)
+                .build();
+
+        ChatMessage savedMessage = chatMessageRepository.save(chatMessage);
+
+        return ChatMessageDto.Response.fromEntity(savedMessage);
+    }
 }

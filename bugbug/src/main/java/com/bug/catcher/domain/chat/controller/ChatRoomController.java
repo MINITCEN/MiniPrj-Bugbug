@@ -2,14 +2,21 @@ package com.bug.catcher.domain.chat.controller;
 
 import com.bug.catcher.domain.chat.dto.ChatMessageDto;
 import com.bug.catcher.domain.chat.dto.ChatRoomDto;
+import com.bug.catcher.domain.chat.service.ChatMessageService;
 import com.bug.catcher.domain.chat.service.ChatRoomService;
+import com.bug.catcher.domain.entity.ChatMessage;
+import com.bug.catcher.global.infra.FileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Tag(name = "Chat API", description = "채팅방 및 메시지 관련 API")
@@ -19,6 +26,9 @@ import java.util.List;
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
+    private final FileService fileService;
+    private final ChatMessageService chatMessageService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     /**
      * 1. 채팅방 생성 (의뢰 지원 시)
@@ -76,5 +86,37 @@ public class ChatRoomController {
         
         chatRoomService.updateReservation(roomId, request);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * 5. 파일 전송 (사진, 동영상, 음성)
+     * POST /api/chats/{roomId}/files
+     */
+    @Operation(summary = "채팅 파일 전송", description = "사진, 동영상, 녹음 파일을 전송합니다.")
+    @PostMapping(value = "/chats/{roomId}/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadChatFile(
+            @PathVariable Long roomId,
+            @RequestPart("file") MultipartFile file,
+            @RequestParam("messageType") ChatMessage.MessageType messageType,
+            @RequestParam("senderId") Long senderId) {
+
+        try {
+            // 1. 로컬(uploads 폴더)에 파일 저장 후 URL 경로 반환 (확장자 검증 포함)
+            String fileUrl = fileService.storeFile(file, messageType);
+
+            // 2. DB에 메시지(파일 URL 포함) 저장
+            ChatMessageDto.Response savedMessage = chatMessageService.saveFileMessage(roomId, senderId, fileUrl, messageType);
+
+            // 3. 웹소켓을 통해 채팅방에 메시지 브로드캐스트
+            messagingTemplate.convertAndSend("/topic/chat/room/" + roomId, savedMessage);
+
+            return ResponseEntity.ok().build();
+
+        } catch (IllegalArgumentException e) {
+            // 확장자가 안 맞아서 에러가 난 경우, 프론트에 400 Bad Request와 에러 메시지를 보냅니다.
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 저장 중 오류가 발생했습니다.");
+        }
     }
 }

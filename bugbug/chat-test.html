@@ -6,9 +6,13 @@
     <!-- SockJS and STOMP -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        .chat-media { max-width: 200px; max-height: 200px; display: block; margin-top: 5px; }
+        .message-box { margin-bottom: 10px; padding: 5px; border-bottom: 1px solid #eee; }
+    </style>
 </head>
 <body>
-    <h2>웹소켓 실시간 채팅 테스트</h2>
+    <h2>웹소켓 실시간 채팅 + 파일 전송 테스트</h2>
     
     <div>
         <label>채팅방 번호 (Room ID): </label>
@@ -21,9 +25,22 @@
     
     <br>
     
-    <div>
-        <input type="text" id="message" placeholder="보낼 메시지 입력">
-        <button onclick="sendMessage()">전송</button>
+    <!-- 텍스트 전송 -->
+    <div style="margin-bottom: 10px;">
+        <input type="text" id="message" placeholder="보낼 텍스트 메시지 입력">
+        <button onclick="sendMessage()">텍스트 전송</button>
+    </div>
+
+    <!-- 파일 전송 (사진, 영상, 음성) -->
+    <div style="background-color: #f9f9f9; padding: 10px; border: 1px solid #ddd;">
+        <strong>파일 전송:</strong>
+        <select id="fileType">
+            <option value="IMAGE">사진 (IMAGE)</option>
+            <option value="VIDEO">동영상 (VIDEO)</option>
+            <option value="AUDIO">음성 (AUDIO)</option>
+        </select>
+        <input type="file" id="fileInput">
+        <button onclick="sendFile()">파일 전송</button>
     </div>
 
     <hr>
@@ -45,12 +62,25 @@
                 console.log('Connected: ' + frame);
                 document.getElementById('chat-box').innerHTML += "<div><i>[" + currentRoomId + "번 방에 연결되었습니다]</i></div>";
 
-                // 해당 방 번호로 구독(Subscribe)
                 stompClient.subscribe('/topic/chat/room/' + currentRoomId, function (chatMessage) {
-                    // 서버로부터 받은 메시지 처리
                     const msg = JSON.parse(chatMessage.body);
                     const chatBox = document.getElementById('chat-box');
-                    chatBox.innerHTML += "<div><b>" + msg.senderNickname + "</b>: " + msg.content + " <small>(" + msg.createdAt + ")</small></div>";
+                    
+                    let mediaHtml = "";
+                    if (msg.messageType === 'IMAGE') {
+                        mediaHtml = `<img src="http://localhost:8080${msg.fileUrl}" class="chat-media">`;
+                    } else if (msg.messageType === 'VIDEO') {
+                        mediaHtml = `<video src="http://localhost:8080${msg.fileUrl}" controls class="chat-media"></video>`;
+                    } else if (msg.messageType === 'AUDIO') {
+                        mediaHtml = `<audio src="http://localhost:8080${msg.fileUrl}" controls class="chat-media"></audio>`;
+                    }
+
+                    chatBox.innerHTML += `
+                        <div class="message-box">
+                            <b>${msg.senderNickname}</b>: ${msg.content} <small>(${msg.createdAt})</small>
+                            ${mediaHtml}
+                        </div>
+                    `;
                 });
             });
         }
@@ -68,19 +98,55 @@
             const senderId = document.getElementById('senderId').value;
             
             if (stompClient && content) {
-                // 발신(Publish) 요청 데이터 조립 (SendRequest DTO 형태에 맞춤)
                 const chatMessage = {
                     roomId: currentRoomId,
                     senderId: senderId,
                     content: content,
                     messageType: "TEXT"
                 };
-
-                // 서버의 /app/chat/message 로 데이터 전송
                 stompClient.send("/app/chat/message", {}, JSON.stringify(chatMessage));
                 document.getElementById('message').value = '';
             } else {
                 alert("연결이 안 되어 있거나 메시지가 없습니다.");
+            }
+        }
+
+        // 파일 전송 로직 (HTTP POST 요청)
+        async function sendFile() {
+            const fileInput = document.getElementById('fileInput');
+            const fileType = document.getElementById('fileType').value;
+            const senderId = document.getElementById('senderId').value;
+
+            if (!stompClient) {
+                alert("먼저 채팅방에 연결해주세요.");
+                return;
+            }
+            if (fileInput.files.length === 0) {
+                alert("파일을 선택해주세요.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+            formData.append("messageType", fileType);
+            formData.append("senderId", senderId);
+
+            try {
+                // 일반 REST API로 파일을 업로드합니다.
+                const response = await fetch(`http://localhost:8080/api/chats/${currentRoomId}/files`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (response.ok) {
+                    console.log("파일 업로드 성공 (알림은 웹소켓으로 자동 수신됨)");
+                    fileInput.value = ""; // 입력창 초기화
+                } else {
+                    alert("파일 전송 실패");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("오류가 발생했습니다.");
             }
         }
     </script>
