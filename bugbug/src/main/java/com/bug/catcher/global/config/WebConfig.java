@@ -1,8 +1,10 @@
 package com.bug.catcher.global.config;
 
+import com.bug.catcher.global.auth.LoginCheckInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.nio.file.Path;
@@ -11,9 +13,24 @@ import java.nio.file.Paths;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    // 1. 인터셉터 설정 (로그인 체크)
     @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new LoginCheckInterceptor())
+                .addPathPatterns("/**") // 모든 경로 검사
+                .excludePathPatterns(   // 예외 경로 (프리패스)
+                        "/api/users/signup",
+                        "/api/auth/login",
+                        "/api/auth/logout",
+                        "/h2-console/**",
+                        "/error",
+                        "/uploads/**"    // 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.
+                );
+    } // <- 여기서 중괄호가 빠져있던 것을 닫아주었습니다.
+
+    // 2. 리소스 핸들러 설정 (업로드된 파일 서빙)
+    @Override // @Override 어노테이션 추가
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 클라이언트가 /uploads/** 경로로 요청하면, 실제 로컬의 uploads/ 폴더에서 파일을 찾아서 제공합니다.
         Path uploadDir = Paths.get("uploads");
         String uploadPath = uploadDir.toFile().getAbsolutePath();
 
@@ -21,9 +38,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:" + uploadPath + "/");
     }
 
+    // 3. CORS 설정 (프론트엔드-백엔드 통신 허용)
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        // 로컬 HTML 파일(file://) 등에서 일반 API를 호출할 수 있도록 CORS 허용
         registry.addMapping("/api/**")
                 .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
