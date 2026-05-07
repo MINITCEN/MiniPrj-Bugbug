@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
 
-    // 1. 특정 채팅방의 모든 메시지를 과거순(오름차순)으로 가져옵니다.
-    // 채팅방에 입장했을 때 위에서부터 순서대로 메시지를 보여주기 위해 사용합니다.
-    List<ChatMessage> findByChatRoomIdOrderByCreatedAtAsc(Long roomId);
+    // 1. 특정 채팅방의 모든 메시지를 최신순(내림차순)으로 가져옵니다.
+    // 리스트의 0번째가 가장 최근 메시지가 됩니다.
+    List<ChatMessage> findByChatRoomIdOrderByCreatedAtDesc(Long roomId);
 }

@@ -76,7 +76,7 @@ public class ChatRoomService {
      */
     @Transactional(readOnly = true)
     public List<ChatMessageDto.Response> getMessages(Long roomId) {
-        return chatMessageRepository.findByChatRoomIdOrderByCreatedAtAsc(roomId)
+        return chatMessageRepository.findByChatRoomIdOrderByCreatedAtDesc(roomId)
                 .stream()
                 .map(ChatMessageDto.Response::fromEntity)
                 .collect(Collectors.toList());
