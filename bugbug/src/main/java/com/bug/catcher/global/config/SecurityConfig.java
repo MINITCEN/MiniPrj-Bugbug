@@ -18,7 +18,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .authorizeHttpRequests(auth -> auth
                         // [수정된 부분] "/h2-console/**" 경로를 추가해서 누구나 접근할 수 있게 열어줍니다!
-                        .requestMatchers("/api/users/signup", "/api/auth/login", "/h2-console/**").permitAll()
+                        .requestMatchers("/api/users/signup", "/api/auth/login", "/h2-console/**","/api/auth/logout").permitAll()
                         .anyRequest().authenticated()
                 );
 
