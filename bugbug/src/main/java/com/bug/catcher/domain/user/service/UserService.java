@@ -15,26 +15,27 @@ public class UserService {
 
     @Transactional
     public void signup(SignupRequestDto requestDto) {
+
         // 1. 이메일 중복 체크
-        // (만약 UserRepository에 findByEmail을 안 만드셨다면 에러가 납니다! 이전 답변을 참고해 꼭 추가해주세요)
-        if (userRepository.findByEmail(requestDto.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
+        if (userRepository.existsByEmail(requestDto.getEmail())) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
 
-        // 2. 비밀번호 암호화 (현재는 임시로 원본 저장, 나중에 Spring Security 추가 시 변경 필요!)
-        String password = requestDto.getPassword();
+        // 2. 닉네임 중복 체크 추가
+        if (userRepository.existsByNickname(requestDto.getNickname())) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다. 다른 닉네임을 사용해 주세요.");
+        }
 
-        // 3. User 엔티티 생성 (권한은 무조건 "USER"로 강제 세팅)
+        // 3. User 엔티티 생성 및 저장 (비밀번호 암호화는 나중에 추가)
         User user = User.builder()
                 .email(requestDto.getEmail())
-                .password(password)
+                .password(requestDto.getPassword())
                 .nickname(requestDto.getNickname())
                 .phoneNumber(requestDto.getPhoneNumber())
                 .address(requestDto.getAddress())
-                .role("USER") // 엔티티의 role 타입이 String이므로 이렇게 고정합니다.
+                .role("USER")
                 .build();
 
-        // 4. DB에 저장
         userRepository.save(user);
     }
 }
