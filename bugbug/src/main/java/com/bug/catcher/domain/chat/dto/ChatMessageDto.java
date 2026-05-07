@@ -10,6 +10,17 @@ import java.time.LocalDateTime;
 
 public class ChatMessageDto {
 
+    // 클라이언트가 웹소켓으로 메시지를 보낼 때 사용하는 DTO
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SendRequest {
+        private Long roomId;
+        private Long senderId;
+        private String content;
+        private ChatMessage.MessageType messageType;
+    }
+
     @Getter
     @Builder
     @NoArgsConstructor

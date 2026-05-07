@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Chat Test</title>
+    <!-- SockJS and STOMP -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <h2>웹소켓 실시간 채팅 테스트</h2>
+    
+    <div>
+        <label>채팅방 번호 (Room ID): </label>
+        <input type="text" id="roomId" value="1">
+        <label>내 유저 번호 (Sender ID): </label>
+        <input type="text" id="senderId" value="1">
+        <button onclick="connect()">연결하기 (입장)</button>
+        <button onclick="disconnect()">연결 끊기</button>
+    </div>
+    
+    <br>
+    
+    <div>
+        <input type="text" id="message" placeholder="보낼 메시지 입력">
+        <button onclick="sendMessage()">전송</button>
+    </div>
+
+    <hr>
+    
+    <div id="chat-box">
+        <!-- 메시지가 여기에 표시됩니다 -->
+    </div>
+
+    <script>
+        let stompClient = null;
+        let currentRoomId = null;
+
+        function connect() {
+            currentRoomId = document.getElementById('roomId').value;
+            const socket = new SockJS('http://localhost:8080/ws/chats');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                document.getElementById('chat-box').innerHTML += "<div><i>[" + currentRoomId + "번 방에 연결되었습니다]</i></div>";
+
+                // 해당 방 번호로 구독(Subscribe)
+                stompClient.subscribe('/topic/chat/room/' + currentRoomId, function (chatMessage) {
+                    // 서버로부터 받은 메시지 처리
+                    const msg = JSON.parse(chatMessage.body);
+                    const chatBox = document.getElementById('chat-box');
+                    chatBox.innerHTML += "<div><b>" + msg.senderNickname + "</b>: " + msg.content + " <small>(" + msg.createdAt + ")</small></div>";
+                });
+            });
+        }
+
+        function disconnect() {
+            if (stompClient !== null) {
+                stompClient.disconnect();
+            }
+            console.log("Disconnected");
+            document.getElementById('chat-box').innerHTML += "<div><i>[연결이 끊어졌습니다]</i></div>";
+        }
+
+        function sendMessage() {
+            const content = document.getElementById('message').value;
+            const senderId = document.getElementById('senderId').value;
+            
+            if (stompClient && content) {
+                // 발신(Publish) 요청 데이터 조립 (SendRequest DTO 형태에 맞춤)
+                const chatMessage = {
+                    roomId: currentRoomId,
+                    senderId: senderId,
+                    content: content,
+                    messageType: "TEXT"
+                };
+
+                // 서버의 /app/chat/message 로 데이터 전송
+                stompClient.send("/app/chat/message", {}, JSON.stringify(chatMessage));
+                document.getElementById('message').value = '';
+            } else {
+                alert("연결이 안 되어 있거나 메시지가 없습니다.");
+            }
+        }
+    </script>
+</body>
+</html>
