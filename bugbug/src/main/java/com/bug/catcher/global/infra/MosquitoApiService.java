@@ -15,7 +15,7 @@ public class MosquitoApiService {
   @Value("${seoul.api.key}")
   private String apiKey;
 
-  public MosquitoApiResponse.MosquitoData fetchTodayMosquitoStatus(String date) {
+  public MosquitoApiResponse fetchTodayMosquitoStatus(String date) {
     // 1. URL 조립
     String url = String.format("http://openapi.seoul.go.kr:8088/%s/json/MosquitoStatus/1/1/%s",
         apiKey, date);
@@ -26,7 +26,7 @@ public class MosquitoApiService {
 
       if (response != null && response.getMosquitoStatus() != null
           && !response.getMosquitoStatus().getList().isEmpty()) {
-        return response.getMosquitoStatus().getList().getFirst(); // MosquitoData
+        return response;
       }
     } catch (Exception e) {
       System.out.println(e.getMessage());
