@@ -81,4 +81,16 @@ public class ChatRoomService {
                 .map(ChatMessageDto.Response::fromEntity)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 채팅방에서 합의된 방문 날짜/시간을 예약합니다.
+     */
+    @Transactional
+    public void updateReservation(Long roomId, ChatRoomDto.ReservationRequest requestDto) {
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
+        
+        chatRoom.updateReservation(requestDto.getReservedAt());
+        // 별도의 save 호출 없이 더티 체킹(Dirty Checking)으로 업데이트됩니다.
+    }
 }

@@ -36,9 +36,18 @@ public class ChatRoom {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    // 5. 방문 예약 날짜/시간
+    @Column(name = "reserved_at")
+    private LocalDateTime reservedAt;
+
     // DB에 저장되기 전에 자동으로 현재 시간을 세팅합니다.
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    // 예약 날짜 업데이트 메서드
+    public void updateReservation(LocalDateTime reservedAt) {
+        this.reservedAt = reservedAt;
     }
 }

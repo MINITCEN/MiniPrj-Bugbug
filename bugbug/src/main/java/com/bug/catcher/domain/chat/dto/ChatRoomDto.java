@@ -28,4 +28,12 @@ public class ChatRoomDto {
         private String otherNickname;  // 상대방 닉네임 (유저에겐 헌터이름, 헌터에겐 유저이름)
         private LocalDateTime createdAt;
     }
+
+    // 3. 방문 날짜/시간 예약 요청 DTO
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ReservationRequest {
+        private LocalDateTime reservedAt;
+    }
 }

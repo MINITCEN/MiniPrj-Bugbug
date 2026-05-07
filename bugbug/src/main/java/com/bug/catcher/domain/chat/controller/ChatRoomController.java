@@ -53,7 +53,7 @@ public class ChatRoomController {
      * 3. 특정 채팅방의 이전 메시지 내역 조회
      * GET /api/chats/{roomId}/messages
      */
-    @Operation(summary = "채팅방 메시지 내역 조회", description = "특정 채팅방의 과거 대화 내역을 시간순으로 불러옵니다.")
+    @Operation(summary = "채팅방 메시지 내역 조회", description = "특정 채팅방의 과거 대화 내역을 최신순으로 불러옵니다.")
     @GetMapping("/chats/{roomId}/messages")
     public ResponseEntity<List<ChatMessageDto.Response>> getMessages(
             @PathVariable Long roomId,
@@ -62,5 +62,19 @@ public class ChatRoomController {
 
         List<ChatMessageDto.Response> response = chatRoomService.getMessages(roomId);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 4. 방문 날짜/시간 예약
+     * POST /api/chats/{roomId}/reservation
+     */
+    @Operation(summary = "방문 날짜 예약", description = "채팅방에서 합의된 방문 날짜와 시간을 예약합니다.")
+    @PostMapping("/chats/{roomId}/reservation")
+    public ResponseEntity<Void> updateReservation(
+            @PathVariable Long roomId,
+            @RequestBody ChatRoomDto.ReservationRequest request) {
+        
+        chatRoomService.updateReservation(roomId, request);
+        return ResponseEntity.ok().build();
     }
 }
