@@ -1,4 +1,4 @@
-package com.bug.catcher.domain.map.service;
+package com.bug.catcher.global.infra;
 
 import com.bug.catcher.domain.map.dto.MosquitoApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class MosquitoApiService {
 
       if (response != null && response.getMosquitoStatus() != null
           && !response.getMosquitoStatus().getList().isEmpty()) {
-        return response.getMosquitoStatus().getList().getFirst();
+        return response.getMosquitoStatus().getList().getFirst(); // MosquitoData
       }
     } catch (Exception e) {
       System.out.println(e.getMessage());
