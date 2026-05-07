@@ -1,11 +1,14 @@
 package com.bug.catcher.global.infra;
 
 import com.bug.catcher.domain.map.dto.MosquitoApiResponse;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MosquitoApiService {
@@ -32,5 +35,14 @@ public class MosquitoApiService {
       System.out.println(e.getMessage());
     }
     return null;
+  }
+
+  public MosquitoApiResponse fetchWithFallback(LocalDate date) {
+    MosquitoApiResponse response = fetchTodayMosquitoStatus(date.toString());
+    if (response == null) {
+      log.info("fetchWithFallback: {} 데이터가 없어 전날({}) 데이터를 조회합니다.", date, date.minusDays(1));
+      response = fetchTodayMosquitoStatus(date.minusDays(1).toString());
+    }
+    return response;
   }
 }
