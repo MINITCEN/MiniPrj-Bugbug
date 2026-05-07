@@ -1,5 +1,6 @@
-package com.bug.catcher.global.infra.mosquitoApi;
+package com.bug.catcher.domain.map.service;
 
+import com.bug.catcher.domain.map.dto.MosquitoApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
