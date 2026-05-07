@@ -1,4 +1,4 @@
-package com.bug.catcher.domain.entity; // 디렉토리 구조에 맞게 유지
+package com.bug.catcher.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
