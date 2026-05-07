@@ -1,6 +1,8 @@
 package com.bug.catcher.domain.chat.service;
 
+import com.bug.catcher.domain.chat.dto.ChatMessageDto;
 import com.bug.catcher.domain.chat.dto.ChatRoomDto;
+import com.bug.catcher.domain.chat.repository.ChatMessageRepository;
 import com.bug.catcher.domain.chat.repository.ChatRoomRepository;
 import com.bug.catcher.domain.entity.ChatRoom;
 import com.bug.catcher.domain.entity.Hunter;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
     // 실제로는 RequestRepository, UserRepository, HunterRepository 도 필요합니다.
 
     /**
@@ -66,5 +69,16 @@ public class ChatRoomService {
                 .otherNickname("상대방 이름") 
                 .createdAt(room.getCreatedAt())
                 .build()).collect(Collectors.toList());
+    }
+
+    /**
+     * 특정 채팅방의 이전 메시지 내역을 조회합니다.
+     */
+    @Transactional(readOnly = true)
+    public List<ChatMessageDto.Response> getMessages(Long roomId) {
+        return chatMessageRepository.findByChatRoomIdOrderByCreatedAtAsc(roomId)
+                .stream()
+                .map(ChatMessageDto.Response::fromEntity)
+                .collect(Collectors.toList());
     }
 }
