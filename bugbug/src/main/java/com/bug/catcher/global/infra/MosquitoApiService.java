@@ -19,7 +19,7 @@ public class MosquitoApiService {
   private String apiKey;
 
   public MosquitoApiResponse fetchTodayMosquitoStatus(String date) {
-    // 1. URL 조립
+    // 1. 서울 공공데이터 URL 조립
     String url = String.format("http://openapi.seoul.go.kr:8088/%s/json/MosquitoStatus/1/1/%s",
         apiKey, date);
 
@@ -27,6 +27,7 @@ public class MosquitoApiService {
       // 2. API 호출
       MosquitoApiResponse response = restTemplate.getForObject(url, MosquitoApiResponse.class);
 
+      // 빈 값이 아니면 JSON응답을 DTO에 저장
       if (response != null && response.getMosquitoStatus() != null
           && !response.getMosquitoStatus().getList().isEmpty()) {
         return response;
@@ -37,6 +38,8 @@ public class MosquitoApiService {
     return null;
   }
 
+  // 전 날 데이터를 저장하는 메서드
+  // 날짜에 -1을 해서 fetchTodayMosquitoStatus 재호출
   public MosquitoApiResponse fetchWithFallback(LocalDate date) {
     MosquitoApiResponse response = fetchTodayMosquitoStatus(date.toString());
     if (response == null) {

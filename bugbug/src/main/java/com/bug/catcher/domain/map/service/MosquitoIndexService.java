@@ -22,6 +22,9 @@ public class MosquitoIndexService {
   private final RegionRepository regionRepository;
   private final DailyRegionMosquitoIndexRepository indexRepository;
 
+  // 메서드 로직 너무 길어서 추후 리팩토링 예정.
+  // 저장, 조회 로직 분리 예정
+  // 어제꺼 저장되어 있는 지 먼저 조회하고 있으면 반환
   @Transactional
   public void calculateAndSaveDailyIndex(LocalDate date){
     // 모기지수 API 가져오기 (fetchTodayMosquitoStatus에서 RestTemplate 이용하여 JSON 받아옵니다)
@@ -41,11 +44,13 @@ public class MosquitoIndexService {
       return;
     }
 
+    // DTO의 모기지수 값들을 미리 꺼내놓음
     var firstData = apiData.getMosquitoStatus().getList().get(0);
     double waterValue = firstData.getWaterValue();
     double houseValue = firstData.getHouseValue();
     double parkValue = firstData.getParkValue();
 
+    // 반복문 돌면서 지역별 모기지수 테이블에 저장.
     for(Region region : regionList){
       if (indexRepository.existsByRegionAndIndexDate(region, date)){
         log.info("이미 존재하는 날짜의 값입니다.");
