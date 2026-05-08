@@ -30,4 +30,9 @@ public class User {
 
     @Column(nullable = false, length = 20)
     private String role;
+
+    // 권한 변경 메서드 (일반 유저 -> 헌터)
+    public void updateRole(String role) {
+        this.role = role;
+    }
 }
