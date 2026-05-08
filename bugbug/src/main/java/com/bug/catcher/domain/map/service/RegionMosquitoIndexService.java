@@ -15,6 +15,8 @@ public class RegionMosquitoIndexService {
     double districtIndex = (seoulWaterIndex * region.getWaterRatio())
         + (seoulResidentialIndex * region.getResidentialRatio())
         + (seoulParkIndex * region.getParkRatio());
-    return Math.min(districtIndex, 100);
+
+    double roundedIndex = Math.round(districtIndex * 10) / 10.0;
+    return Math.min(roundedIndex, 100);
   }
 }
