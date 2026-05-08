@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
+@RequestMapping("/api/request")
 public class RequestController {
     private RequestService requestService;
 
@@ -21,8 +22,8 @@ public class RequestController {
     }
 
 
-    @Value("${kakao.api.key}")
-    private String kakaoMapApiKey;
+//    @Value("${kakao.api.key}")
+//    private String kakaoMapApiKey;
 
     //뷰 추가되면 구현하기
     //페이징 포함 게시판
@@ -47,7 +48,7 @@ public class RequestController {
 //    }
 
     //create request 테스트
-    @PostMapping("/request/test1")
+    @PostMapping("/createRequest")
     @ResponseBody
     public String createRequestTest(@RequestBody RequestFormDTO form) {
         requestService.createRequest(form);
@@ -56,7 +57,7 @@ public class RequestController {
     }
 
     //read request 테스트(전체 게시판)
-    @GetMapping("/request/test2")
+    @GetMapping("/readWholeRequests")
     @ResponseBody
     public List<Request> readRequestList() {
         requestService.readRequestList();
@@ -65,14 +66,14 @@ public class RequestController {
     }
 
     //상세보기 조회수 증가 체크
-    @GetMapping("/request/test2/{id}")
+    @GetMapping("/requestDetail/{id}")
     @ResponseBody
-    public Request requestDetailTest(@PathVariable Long id) {
+    public Request requestDetail(@PathVariable Long id) {
         return requestService.readRequestDetail(id);
     }
 
     //update request 테스트
-    @PostMapping("/request/test3/{requestId}")
+    @PatchMapping("/updateRequest/{requestId}")
     @ResponseBody
     public List<Request> updateRequestList(
             @PathVariable Long requestId,
@@ -83,7 +84,7 @@ public class RequestController {
     }
 
     // delete request 테스트
-    @PostMapping("/request/test4/{requestId}")
+    @DeleteMapping("/deleteRequest/{requestId}")
     @ResponseBody
     public List<Request> deleteRequestList(@PathVariable Long requestId) {
         requestService.deleteRequest(requestId);

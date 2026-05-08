@@ -21,9 +21,6 @@ public class RequestFormDTO {
     private String detailLocation;  // Request.exactLocation으로 저장
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    private LocalDateTime preferredTime;
-
-    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime occurrenceTime;
 
     private Double latitude;

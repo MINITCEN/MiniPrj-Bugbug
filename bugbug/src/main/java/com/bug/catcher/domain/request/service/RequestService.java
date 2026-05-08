@@ -50,7 +50,7 @@ public class RequestService {
                 .exactLocation(form.getDetailLocation())
                 .title(form.getTitle())
                 .content(form.getContent())
-                .occurrenceTime(resolveOccurrenceTime(form))
+                .occurrenceTime(form.getOccurrenceTime())
                 .description(buildDescription(form))
                 .viewCount(0)
                 .build();
@@ -74,21 +74,18 @@ public class RequestService {
         return request;
     }
 
-    //update 테스트
+    // update 테스트
     @Transactional
     public void updateRequest(Long requestId, RequestFormDTO form) {
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
-        LocalDateTime occurrenceTime = form.getOccurrenceTime();
-        if (occurrenceTime == null) {
-            occurrenceTime = form.getPreferredTime();
-        }
+
         request.updateRequest(
                 form.getTitle(),
                 form.getContent(),
                 form.getLocation(),
                 form.getDetailLocation(),
-                occurrenceTime,
+                form.getOccurrenceTime(),
                 buildDescription(form)
         );
     }
@@ -101,14 +98,6 @@ public class RequestService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
 
         requestRepository.delete(request);
-    }
-
-    private LocalDateTime resolveOccurrenceTime(RequestFormDTO form) {
-        if (form.getOccurrenceTime() != null) {
-            return form.getOccurrenceTime();
-        }
-
-        return form.getPreferredTime();
     }
 
     private void saveImages(RequestFormDTO form, Request savedRequest) {

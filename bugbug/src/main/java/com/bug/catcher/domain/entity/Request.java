@@ -2,6 +2,8 @@ package com.bug.catcher.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,6 +24,9 @@ public class Request {
     private User user;
 
     private String status;
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
     private String approxLocation;
     private String exactLocation;
