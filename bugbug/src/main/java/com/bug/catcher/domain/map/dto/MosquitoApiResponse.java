@@ -1,4 +1,4 @@
-package com.bug.catcher.global.infra.mosquitoApi;
+package com.bug.catcher.domain.map.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
@@ -16,13 +16,13 @@ public class MosquitoApiResponse {
   @Setter
   public static class MosquitoStatus{
     @JsonProperty("list_total_count")
-    private int list_total_count;
+    private int listTotalCount;
 
     @JsonProperty("RESULT")
     private ApiResult result;
 
     @JsonProperty("row")
-    List<MosquitoData> list = new ArrayList<>();
+    private List<MosquitoData> list = new ArrayList<>();
   }
 
   @Getter
