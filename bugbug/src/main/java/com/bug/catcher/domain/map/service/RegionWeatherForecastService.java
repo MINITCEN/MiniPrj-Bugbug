@@ -114,6 +114,7 @@ public class RegionWeatherForecastService {
               .build()
       );
     }
+    log.info("지역별 날씨 정보 저장 완료.");
   }
 
   BaseDateTime resolveBaseDateTime(LocalDateTime now) {
