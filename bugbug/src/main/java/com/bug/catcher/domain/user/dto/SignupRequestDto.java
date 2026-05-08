@@ -12,6 +12,9 @@ public class SignupRequestDto {
     private String phoneNumber;
     private String address;
 
-    // 주의: role(권한) 필드는 넣지 않습니다!
-    // 클라이언트(프론트엔드)에서 임의로 "ADMIN" 이라고 보내서 가입하는 해킹을 막기 위함입니다.
+    // role(권한) 필드는 넣지 않습니다
+    // 클라이언트에서 임의로 "ADMIN" 이라고 보내서 가입하는 해킹을 막기 위함.
+
+    // 개인정보 동의 여부 체크
+    private Boolean isPrivacyAgreed;
 }
