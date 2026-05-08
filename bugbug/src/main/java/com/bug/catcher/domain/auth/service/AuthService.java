@@ -6,6 +6,7 @@ import com.bug.catcher.domain.user.repository.UserRepository;
 import com.bug.catcher.global.auth.SessionConst;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
