@@ -12,23 +12,25 @@ import java.util.List;
 @Getter
 @Setter
 public class RequestFormDTO {
-    // Request 엔티티에 직접 매핑 가능한 값
+    // Request 엔티티에 저장될 기본 입력값
     private String title;
-
     private String content;
 
-    private String location;        // Request.approxLocation으로 저장
-    private String detailLocation;  // Request.exactLocation으로 저장
+    // 화면에서는 location, detailLocation으로 받고
+    // 서비스에서 Request.approxLocation, Request.exactLocation으로 매핑
+    private String location;
+    private String detailLocation;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime occurrenceTime;
-
     private Double latitude;
     private Double longitude;
-
     private String occurrencePlace;
     private String additionalDescription;
 
-    // RequestImage 엔티티로 저장할 값
+    // 이미지 여러 장 업로드
     private List<MultipartFile> imageFiles = new ArrayList<>();
+
+    // 동영상 한 개 업로드
+    private MultipartFile videoFile;
 }

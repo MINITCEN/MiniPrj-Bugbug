@@ -6,16 +6,15 @@ import com.bug.catcher.domain.request.DTO.RequestFormDTO;
 import com.bug.catcher.domain.request.repository.RequestImageRepository;
 import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.global.file.FileStore;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class RequestService {
@@ -32,20 +31,20 @@ public class RequestService {
         this.fileStore = fileStore;
     }
 
-    @Transactional(readOnly = true)
-    public Page<Request> findRequestPage(int page) {
-        return requestRepository.findAll(
-                PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "createdAt"))
-        );
-    }
+//    @Transactional(readOnly = true)
+//    public Page<Request> findRequestPage(int page) {
+//        return requestRepository.findAll(
+//                PageRequest.of(page, 20, Sort.by(Sort.Direction.DESC, "createdAt"))
+//        );
+//    }
 
     //여기서부터 Request Talend 테스트
     //create 테스트
     @Transactional
-    public void createRequest(RequestFormDTO form) {
+    public Map<String, Object> createRequest(RequestFormDTO form) {
+
         Request request = Request.builder()
                 .status("WAITING")
-                .createdAt(LocalDateTime.now())
                 .approxLocation(form.getLocation())
                 .exactLocation(form.getDetailLocation())
                 .title(form.getTitle())
@@ -54,69 +53,115 @@ public class RequestService {
                 .description(buildDescription(form))
                 .viewCount(0)
                 .build();
+
         Request savedRequest = requestRepository.save(request);
-        saveImages(form, savedRequest);
+
+        List<String> imageUrls = saveImages(form, savedRequest);
+
+        String videoUrl = saveVideo(form, savedRequest);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("requestId", savedRequest.getId());
+        result.put("title", savedRequest.getTitle());
+        result.put("content", savedRequest.getContent());
+        result.put("imageUrls", imageUrls);
+        result.put("videoUrl", videoUrl);
+
+        return result;
     }
 
 
     //read 테스트
     @Transactional(readOnly = true)
-    public List<Request> readRequestList(){
-        return requestRepository.findAll();
+    public List<Map<String, Object>> readRequestList() {
+        List<Request> requests = requestRepository.findAll();
+        return requests.stream().map(request -> {
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("requestId", request.getId());
+            result.put("title", request.getTitle());
+            result.put("content", request.getContent());
+            result.put("approxLocation", request.getApproxLocation());
+            result.put("exactLocation", request.getExactLocation());
+            result.put("occurrenceTime", request.getOccurrenceTime());
+            result.put("createdAt", request.getCreatedAt());
+            result.put("description", request.getDescription());
+            result.put("viewCount", request.getViewCount());
+            result.put("videoUrl", request.getVideoUrl());
+
+            List<String> imageUrls = request.getRequestImages()
+                    .stream()
+                    .map(RequestImage::getImageUrl)
+                    .toList();
+            result.put("imageUrls", imageUrls);
+            return result;
+        }).toList();
     }
-
-    //상세보기 테스트(조회수 증가 체크)
-    @Transactional
-    public Request readRequestDetail(Long requestId) {
-        Request request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
-        request.increaseViewCount();
-        return request;
-    }
-
-    // update 테스트
-    @Transactional
-    public void updateRequest(Long requestId, RequestFormDTO form) {
-        Request request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
-
-        request.updateRequest(
-                form.getTitle(),
-                form.getContent(),
-                form.getLocation(),
-                form.getDetailLocation(),
-                form.getOccurrenceTime(),
-                buildDescription(form)
-        );
-    }
-
-    //delete request 테스트
-    //단, requestImage가 있을 때는 주의 필요(참조키 제약 조건 상 에러가 날 수 있음)
-    @Transactional
-    public void deleteRequest(Long requestId) {
-        Request request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
-
-        requestRepository.delete(request);
-    }
-
-    private void saveImages(RequestFormDTO form, Request savedRequest) {
-        if (form.getImageFiles() == null) {
-            return;
+//
+//    //상세보기 테스트(조회수 증가 체크)
+//    @Transactional
+//    public Request readRequestDetail(Long requestId) {
+//        Request request = requestRepository.findById(requestId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
+//        request.increaseViewCount();
+//        return request;
+//    }
+//
+//    // update 테스트
+//    @Transactional
+//    public void updateRequest(Long requestId, RequestFormDTO form) {
+//        Request request = requestRepository.findById(requestId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
+//
+//        request.updateRequest(
+//                form.getTitle(),
+//                form.getContent(),
+//                form.getLocation(),
+//                form.getDetailLocation(),
+//                form.getOccurrenceTime(),
+//                buildDescription(form)
+//        );
+//    }
+//
+//    //delete request 테스트
+//    //단, requestImage가 있을 때는 주의 필요(참조키 제약 조건 상 에러가 날 수 있음)
+//    @Transactional
+//    public void deleteRequest(Long requestId) {
+//        Request request = requestRepository.findById(requestId)
+//                .orElseThrow(() -> new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
+//
+//        requestRepository.delete(request);
+//    }
+//
+//
+    //이미지 파일 URL 반환하도록 하기
+    private List<String> saveImages(RequestFormDTO form, Request savedRequest) {
+        List<String> imageUrls = new ArrayList<>();
+        if (form.getImageFiles() == null || form.getImageFiles().isEmpty()) {
+            return imageUrls;
         }
-
         for (MultipartFile imageFile : form.getImageFiles()) {
             if (imageFile != null && !imageFile.isEmpty()) {
-                String imageUrl = fileStore.storeFile(imageFile);
-
-                RequestImage requestImage = RequestImage.builder()
+                String imageUrl = fileStore.storeImage(imageFile);
+                RequestImage requestMedia = RequestImage.builder()
                         .request(savedRequest)
                         .imageUrl(imageUrl)
                         .build();
-
-                requestImageRepository.save(requestImage);
+                requestImageRepository.save(requestMedia);
+                imageUrls.add(imageUrl);
             }
         }
+        return imageUrls;
+    }
+
+    //비디오 파일 URL 반환하도록 수정하기
+    private String saveVideo(RequestFormDTO form, Request savedRequest) {
+        MultipartFile videoFile = form.getVideoFile();
+        if (videoFile == null || videoFile.isEmpty()) {
+            return null;
+        }
+        String videoUrl = fileStore.storeVideo(videoFile);
+        requestRepository.updateVideoUrl(savedRequest.getId(), videoUrl);
+        return videoUrl;
     }
 
     private String buildDescription(RequestFormDTO form) {

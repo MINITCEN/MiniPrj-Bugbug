@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/api/request")
@@ -50,44 +51,43 @@ public class RequestController {
     //create request 테스트
     @PostMapping("/createRequest")
     @ResponseBody
-    public String createRequestTest(@RequestBody RequestFormDTO form) {
+    public List<Map<String, Object>> createRequest(@ModelAttribute RequestFormDTO form) {
         requestService.createRequest(form);
         System.out.println("등록 성공");
-        return "등록 성공";
+        return requestService.readRequestList();
     }
 
     //read request 테스트(전체 게시판)
     @GetMapping("/readWholeRequests")
     @ResponseBody
-    public List<Request> readRequestList() {
-        requestService.readRequestList();
+    public List<Map<String, Object>> readRequestList() {
         System.out.println("조회 성공");
         return requestService.readRequestList();
     }
-
-    //상세보기 조회수 증가 체크
-    @GetMapping("/requestDetail/{id}")
-    @ResponseBody
-    public Request requestDetail(@PathVariable Long id) {
-        return requestService.readRequestDetail(id);
-    }
-
-    //update request 테스트
-    @PatchMapping("/updateRequest/{requestId}")
-    @ResponseBody
-    public List<Request> updateRequestList(
-            @PathVariable Long requestId,
-            @RequestBody RequestFormDTO form
-    ) {
-        requestService.updateRequest(requestId, form);
-        return requestService.readRequestList();
-    }
-
-    // delete request 테스트
-    @DeleteMapping("/deleteRequest/{requestId}")
-    @ResponseBody
-    public List<Request> deleteRequestList(@PathVariable Long requestId) {
-        requestService.deleteRequest(requestId);
-        return requestService.readRequestList();
-    }
+//
+//    //상세보기 조회수 증가 체크
+//    @GetMapping("/requestDetail/{id}")
+//    @ResponseBody
+//    public Request requestDetail(@PathVariable Long id) {
+//        return requestService.readRequestDetail(id);
+//    }
+//
+//    //update request 테스트
+//    @PatchMapping("/updateRequest/{requestId}")
+//    @ResponseBody
+//    public List<Request> updateRequestList(
+//            @PathVariable Long requestId,
+//            @RequestBody RequestFormDTO form
+//    ) {
+//        requestService.updateRequest(requestId, form);
+//        return requestService.readRequestList();
+//    }
+//
+//    // delete request 테스트
+//    @DeleteMapping("/deleteRequest/{requestId}")
+//    @ResponseBody
+//    public List<Request> deleteRequestList(@PathVariable Long requestId) {
+//        requestService.deleteRequest(requestId);
+//        return requestService.readRequestList();
+//    }
 }

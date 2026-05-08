@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -23,57 +25,25 @@ public class Request {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private String status;
-
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-    private String approxLocation;
-    private String exactLocation;
-    private String title;
-    private String content;
-    private LocalDateTime occurrenceTime;
+
+    @OneToMany(mappedBy = "request", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<RequestImage> requestImages = new ArrayList<>();
 
     @Column(columnDefinition = "text")
     private String description;
+
+    private String approxLocation;
+    private String exactLocation;
+    private String title;
+    private String status;
+    private String content;
+    private String videoUrl;
     private Integer viewCount;
+    private LocalDateTime occurrenceTime;
 
-    public void updateRequest(
-            String title,
-            String content,
-            String approxLocation,
-            String exactLocation,
-            LocalDateTime occurrenceTime,
-            String description
-    ) {
-        if (title != null) {
-            this.title = title;
-        }
 
-        if (content != null) {
-            this.content = content;
-        }
-
-        if (approxLocation != null) {
-            this.approxLocation = approxLocation;
-        }
-
-        if (exactLocation != null) {
-            this.exactLocation = exactLocation;
-        }
-
-        if (occurrenceTime != null) {
-            this.occurrenceTime = occurrenceTime;
-        }
-
-        if (description != null) {
-            this.description = description;
-        }
-    }
-    public void increaseViewCount() {
-        if (this.viewCount == null) {
-            this.viewCount = 0;
-        }
-        this.viewCount++;
-    }
 }
