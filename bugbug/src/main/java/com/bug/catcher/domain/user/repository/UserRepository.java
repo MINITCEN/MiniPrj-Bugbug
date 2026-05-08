@@ -1,6 +1,8 @@
 package com.bug.catcher.domain.user.repository;
 
 import com.bug.catcher.domain.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -18,5 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 회원가입 시 중복 체크용 (닉네임)
     boolean existsByNickname(String nickname);
 
+    // 역할(role)로 사용자를 필터링하고 페이징 처리하는 메서드 (재혁 0508)
+    Page<User> findByRole(String role, Pageable pageable);
 
 }
