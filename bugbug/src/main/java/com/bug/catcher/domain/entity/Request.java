@@ -31,6 +31,44 @@ public class Request {
 
     @Column(columnDefinition = "text")
     private String description;
-
     private Integer viewCount;
+
+    public void updateRequest(
+            String title,
+            String content,
+            String approxLocation,
+            String exactLocation,
+            LocalDateTime occurrenceTime,
+            String description
+    ) {
+        if (title != null) {
+            this.title = title;
+        }
+
+        if (content != null) {
+            this.content = content;
+        }
+
+        if (approxLocation != null) {
+            this.approxLocation = approxLocation;
+        }
+
+        if (exactLocation != null) {
+            this.exactLocation = exactLocation;
+        }
+
+        if (occurrenceTime != null) {
+            this.occurrenceTime = occurrenceTime;
+        }
+
+        if (description != null) {
+            this.description = description;
+        }
+    }
+    public void increaseViewCount() {
+        if (this.viewCount == null) {
+            this.viewCount = 0;
+        }
+        this.viewCount++;
+    }
 }
