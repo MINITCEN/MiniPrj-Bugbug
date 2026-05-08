@@ -31,12 +31,28 @@ public class Region {
   @Column(name = "park_ratio", nullable = false)
   private Double parkRatio;
 
+  @Column(name = "grid_x")
+  private Integer gridX;
+
+  @Column(name = "grid_y")
+  private Integer gridY;
+
   @Builder
-  public Region(Long id, String name, Double waterRatio, Double residentialRatio, Double parkRatio) {
+  public Region(
+      Long id,
+      String name,
+      Double waterRatio,
+      Double residentialRatio,
+      Double parkRatio,
+      Integer gridX,
+      Integer gridY
+  ) {
     this.id = id;
     this.name = name;
     this.waterRatio = waterRatio;
     this.residentialRatio = residentialRatio;
     this.parkRatio = parkRatio;
+    this.gridX = gridX;
+    this.gridY = gridY;
   }
 }
