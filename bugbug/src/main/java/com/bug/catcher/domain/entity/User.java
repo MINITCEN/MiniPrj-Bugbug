@@ -35,4 +35,8 @@ public class User {
     public void updateRole(String role) {
         this.role = role;
     }
+    // 개인정보 수집 동의 여부 추가
+    @Column(nullable = false)
+    private Boolean isPrivacyAgreed;
+
 }

@@ -26,11 +26,12 @@ public class WebConfig implements WebMvcConfigurer {
                         "/error",
                         "/uploads/**",// 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.
                         "/swagger-ui/**",// 스웨거 화면 접근 허용
+
                         "/v3/api-docs/**",   // 스웨거 데이터 접근 허용
                         "/swagger-resources/**",
                         "/api/v1/mosquito/**"
                 );
-    } // <- 여기서 중괄호가 빠져있던 것을 닫아주었습니다.
+    } 
 
     // 2. 리소스 핸들러 설정 (업로드된 파일 서빙)
     @Override // @Override 어노테이션 추가
