@@ -10,7 +10,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,8 +26,8 @@ import lombok.NoArgsConstructor;
     name = "region_weather_forecast",
     uniqueConstraints = {
         @UniqueConstraint(
-            name = "uk_region_weather_forecast_region_forecast_at",
-            columnNames = {"region_id", "forecast_at"}
+            name = "uk_region_weather_forecast_region",
+            columnNames = {"region_id"}
         )
     }
 )
@@ -38,36 +38,40 @@ public class RegionWeatherForecast {
   @Column(name = "region_weather_forecast_id")
   private Long id;
 
-  // Region that this forecast belongs to.
+  // Region that this weather snapshot belongs to.
   @ManyToOne(fetch = FetchType.LAZY, optional = false)
   @JoinColumn(name = "region_id", nullable = false)
   private Region region;
 
-  // Forecast timestamp that will be shown to the user.
-  @Column(name = "forecast_at", nullable = false)
-  private LocalDateTime forecastAt;
+  // Base date from the KMA forecast response.
+  @Column(name = "base_date", nullable = false)
+  private LocalDate baseDate;
 
-  // 시간당 온도
+  // Base time from the KMA forecast response.
+  @Column(name = "base_time", nullable = false, length = 4)
+  private String baseTime;
+
+  // Forecast temperature in Celsius.
   @Column(name = "temperature")
   private Double temperature;
 
-  // 습도
+  // Forecast humidity in percent.
   @Column(name = "humidity")
   private Integer humidity;
 
-  // 강수량(mm)
-  @Column(name = "precipitation")
-  private Double precipitation;
+  // Forecast precipitation text from the KMA response.
+  @Column(name = "precipitation", length = 30)
+  private String precipitation;
 
-  // 강수 타입
+  // Precipitation state such as none, rain, rain/snow, or snow.
   @Column(name = "precipitation_type", length = 20)
   private String precipitationType;
 
-  // 하늘 상태
+  // Sky state such as clear, mostly cloudy, or cloudy.
   @Column(name = "sky_status", length = 20)
   private String skyStatus;
 
-  // 풍속
+  // Forecast wind speed in meters per second.
   @Column(name = "wind_speed")
   private Double windSpeed;
 }
