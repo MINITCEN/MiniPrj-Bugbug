@@ -16,8 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -55,9 +55,9 @@ public class MosquitoIndexController {
     );
   }
 
-  @GetMapping("/detail")
-  public ResponseEntity<RegionDetailResponse> getRegionDetail(@RequestParam String regionName) {
-    Region region = regionRepository.findByName(regionName)
+  @GetMapping("/detail/{regionId}")
+  public ResponseEntity<RegionDetailResponse> getRegionDetail(@PathVariable Long regionId) {
+    Region region = regionRepository.findById(regionId)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 지역입니다."));
 
     DailyRegionMosquitoIndex mosquitoIndex = dailyRegionMosquitoIndexRepository

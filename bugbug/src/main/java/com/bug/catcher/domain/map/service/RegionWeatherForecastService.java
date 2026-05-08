@@ -7,6 +7,7 @@ import com.bug.catcher.domain.map.repository.RegionRepository;
 import com.bug.catcher.domain.map.repository.RegionWeatherForecastRepository;
 import com.bug.catcher.global.infra.WeatherForecastApiService;
 import jakarta.transaction.Transactional;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -93,8 +94,8 @@ public class RegionWeatherForecastService {
 
       // 지역별 최신 1건만 저장하므로,
       // 이번 발표(baseDate/baseTime)에서 가장 첫 예보 슬롯만 대표값으로 사용한다.
-      LocalDateTime firstForecastAt = forecastMap.keySet().iterator().next();
-      ForecastAccumulator value = forecastMap.get(firstForecastAt);
+      LocalDateTime nearestForecastAt = selectNearestForecastTime(forecastMap, LocalDateTime.now());
+      ForecastAccumulator value = forecastMap.get(nearestForecastAt);
 
       // 기존 지역 스냅샷이 있으면 지우고 최신 값으로 교체한다.
       regionWeatherForecastRepository.findByRegion(region)
@@ -139,6 +140,19 @@ public class RegionWeatherForecastService {
         LocalDate.parse(forecastDate, DATE_FORMATTER),
         LocalTime.parse(forecastTime, TIME_FORMATTER)
     );
+  }
+
+  private LocalDateTime selectNearestForecastTime(
+      Map<LocalDateTime, ForecastAccumulator> forecastMap,
+      LocalDateTime now
+  ) {
+    return forecastMap.keySet().stream()
+        .min((left, right) -> {
+          long leftDiff = Math.abs(Duration.between(now, left).toMinutes());
+          long rightDiff = Math.abs(Duration.between(now, right).toMinutes());
+          return Long.compare(leftDiff, rightDiff);
+        })
+        .orElseThrow();
   }
 
   // 카테고리별 응답 행을 하나의 예보 스냅샷 객체에 누적 반영한다.
