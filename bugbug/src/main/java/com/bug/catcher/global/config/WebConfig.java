@@ -24,7 +24,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/auth/logout",
                         "/h2-console/**",
                         "/error",
-                        "/uploads/**"    // 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.
+                        "/uploads/**"// 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.
                 );
     } // <- 여기서 중괄호가 빠져있던 것을 닫아주었습니다.
 
