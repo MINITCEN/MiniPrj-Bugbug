@@ -112,29 +112,6 @@ public class RequestService {
 //    }
 //
 //
-    //이미지 파일 URL 반환하도록 하기
-    private List<String> saveImages(RequestFormDTO form, Request savedRequest) {
-        List<String> imageUrls = fileStore.storeImages(form.getImageFiles());
-        for (String imageUrl : imageUrls) {
-            RequestImage requestImage = RequestImage.builder()
-                    .request(savedRequest)
-                    .imageUrl(imageUrl)
-                    .build();
-            requestImageRepository.save(requestImage);
-        }
-        return imageUrls;
-    }
-
-    //비디오 파일 URL 반환하도록 수정하기
-    private String saveVideo(RequestFormDTO form, Request savedRequest) {
-        String videoUrl = fileStore.storeVideo(form.getVideoFile());
-        if (videoUrl == null) {
-            return null;
-        }
-        requestRepository.updateVideoUrl(savedRequest.getId(), videoUrl);
-        return videoUrl;
-    }
-
     private String buildDescription(RequestFormDTO form) {
         return """
                 발생 위치: %s
