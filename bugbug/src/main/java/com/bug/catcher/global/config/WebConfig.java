@@ -27,6 +27,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/request/requestDetail/**",
                         "/api/request/updateRequest/**",
                         "/api/request/deleteRequest/**",
+                        "/api/request/upload/images",
+                        "/api/request/upload/video",
                         "/h2-console/**",
                         "/error",
                         "/uploads/**",    // 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.

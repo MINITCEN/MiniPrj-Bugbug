@@ -51,7 +51,7 @@ public class RequestController {
     //create request 테스트
     @PostMapping("/createRequest")
     @ResponseBody
-    public List<Map<String, Object>> createRequest(@ModelAttribute RequestFormDTO form) {
+    public List<Map<String, Object>> createRequest(@RequestBody RequestFormDTO form) {
         requestService.createRequest(form);
         System.out.println("등록 성공");
         return requestService.readRequestList();

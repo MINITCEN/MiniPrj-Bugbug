@@ -8,10 +8,7 @@ import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.global.file.FileStore;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +39,6 @@ public class RequestService {
     //create 테스트
     @Transactional
     public Map<String, Object> createRequest(RequestFormDTO form) {
-
         Request request = Request.builder()
                 .status("WAITING")
                 .approxLocation(form.getLocation())
@@ -53,23 +49,13 @@ public class RequestService {
                 .description(buildDescription(form))
                 .viewCount(0)
                 .build();
-
         Request savedRequest = requestRepository.save(request);
-
-        List<String> imageUrls = saveImages(form, savedRequest);
-
-        String videoUrl = saveVideo(form, savedRequest);
-
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("requestId", savedRequest.getId());
         result.put("title", savedRequest.getTitle());
         result.put("content", savedRequest.getContent());
-        result.put("imageUrls", imageUrls);
-        result.put("videoUrl", videoUrl);
-
         return result;
     }
-
 
     //read 테스트
     @Transactional(readOnly = true)
@@ -86,13 +72,6 @@ public class RequestService {
             result.put("createdAt", request.getCreatedAt());
             result.put("description", request.getDescription());
             result.put("viewCount", request.getViewCount());
-            result.put("videoUrl", request.getVideoUrl());
-
-            List<String> imageUrls = request.getRequestImages()
-                    .stream()
-                    .map(RequestImage::getImageUrl)
-                    .toList();
-            result.put("imageUrls", imageUrls);
             return result;
         }).toList();
     }
@@ -135,31 +114,23 @@ public class RequestService {
 //
     //이미지 파일 URL 반환하도록 하기
     private List<String> saveImages(RequestFormDTO form, Request savedRequest) {
-        List<String> imageUrls = new ArrayList<>();
-        if (form.getImageFiles() == null || form.getImageFiles().isEmpty()) {
-            return imageUrls;
-        }
-        for (MultipartFile imageFile : form.getImageFiles()) {
-            if (imageFile != null && !imageFile.isEmpty()) {
-                String imageUrl = fileStore.storeImage(imageFile);
-                RequestImage requestMedia = RequestImage.builder()
-                        .request(savedRequest)
-                        .imageUrl(imageUrl)
-                        .build();
-                requestImageRepository.save(requestMedia);
-                imageUrls.add(imageUrl);
-            }
+        List<String> imageUrls = fileStore.storeImages(form.getImageFiles());
+        for (String imageUrl : imageUrls) {
+            RequestImage requestImage = RequestImage.builder()
+                    .request(savedRequest)
+                    .imageUrl(imageUrl)
+                    .build();
+            requestImageRepository.save(requestImage);
         }
         return imageUrls;
     }
 
     //비디오 파일 URL 반환하도록 수정하기
     private String saveVideo(RequestFormDTO form, Request savedRequest) {
-        MultipartFile videoFile = form.getVideoFile();
-        if (videoFile == null || videoFile.isEmpty()) {
+        String videoUrl = fileStore.storeVideo(form.getVideoFile());
+        if (videoUrl == null) {
             return null;
         }
-        String videoUrl = fileStore.storeVideo(videoFile);
         requestRepository.updateVideoUrl(savedRequest.getId(), videoUrl);
         return videoUrl;
     }
