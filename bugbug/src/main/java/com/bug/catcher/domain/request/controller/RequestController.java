@@ -14,7 +14,7 @@ import java.util.List;
 
 @Controller
 public class RequestController {
-    private RequestService requestService;
+    /*private RequestService requestService;
 
     public RequestController(RequestService requestService){
         this.requestService = requestService;
@@ -88,5 +88,5 @@ public class RequestController {
     public List<Request> deleteRequestList(@PathVariable Long requestId) {
         requestService.deleteRequest(requestId);
         return requestService.readRequestList();
-    }
+    }*/
 }
