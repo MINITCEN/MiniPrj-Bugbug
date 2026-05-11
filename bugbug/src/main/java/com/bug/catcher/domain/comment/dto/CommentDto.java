@@ -15,7 +15,6 @@ public class CommentDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CreateRequest {
-        private Long userId;
         private String content;
     }
 
@@ -23,7 +22,6 @@ public class CommentDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ReplyRequest {
-        private Long userId;
         private String content;
     }
 

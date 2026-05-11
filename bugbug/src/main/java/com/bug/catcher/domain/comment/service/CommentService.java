@@ -25,9 +25,9 @@ public class CommentService {
      * 게시글에 최상위 댓글을 생성한다.
      */
     @Transactional
-    public CommentDto.Response createComment(Long requestId, CommentDto.CreateRequest requestDto) {
+    public CommentDto.Response createComment(Long requestId, Long loginUserId, CommentDto.CreateRequest requestDto) {
         Request request = getRequest(requestId);
-        User user = getUser(requestDto.getUserId());
+        User user = getUser(loginUserId);
 
         Comment comment = Comment.builder()
                 .request(request)
@@ -43,9 +43,9 @@ public class CommentService {
      * 부모 댓글 아래에 대댓글을 생성한다.
      */
     @Transactional
-    public CommentDto.Response createReply(Long requestId, Long parentCommentId, CommentDto.ReplyRequest requestDto) {
+    public CommentDto.Response createReply(Long requestId, Long parentCommentId, Long loginUserId, CommentDto.ReplyRequest requestDto) {
         Request request = getRequest(requestId);
-        User user = getUser(requestDto.getUserId());
+        User user = getUser(loginUserId);
         Comment parentComment = getCommentInRequest(parentCommentId, requestId);
 
         Comment reply = Comment.builder()
@@ -86,8 +86,9 @@ public class CommentService {
      * 댓글을 soft delete 처리한다.
      */
     @Transactional
-    public void deleteComment(Long requestId, Long commentId) {
+    public void deleteComment(Long requestId, Long commentId, Long loginUserId) {
         Comment comment = getCommentInRequest(commentId, requestId);
+        validateCommentOwner(comment, loginUserId);
         comment.markDeleted();
     }
 
@@ -109,6 +110,12 @@ public class CommentService {
     private void validateRequestExists(Long requestId) {
         if (!requestRepository.existsById(requestId)) {
             throw new IllegalArgumentException("존재하지 않는 게시글입니다.");
+        }
+    }
+
+    private void validateCommentOwner(Comment comment, Long loginUserId) {
+        if (!comment.getUser().getId().equals(loginUserId)) {
+            throw new IllegalArgumentException("본인이 작성한 댓글만 삭제할 수 있습니다.");
         }
     }
 
