@@ -2,7 +2,11 @@ package com.bug.catcher.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -21,16 +25,28 @@ public class Request {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private String status;
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
-    private String approxLocation;
-    private String exactLocation;
-    private String title;
-    private String content;
-    private LocalDateTime occurrenceTime;
+
+    @OneToMany(mappedBy = "request", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<RequestImage> requestImages = new ArrayList<>();
 
     @Column(columnDefinition = "text")
     private String description;
-    private Integer viewCount;
 
+    private String approxLocation;
+    private String exactLocation;
+    private String title;
+    private String status;
+    private String content;
+    private String videoUrl;
+    private Integer viewCount;
+    private LocalDateTime occurrenceTime;
+
+    // --- 댓글 연관관계 추가 ---
+    @OneToMany(mappedBy = "request", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
 }

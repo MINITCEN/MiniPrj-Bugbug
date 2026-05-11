@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "request_images")
+@Table(name = "request_image")
 public class RequestImage {
 
     @Id
