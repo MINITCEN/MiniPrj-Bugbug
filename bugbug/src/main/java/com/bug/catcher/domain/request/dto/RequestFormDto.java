@@ -1,4 +1,4 @@
-package com.bug.catcher.domain.request.DTO;
+package com.bug.catcher.domain.request.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class RequestFormDTO {
+public class RequestFormDto {
     // Request 엔티티에 저장될 기본 입력값
     private String title;
     private String content;
