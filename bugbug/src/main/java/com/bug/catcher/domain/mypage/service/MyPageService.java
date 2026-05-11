@@ -1,9 +1,7 @@
 package com.bug.catcher.domain.mypage.service;
 
 import com.bug.catcher.domain.entity.*;
-import com.bug.catcher.domain.hunter.repository.HunterApplicationRepository;
-import com.bug.catcher.domain.hunter.repository.HunterRepository;
-import com.bug.catcher.domain.hunter.repository.SavedHunterRepository;
+import com.bug.catcher.domain.hunter.repository.*;
 import com.bug.catcher.domain.mypage.dto.*;
 import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.domain.review.repository.ReviewRepository;
@@ -25,6 +23,8 @@ public class MyPageService {
     private final HunterRepository hunterRepository;
     private final ReviewRepository reviewRepository;
     private final HunterApplicationRepository hunterApplicationRepository;
+    private final ApplicationRepository applicationRepository;
+    private final SavedRequestRepository savedRequestRepository;
 
     @Transactional(readOnly = true)
     public MyInfoResponseDto getMyInfo(Long userId) {
@@ -121,7 +121,7 @@ public class MyPageService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
 
-        // 이미 신청한 내역이 있는지(대기 중인지) 검증하는 로직 추가 권장
+        // 이미 신청한 내역이 있는지(대기 중인지) 검증하는 로직
          if (hunterApplicationRepository.existsByUserAndStatus(user, ApplicationStatus.PENDING)) {
              throw new IllegalArgumentException("이미 심사 대기 중인 신청서가 있습니다.");
          }
@@ -135,6 +135,37 @@ public class MyPageService {
                 .build();
 
         hunterApplicationRepository.save(application);
+    }
+    // 1. 수행(수락)한 의뢰 목록 보기
+    @Transactional(readOnly = true)
+    public List<HunterTaskResponseDto> getHunterTasks(Long userId) {
+        Hunter hunter = hunterRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
+
+        return applicationRepository.findByHunterId(hunter.getId()).stream()
+                .map(HunterTaskResponseDto::new)
+                .toList();
+    }
+
+    // 2. 찜한 의뢰(게시물) 목록 보기
+    @Transactional(readOnly = true)
+    public List<HunterSavedRequestDto> getHunterSavedRequests(Long userId) {
+        Hunter hunter = hunterRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
+
+        return savedRequestRepository.findByHunterId(hunter.getId()).stream()
+                .map(HunterSavedRequestDto::new)
+                .toList();
+    }
+
+    // 3. 헌터 등록 해제 (Role 강등)
+    @Transactional
+    public void resignHunter(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다."));
+
+        // 유저의 권한을 다시 USER로 강등
+        user.updateRole("USER");
     }
 
 }
