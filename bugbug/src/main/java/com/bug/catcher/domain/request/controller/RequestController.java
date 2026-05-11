@@ -1,7 +1,7 @@
 package com.bug.catcher.domain.request.controller;
 
 import com.bug.catcher.domain.entity.Request;
-import com.bug.catcher.domain.request.DTO.RequestFormDTO;
+import com.bug.catcher.domain.request.dto.RequestFormDto;
 import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.domain.request.service.RequestService;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,7 +49,7 @@ public class RequestController {
     //create request 테스트
     @PostMapping("/request/test1")
     @ResponseBody
-    public String createRequestTest(@RequestBody RequestFormDTO form) {
+    public String createRequestTest(@RequestBody RequestFormDto form) {
         requestService.createRequest(form);
         System.out.println("등록 성공");
         return "등록 성공";
@@ -76,7 +76,7 @@ public class RequestController {
     @ResponseBody
     public List<Request> updateRequestList(
             @PathVariable Long requestId,
-            @RequestBody RequestFormDTO form
+            @RequestBody RequestFormDto form
     ) {
         requestService.updateRequest(requestId, form);
         return requestService.readRequestList();
