@@ -20,7 +20,7 @@ import java.util.List;
 @Service
 public class RequestService {
 
-    private final RequestRepository requestRepository;
+    /*private final RequestRepository requestRepository;
     private final RequestImageRepository requestImageRepository;
     private final FileStore fileStore;
 
@@ -142,5 +142,5 @@ public class RequestService {
 
     private String nullToBlank(String value) {
         return value == null ? "" : value;
-    }
+    }*/
 }
