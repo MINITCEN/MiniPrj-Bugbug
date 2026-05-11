@@ -2,6 +2,7 @@ package com.bug.catcher.domain.mypage.service;
 
 import com.bug.catcher.domain.entity.*;
 import com.bug.catcher.domain.hunter.repository.*;
+import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.domain.mypage.dto.*;
 import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.domain.review.repository.ReviewRepository;
@@ -25,6 +26,7 @@ public class MyPageService {
     private final HunterApplicationRepository hunterApplicationRepository;
     private final ApplicationRepository applicationRepository;
     private final SavedRequestRepository savedRequestRepository;
+    private final HunterService hunterService;
 
     @Transactional(readOnly = true)
     public MyInfoResponseDto getMyInfo(Long userId) {
@@ -76,6 +78,8 @@ public class MyPageService {
                 .build();
 
         reviewRepository.save(review);
+        //리뷰가 생성되었으니 해당 헌터의 등급 갱신
+        hunterService.updateHunterLevel(requestDto.getHunterId());
     }
     // 리뷰 수정
     @Transactional
@@ -94,6 +98,8 @@ public class MyPageService {
                 requestDto.getRating(),
                 requestDto.getReviewContent()
         );
+        // 평점이 바뀌었으니 헌터의 등급 갱신
+        hunterService.updateHunterLevel(review.getHunter().getId());
     }
 
     // 리뷰 삭제
@@ -101,13 +107,18 @@ public class MyPageService {
     public void deleteReview(Long userId, Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
-
-        //  삭제 권한 확인
+        // 삭제 권한 확인
         if (!review.getRequest().getUser().getId().equals(userId)) {
             throw new IllegalArgumentException("본인이 작성한 리뷰만 삭제할 수 있습니다.");
         }
+        // [핵심] 삭제하기 전에 어떤 헌터의 리뷰였는지 ID를 미리 백업해 둡니다.
+        Long targetHunterId = review.getHunter().getId();
 
+        // 리뷰 삭제 실행
         reviewRepository.delete(review);
+
+        //  백업해둔 헌터 ID를 이용해 등급 재산정 (리뷰가 지워졌으니 강등될 수도 있음!)
+        hunterService.updateHunterLevel(targetHunterId);
     }
 
     @Transactional(readOnly = true)

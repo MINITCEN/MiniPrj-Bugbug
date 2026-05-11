@@ -1,6 +1,7 @@
 package com.bug.catcher.domain.hunter.service;
 
 import com.bug.catcher.domain.entity.Hunter;
+import com.bug.catcher.domain.hunter.dto.HunterProfileResponseDto;
 import com.bug.catcher.domain.hunter.repository.HunterRepository;
 import com.bug.catcher.domain.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,15 @@ public class HunterService {//등급 산정 엔진과 외부 공개 프로필 �
 
         // 산정된 등급으로 즉시 업데이트
         hunter.updateGrade(newGrade);
+    }
+    @Transactional(readOnly = true)
+    public HunterProfileResponseDto getHunterProfile(Long hunterId) {
+        Hunter hunter = hunterRepository.findById(hunterId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 헌터입니다."));
+
+        long completionCount = reviewRepository.countByHunterId(hunterId);
+        float averageRating = reviewRepository.getAverageRatingByHunterId(hunterId);
+
+        return new HunterProfileResponseDto(hunter, completionCount, averageRating);
     }
 }
