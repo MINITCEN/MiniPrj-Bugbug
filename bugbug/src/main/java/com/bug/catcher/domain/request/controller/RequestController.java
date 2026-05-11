@@ -1,6 +1,8 @@
 package com.bug.catcher.domain.request.controller;
 
+import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.request.dto.RequestFormDto;
+import com.bug.catcher.domain.request.dto.RequestDetailResponseDto;
 import com.bug.catcher.domain.request.service.RequestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +45,7 @@ public class RequestController {
 //        return "requestForm";
 //    }
 
-    //create request 테스트
+    //create request
     @PostMapping("/createRequest")
     @ResponseBody
     public List<Map<String, Object>> createRequest(@RequestBody RequestFormDto form) {
@@ -52,37 +54,34 @@ public class RequestController {
         return requestService.readRequestList();
     }
 
-    //read request 테스트(전체 게시판)
+    //read request(전체 게시판)
     @GetMapping("/readWholeRequests")
     @ResponseBody
     public List<Map<String, Object>> readRequestList() {
         System.out.println("조회 성공");
         return requestService.readRequestList();
     }
-//
-//    //상세보기 조회수 증가 체크
-//    @GetMapping("/requestDetail/{id}")
-//    @ResponseBody
-//    public Request requestDetail(@PathVariable Long id) {
-//        return requestService.readRequestDetail(id);
-//    }
-//
-//    //update request 테스트
-//    @PatchMapping("/updateRequest/{requestId}")
-//    @ResponseBody
-//    public List<Request> updateRequestList(
-//            @PathVariable Long requestId,
-//            @RequestBody RequestFormDTO form
-//    ) {
-//        requestService.updateRequest(requestId, form);
-//        return requestService.readRequestList();
-//    }
-//
-//    // delete request 테스트
-//    @DeleteMapping("/deleteRequest/{requestId}")
-//    @ResponseBody
-//    public List<Request> deleteRequestList(@PathVariable Long requestId) {
-//        requestService.deleteRequest(requestId);
-//        return requestService.readRequestList();
-//    }
+
+    // 상세보기
+    @GetMapping("/requestDetail/{id}")
+    @ResponseBody
+    public RequestDetailResponseDto requestDetail(@PathVariable Long id) {
+        return requestService.readRequestDetail(id);
+    }
+
+    // update request
+    @PatchMapping("/updateRequest/{requestId}")
+    @ResponseBody
+    public RequestDetailResponseDto updateRequest(@PathVariable Long requestId, @RequestParam Long loginUserId, @RequestBody RequestFormDto form) {
+        requestService.updateRequest(requestId, loginUserId, form);
+        return requestService.readRequestDetail(requestId);
+    }
+
+    // delete request
+    @DeleteMapping("/deleteRequest/{requestId}")
+    @ResponseBody
+    public List<Map<String, Object>> deleteRequestList(@PathVariable Long requestId, @PathVariable Long loginUserId) {
+        requestService.deleteRequest(requestId, loginUserId);
+        return requestService.readRequestList();
+    }
 }
