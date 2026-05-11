@@ -18,6 +18,8 @@ public interface DailyRegionMosquitoIndexRepository extends JpaRepository<DailyR
 
   List<DailyRegionMosquitoIndex> findAllByIndexDate(LocalDate date);
 
+  List<DailyRegionMosquitoIndex> findTop7ByRegionOrderByIndexDateDesc(Region region);
+
   @Query("SELECT d FROM DailyRegionMosquitoIndex d JOIN FETCH d.region " +
       "WHERE d.indexDate = (SELECT MAX(d2.indexDate) FROM DailyRegionMosquitoIndex d2)")
   List<DailyRegionMosquitoIndex> findAllByLatestDate();

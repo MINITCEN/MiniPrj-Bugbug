@@ -4,12 +4,15 @@ import com.bug.catcher.domain.entity.DailyRegionMosquitoIndex;
 import com.bug.catcher.domain.entity.Region;
 import com.bug.catcher.domain.entity.RegionWeatherForecast;
 import com.bug.catcher.domain.map.dto.MosquitoResponse;
+import com.bug.catcher.domain.map.dto.MosquitoTrendResponse;
 import com.bug.catcher.domain.map.dto.RegionDetailResponse;
 import com.bug.catcher.domain.map.repository.DailyRegionMosquitoIndexRepository;
 import com.bug.catcher.domain.map.repository.RegionRepository;
 import com.bug.catcher.domain.map.repository.RegionWeatherForecastRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -74,5 +77,24 @@ public class MosquitoIndexController {
     return ResponseEntity.ok(
         RegionDetailResponse.from(region.getName(), mosquitoIndex, weatherForecast.orElse(null))
     );
+  }
+
+  @GetMapping("/trend/{regionId}")
+  public ResponseEntity<List<MosquitoTrendResponse>> getRegionTrend(@PathVariable Long regionId) {
+    Region region = regionRepository.findById(regionId)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 지역입니다."));
+
+    List<MosquitoTrendResponse> response = dailyRegionMosquitoIndexRepository
+        .findTop7ByRegionOrderByIndexDateDesc(region)
+        .stream()
+        .map(MosquitoTrendResponse::from)
+        .sorted(Comparator.comparing(MosquitoTrendResponse::date))
+        .toList();
+
+    if (response.isEmpty()) {
+      return ResponseEntity.ok(Collections.emptyList());
+    }
+
+    return ResponseEntity.ok(response);
   }
 }

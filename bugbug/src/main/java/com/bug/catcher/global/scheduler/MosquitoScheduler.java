@@ -18,8 +18,8 @@ public class MosquitoScheduler {
 
   @EventListener(ApplicationReadyEvent.class)
   public void init() {
-    log.info("Application is ready. Starting mosquito index collection.");
-    runDailyMosquitoCollection();
+    log.info("Application is ready. Starting mosquito index backfill.");
+    mosquitoIndexService.backfillRecentDays(7);
   }
 
   @Scheduled(cron = "0 0 6 * * *")
