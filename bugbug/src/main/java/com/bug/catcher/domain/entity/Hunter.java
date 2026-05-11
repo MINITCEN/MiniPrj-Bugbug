@@ -21,8 +21,7 @@ public class Hunter {
     private User user;
 
     private String name;
-    private Integer age;
-    private String gender;
+    //나이, 성별 삭제
     private Boolean pledgeAgreed;
     private String grade;
     private Integer requestCount;

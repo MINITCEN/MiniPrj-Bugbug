@@ -1,8 +1,11 @@
 package com.bug.catcher.domain.admin.service;
 
 import com.bug.catcher.domain.admin.dto.AdminUserResponseDto;
+import com.bug.catcher.domain.entity.ApplicationStatus;
 import com.bug.catcher.domain.entity.Hunter;
+import com.bug.catcher.domain.entity.HunterApplication;
 import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.hunter.repository.HunterApplicationRepository;
 import com.bug.catcher.domain.hunter.repository.HunterRepository;
 import com.bug.catcher.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ public class AdminService {
 
     private final UserRepository userRepository;
     private final HunterRepository hunterRepository;
+    private final HunterApplicationRepository hunterApplicationRepository;
 
     public Page<AdminUserResponseDto> getUsers(String role, Pageable pageable) {
         Page<User> users;
@@ -34,18 +38,26 @@ public class AdminService {
     }
 
     @Transactional
-    public void approveHunter(Long hunterId) {
-        // 1. 헌터 정보를 찾습니다.
-        Hunter hunter = hunterRepository.findById(hunterId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 헌터 신청 내역입니다."));
+    public void approveHunterApplication(Long applicationId) {
+        HunterApplication application = hunterApplicationRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("신청서를 찾을 수 없습니다."));
 
-        // 2. 헌터와 연결된 유저 정보를 가져와서 권한을 'HUNTER'로 승격시킵니다.
-        User user = hunter.getUser();
-        if ("HUNTER".equals(user.getRole())) {
-            throw new IllegalStateException("이미 헌터로 승인된 유저입니다.");
-        }
-        
+        // 1. 신청서 상태를 승인으로 변경
+        application.updateStatus(ApplicationStatus.APPROVED);
+
+        // 2. 해당 유저의 권한을 일반 유저에서 헌터로 변경
+        User user = application.getUser();
         user.updateRole("HUNTER");
-        // 더티 체킹(Dirty Checking)으로 인해 별도의 save 호출 없이 DB에 반영됩니다.
+
+        // 3. [추가됨] 승인과 동시에 헌터 전용 프로필(엔티티) 생성
+        Hunter hunter = Hunter.builder()
+                .user(user)
+                .name(application.getName())
+                .pledgeAgreed(application.getPledgeAgreed())
+                .grade("슬리퍼 전사") // 진화 시스템의 초기 등급 설정!
+                .requestCount(0)
+                .responseCount(0)
+                .build();
+        hunterRepository.save(hunter);
     }
 }

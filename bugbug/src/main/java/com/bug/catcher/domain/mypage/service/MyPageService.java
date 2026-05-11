@@ -1,9 +1,7 @@
 package com.bug.catcher.domain.mypage.service;
 
-import com.bug.catcher.domain.entity.Hunter;
-import com.bug.catcher.domain.entity.Request;
-import com.bug.catcher.domain.entity.Review;
-import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.entity.*;
+import com.bug.catcher.domain.hunter.repository.HunterApplicationRepository;
 import com.bug.catcher.domain.hunter.repository.HunterRepository;
 import com.bug.catcher.domain.hunter.repository.SavedHunterRepository;
 import com.bug.catcher.domain.mypage.dto.*;
@@ -14,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,6 +24,7 @@ public class MyPageService {
     private final SavedHunterRepository savedHunterRepository;
     private final HunterRepository hunterRepository;
     private final ReviewRepository reviewRepository;
+    private final HunterApplicationRepository hunterApplicationRepository;
 
     @Transactional(readOnly = true)
     public MyInfoResponseDto getMyInfo(Long userId) {
@@ -109,4 +109,32 @@ public class MyPageService {
 
         reviewRepository.delete(review);
     }
+
+    @Transactional(readOnly = true)
+    public HunterFormResponseDto getHunterForm(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        return new HunterFormResponseDto(user);
+    }
+    @Transactional
+    public void applyForHunter(Long userId, HunterApplyRequestDto requestDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
+
+        // 이미 신청한 내역이 있는지(대기 중인지) 검증하는 로직 추가 권장
+         if (hunterApplicationRepository.existsByUserAndStatus(user, ApplicationStatus.PENDING)) {
+             throw new IllegalArgumentException("이미 심사 대기 중인 신청서가 있습니다.");
+         }
+
+        HunterApplication application = HunterApplication.builder()
+                .user(user)
+                .name(user.getNickname()) // 팝업에서 따로 실명을 받는다면 requestDto에서 가져오기
+                .pledgeAgreed(requestDto.getPledgeAgreed())
+                .status(ApplicationStatus.PENDING) // 처음엔 무조건 대기 상태
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        hunterApplicationRepository.save(application);
+    }
+
 }
