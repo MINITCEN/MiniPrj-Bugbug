@@ -2,6 +2,7 @@ package com.bug.catcher.domain.request.controller;
 
 import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.request.dto.RequestFormDto;
+import com.bug.catcher.domain.request.dto.RequestDetailResponseDto;
 import com.bug.catcher.domain.request.service.RequestService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -61,20 +62,17 @@ public class RequestController {
         return requestService.readRequestList();
     }
 
-    //상세보기 조회수 증가 체크(선택한 게시물 보기)
+    // 상세보기
     @GetMapping("/requestDetail/{id}")
     @ResponseBody
-    public Request requestDetail(@PathVariable Long id) {
+    public RequestDetailResponseDto requestDetail(@PathVariable Long id) {
         return requestService.readRequestDetail(id);
     }
 
-    //update request
+    // update request
     @PatchMapping("/updateRequest/{requestId}")
     @ResponseBody
-    public Request updateRequestList(
-            @PathVariable Long requestId, Long loginUserId,
-            @RequestBody RequestFormDto form
-    ) {
+    public RequestDetailResponseDto updateRequest(@PathVariable Long requestId, @RequestParam Long loginUserId, @RequestBody RequestFormDto form) {
         requestService.updateRequest(requestId, loginUserId, form);
         return requestService.readRequestDetail(requestId);
     }

@@ -1,6 +1,7 @@
 package com.bug.catcher.domain.request.service;
 
 import com.bug.catcher.domain.entity.Request;
+import com.bug.catcher.domain.request.dto.RequestDetailResponseDto;
 import com.bug.catcher.domain.request.dto.RequestFormDto;
 import com.bug.catcher.domain.request.repository.RequestImageRepository;
 import com.bug.catcher.domain.request.repository.RequestRepository;
@@ -67,13 +68,14 @@ public class RequestService {
     //상세보기
     //조회 수 증가
     @Transactional
-    public Request readRequestDetail(Long requestId) {
+    public RequestDetailResponseDto readRequestDetail(Long requestId) {
         int updatedCount = requestRepository.increaseViewCount(requestId);
         if (updatedCount == 0) {
             throw new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다.");
         }
-        return requestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(()->new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
+        return RequestDetailResponseDto.responseDto(request);
     }
 
     // update
