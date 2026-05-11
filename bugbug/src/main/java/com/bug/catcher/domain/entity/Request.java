@@ -32,4 +32,5 @@ public class Request {
     @Column(columnDefinition = "text")
     private String description;
     private Integer viewCount;
+
 }
