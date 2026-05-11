@@ -22,13 +22,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/users/signup",
                         "/api/auth/login",
                         "/api/auth/logout",
-                        "/api/request/createRequest",
-                        "/api/request/readWholeRequests",
-                        "/api/request/requestDetail/**",
-                        "/api/request/updateRequest/**",
-                        "/api/request/deleteRequest/**",
-                        "/api/request/upload/images",
-                        "/api/request/upload/video",
+                        "/api/request/**",
                         "/h2-console/**",
                         "/error",
                         "/uploads/**",// 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.
@@ -36,7 +30,7 @@ public class WebConfig implements WebMvcConfigurer {
 
                         "/v3/api-docs/**",   // 스웨거 데이터 접근 허용
                         "/swagger-resources/**",
-                        "/api/v1/mosquito/**"
+                        "/api/v1/mosquito/**",
                         "/uploads/**",    // 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.
                         "/swagger-ui/**",    // 스웨거 화면 접근 허용
                         "/v3/api-docs/**",   // 스웨거 데이터 접근 허용
