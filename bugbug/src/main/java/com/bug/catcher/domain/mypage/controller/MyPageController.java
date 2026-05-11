@@ -1,6 +1,7 @@
 package com.bug.catcher.domain.mypage.controller;
 
 import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.domain.mypage.dto.*;
 import com.bug.catcher.domain.mypage.service.MyPageService;
 import com.bug.catcher.domain.user.repository.UserRepository;

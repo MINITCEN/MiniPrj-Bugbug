@@ -26,4 +26,8 @@ public class Hunter {
     private String grade;
     private Integer requestCount;
     private Integer responseCount;
+    //  레벨업 시 등급을 변경하는 메서드
+    public void updateGrade(String newGrade) {
+        this.grade = newGrade;
+    }
 }
