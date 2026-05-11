@@ -51,4 +51,14 @@ public class Comment {
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public void addChild(Comment child) {
+        children.add(child);
+        child.parentComment = this;
+    }
+
+    public void markDeleted() {
+        this.isDeleted = true;
+        this.content = "삭제된 댓글입니다.";
+    }
 }
