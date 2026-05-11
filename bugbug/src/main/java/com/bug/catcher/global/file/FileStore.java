@@ -67,4 +67,8 @@ public class FileStore {
             throw new RuntimeException(errorMessage, e);
         }
     }
+
+    /**
+     * 파일 삭제 로직 구현 시작
+     */
 }
