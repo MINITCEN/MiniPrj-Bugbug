@@ -4,7 +4,6 @@ import com.bug.catcher.domain.entity.Hunter;
 import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.Review;
 import com.bug.catcher.domain.entity.User;
-import com.bug.catcher.domain.hunter.repository.HunterRepository;
 import com.bug.catcher.domain.hunter.repository.SavedHunterRepository;
 import com.bug.catcher.domain.mypage.dto.*;
 import com.bug.catcher.domain.request.repository.RequestRepository;

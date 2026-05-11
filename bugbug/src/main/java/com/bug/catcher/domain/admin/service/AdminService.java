@@ -3,7 +3,7 @@ package com.bug.catcher.domain.admin.service;
 import com.bug.catcher.domain.admin.dto.AdminUserResponseDto;
 import com.bug.catcher.domain.entity.Hunter;
 import com.bug.catcher.domain.entity.User;
-import com.bug.catcher.domain.user.repository.HunterRepository;
+import com.bug.catcher.domain.hunter.repository.HunterRepository;
 import com.bug.catcher.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
