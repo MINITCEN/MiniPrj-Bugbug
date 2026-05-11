@@ -92,6 +92,17 @@ public class CommentService {
         comment.markDeleted();
     }
 
+    /**
+     * 댓글 내용을 수정한다.
+     */
+    @Transactional
+    public CommentDto.Response updateComment(Long requestId, Long commentId, Long loginUserId, CommentDto.UpdateRequest requestDto) {
+        Comment comment = getCommentInRequest(commentId, requestId);
+        validateCommentOwner(comment, loginUserId);
+        comment.updateContent(requestDto.getContent());
+        return CommentDto.Response.fromEntity(comment);
+    }
+
     private Request getRequest(Long requestId) {
         return requestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));

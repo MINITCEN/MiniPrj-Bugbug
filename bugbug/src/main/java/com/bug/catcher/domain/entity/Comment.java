@@ -61,4 +61,7 @@ public class Comment {
         this.isDeleted = true;
         this.content = "삭제된 댓글입니다.";
     }
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

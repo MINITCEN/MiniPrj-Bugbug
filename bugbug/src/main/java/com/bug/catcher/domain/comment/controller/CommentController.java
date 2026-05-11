@@ -84,6 +84,21 @@ public class CommentController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * 특정 댓글의 내용을 수정한다.
+     */
+    @PatchMapping("/{commentId}")
+    public ResponseEntity<CommentDto.Response> updateComment(
+            @PathVariable Long requestId,
+            @PathVariable Long commentId,
+            @RequestBody CommentDto.UpdateRequest requestDto,
+            HttpServletRequest request) {
+
+        User loginUser = getLoginUser(request);
+        CommentDto.Response response = commentService.updateComment(requestId, commentId, loginUser.getId(), requestDto);
+        return ResponseEntity.ok(response);
+    }
+
     private User getLoginUser(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) {
