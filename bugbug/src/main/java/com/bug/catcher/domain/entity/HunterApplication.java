@@ -21,15 +21,19 @@ public class HunterApplication {
 
     // 신청서에 입력한 정보들 (기존 유저 정보에서 가져오되 수정 가능)
     private String name;
-    private Integer age;
-    private String gender;
-    private String phoneNumber;
-    private String address;
+
+    @Column(nullable = false)
+    private Boolean pledgeAgreed;
 
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status; // PENDING, APPROVED, REJECTED
 
     private LocalDateTime createdAt;
+
+    // 관리자가 승인/거절 시 상태를 변경하는 메서드
+    public void updateStatus(ApplicationStatus status) {
+        this.status = status;
+    }
 
 
 }
