@@ -1,4 +1,4 @@
-package com.bug.catcher.domain.request.DTO;
+package com.bug.catcher.domain.request.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +11,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class RequestFormDTO {
+public class RequestFormDto {
     // Request 엔티티에 직접 매핑 가능한 값
     private String title;
 

@@ -2,7 +2,7 @@ package com.bug.catcher.domain.request.service;
 
 import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.RequestImage;
-import com.bug.catcher.domain.request.DTO.RequestFormDTO;
+import com.bug.catcher.domain.request.dto.RequestFormDto;
 import com.bug.catcher.domain.request.repository.RequestImageRepository;
 import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.global.file.FileStore;
@@ -42,7 +42,7 @@ public class RequestService {
     //여기서부터 Request Talend 테스트
     //create 테스트
     @Transactional
-    public void createRequest(RequestFormDTO form) {
+    public void createRequest(RequestFormDto form) {
         Request request = Request.builder()
                 .status("WAITING")
                 .createdAt(LocalDateTime.now())
@@ -76,7 +76,7 @@ public class RequestService {
 
     //update 테스트
     @Transactional
-    public void updateRequest(Long requestId, RequestFormDTO form) {
+    public void updateRequest(Long requestId, RequestFormDto form) {
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
         LocalDateTime occurrenceTime = form.getOccurrenceTime();
@@ -103,7 +103,7 @@ public class RequestService {
         requestRepository.delete(request);
     }
 
-    private LocalDateTime resolveOccurrenceTime(RequestFormDTO form) {
+    private LocalDateTime resolveOccurrenceTime(RequestFormDto form) {
         if (form.getOccurrenceTime() != null) {
             return form.getOccurrenceTime();
         }
@@ -111,7 +111,7 @@ public class RequestService {
         return form.getPreferredTime();
     }
 
-    private void saveImages(RequestFormDTO form, Request savedRequest) {
+    private void saveImages(RequestFormDto form, Request savedRequest) {
         if (form.getImageFiles() == null) {
             return;
         }
@@ -130,7 +130,7 @@ public class RequestService {
         }
     }
 
-    private String buildDescription(RequestFormDTO form) {
+    private String buildDescription(RequestFormDto form) {
         return """
                 발생 위치: %s
                 추가 설명: %s
