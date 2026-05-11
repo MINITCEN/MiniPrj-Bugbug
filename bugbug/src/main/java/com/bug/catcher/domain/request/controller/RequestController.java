@@ -1,9 +1,9 @@
 package com.bug.catcher.domain.request.controller;
 
-import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.request.dto.RequestFormDto;
 import com.bug.catcher.domain.request.dto.RequestDetailResponseDto;
 import com.bug.catcher.domain.request.service.RequestService;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,9 +46,9 @@ public class RequestController {
 //    }
 
     //create request
-    @PostMapping("/createRequest")
+    @PostMapping(path = "/createRequest",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    public List<Map<String, Object>> createRequest(@RequestBody RequestFormDto form) {
+    public List<Map<String, Object>> createRequest(@ModelAttribute RequestFormDto form) {
         requestService.createRequest(form);
         System.out.println("등록 성공");
         return requestService.readRequestList();

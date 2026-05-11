@@ -1,6 +1,7 @@
 package com.bug.catcher.domain.request.repository;
 
 import com.bug.catcher.domain.entity.Request;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,4 +33,6 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
             "from Request r " +
             "where r.id = :requestId and r.user.id = :loginUserId")
     int delete(Long requestId, Long loginUserId);
+
+    List<Request> findByUserIdOrderByCreatedAtDesc(Long userId);
 }
