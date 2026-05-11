@@ -1,8 +1,7 @@
 package com.bug.catcher.domain.request.service;
 
 import com.bug.catcher.domain.entity.Request;
-import com.bug.catcher.domain.entity.RequestImage;
-import com.bug.catcher.domain.request.DTO.RequestFormDTO;
+import com.bug.catcher.domain.request.dto.RequestFormDto;
 import com.bug.catcher.domain.request.repository.RequestImageRepository;
 import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.global.file.FileStore;
@@ -38,7 +37,7 @@ public class RequestService {
     //여기서부터 Request Talend 테스트
     //create 테스트
     @Transactional
-    public Map<String, Object> createRequest(RequestFormDTO form) {
+    public Map<String, Object> createRequest(RequestFormDto form) {
         Request request = Request.builder()
                 .status("WAITING")
                 .approxLocation(form.getLocation())
@@ -112,7 +111,7 @@ public class RequestService {
 //    }
 //
 //
-    private String buildDescription(RequestFormDTO form) {
+    private String buildDescription(RequestFormDto form) {
         return """
                 발생 위치: %s
                 추가 설명: %s

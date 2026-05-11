@@ -45,5 +45,8 @@ public class Request {
     private Integer viewCount;
     private LocalDateTime occurrenceTime;
 
-
+    // --- 댓글 연관관계 추가 ---
+    @OneToMany(mappedBy = "request", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Comment> comments = new ArrayList<>();
 }

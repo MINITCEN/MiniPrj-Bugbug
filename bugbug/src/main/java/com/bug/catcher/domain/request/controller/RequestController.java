@@ -1,13 +1,8 @@
 package com.bug.catcher.domain.request.controller;
 
-import com.bug.catcher.domain.entity.Request;
-import com.bug.catcher.domain.request.DTO.RequestFormDTO;
-import com.bug.catcher.domain.request.repository.RequestRepository;
+import com.bug.catcher.domain.request.dto.RequestFormDto;
 import com.bug.catcher.domain.request.service.RequestService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,7 +46,7 @@ public class RequestController {
     //create request 테스트
     @PostMapping("/createRequest")
     @ResponseBody
-    public List<Map<String, Object>> createRequest(@RequestBody RequestFormDTO form) {
+    public List<Map<String, Object>> createRequest(@RequestBody RequestFormDto form) {
         requestService.createRequest(form);
         System.out.println("등록 성공");
         return requestService.readRequestList();
