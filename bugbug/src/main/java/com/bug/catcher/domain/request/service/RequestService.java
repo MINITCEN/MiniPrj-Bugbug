@@ -3,9 +3,7 @@ package com.bug.catcher.domain.request.service;
 import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.request.dto.RequestDetailResponseDto;
 import com.bug.catcher.domain.request.dto.RequestFormDto;
-import com.bug.catcher.domain.request.repository.RequestImageRepository;
 import com.bug.catcher.domain.request.repository.RequestRepository;
-import com.bug.catcher.global.file.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +17,6 @@ import java.util.Map;
 public class RequestService {
 
     private final RequestRepository requestRepository;
-    private final RequestImageRepository requestImageRepository;
-    private final FileStore fileStore;
 
 //    @Transactional(readOnly = true)
 //    public Page<Request> findRequestPage(int page) {
