@@ -1,5 +1,6 @@
 package com.bug.catcher.domain.comment.service;
 
+import com.bug.catcher.domain.comment.dto.CommentDto;
 import com.bug.catcher.domain.comment.repository.CommentRepository;
 import com.bug.catcher.domain.entity.Comment;
 import com.bug.catcher.domain.entity.Request;
@@ -24,57 +25,61 @@ public class CommentService {
      * 게시글에 최상위 댓글을 생성한다.
      */
     @Transactional
-    public Comment createComment(Long requestId, Long userId, String content) {
+    public CommentDto.Response createComment(Long requestId, CommentDto.CreateRequest requestDto) {
         Request request = getRequest(requestId);
-        User user = getUser(userId);
+        User user = getUser(requestDto.getUserId());
 
         Comment comment = Comment.builder()
                 .request(request)
                 .user(user)
-                .content(content)
+                .content(requestDto.getContent())
                 .depth(0)
                 .build();
 
-        return commentRepository.save(comment);
+        return CommentDto.Response.fromEntity(commentRepository.save(comment));
     }
 
     /**
      * 부모 댓글 아래에 대댓글을 생성한다.
      */
     @Transactional
-    public Comment createReply(Long requestId, Long parentCommentId, Long userId, String content) {
+    public CommentDto.Response createReply(Long requestId, Long parentCommentId, CommentDto.ReplyRequest requestDto) {
         Request request = getRequest(requestId);
-        User user = getUser(userId);
+        User user = getUser(requestDto.getUserId());
         Comment parentComment = getCommentInRequest(parentCommentId, requestId);
 
         Comment reply = Comment.builder()
                 .request(request)
                 .user(user)
-                .content(content)
+                .content(requestDto.getContent())
                 .parentComment(parentComment)
                 .depth(parentComment.getDepth() + 1)
                 .build();
 
         parentComment.addChild(reply);
-        return commentRepository.save(reply);
+        return CommentDto.Response.fromEntity(commentRepository.save(reply));
     }
 
     /**
      * 특정 게시글의 최상위 댓글 목록을 생성 순으로 조회한다.
      */
     @Transactional(readOnly = true)
-    public List<Comment> readRootComments(Long requestId) {
+    public List<CommentDto.Response> readRootComments(Long requestId) {
         validateRequestExists(requestId);
-        return commentRepository.findByRequestIdAndParentCommentIsNullOrderByCreatedAtAsc(requestId);
+        return commentRepository.findByRequestIdAndParentCommentIsNullOrderByCreatedAtAsc(requestId).stream()
+                .map(this::toResponseTree)
+                .toList();
     }
 
     /**
      * 특정 부모 댓글에 속한 자식 댓글 목록을 생성 순으로 조회한다.
      */
     @Transactional(readOnly = true)
-    public List<Comment> readChildComments(Long requestId, Long parentCommentId) {
+    public List<CommentDto.Response> readChildComments(Long requestId, Long parentCommentId) {
         getCommentInRequest(parentCommentId, requestId);
-        return commentRepository.findByParentCommentIdOrderByCreatedAtAsc(parentCommentId);
+        return commentRepository.findByParentCommentIdOrderByCreatedAtAsc(parentCommentId).stream()
+                .map(this::toResponseTree)
+                .toList();
     }
 
     /**
@@ -105,5 +110,12 @@ public class CommentService {
         if (!requestRepository.existsById(requestId)) {
             throw new IllegalArgumentException("존재하지 않는 게시글입니다.");
         }
+    }
+
+    private CommentDto.Response toResponseTree(Comment comment) {
+        List<CommentDto.Response> children = commentRepository.findByParentCommentIdOrderByCreatedAtAsc(comment.getId()).stream()
+                .map(this::toResponseTree)
+                .toList();
+        return CommentDto.Response.fromEntity(comment, children);
     }
 }
