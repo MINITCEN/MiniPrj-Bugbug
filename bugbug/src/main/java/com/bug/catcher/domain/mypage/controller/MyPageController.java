@@ -95,24 +95,31 @@ public class MyPageController {
         return ResponseEntity.ok("리뷰가 삭제되었습니다.");
     }
 
+    // 헌터 신청 팝업에서 제출 버튼을 눌렀을 때 호출
+    @PostMapping("/hunter/apply")
+    public ResponseEntity<String> applyForHunter(@RequestBody HunterApplyRequestDto requestDto, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+
+        myPageService.applyForHunter(loginUser.getId(), requestDto);
+        return ResponseEntity.ok("헌터 신청이 성공적으로 접수되었습니다.");
+    }
+
+    // 마이페이지 대시보드 접근 시 세션/권한 동기화
     @GetMapping("/dashboard")
-    public ResponseEntity<?> getMyPageDashboard(HttpServletRequest request) {
-        // 1. 현재 세션에 저장된 유저 정보 가져오기
+    public ResponseEntity<DashboardResponseDto> getMyPageDashboard(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         User sessionUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
 
-        // 2. DB에서 가장 최신의 유저 정보 조회
         User dbUser = userRepository.findById(sessionUser.getId())
                 .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
 
-        // 3. 세션의 권한과 DB의 권한이 다르다면? (관리자가 그 사이에 승인해준 경우)
         if (!sessionUser.getRole().equals(dbUser.getRole())) {
-            // 세션 정보를 최신 DB 정보로 덮어씌움 (새로고침이나 재로그인 없이 즉시 헌터 권한 적용)
             session.setAttribute(SessionConst.LOGIN_USER, dbUser);
-            sessionUser = dbUser; // 현재 요청에서도 헌터 정보를 쓰기 위해 동기화
+            sessionUser = dbUser;
         }
 
-        // 이후 sessionUser.getRole()이 "HUNTER"인지 분기하여 헌터용 데이터 반환
-        // ...
+        DashboardResponseDto responseDto = new DashboardResponseDto(sessionUser.getRole(), sessionUser.getNickname());
+        return ResponseEntity.ok(responseDto);
     }
 }

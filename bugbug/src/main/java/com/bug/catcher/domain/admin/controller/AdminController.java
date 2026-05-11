@@ -31,9 +31,10 @@ public class AdminController {
     }
 
     @Operation(summary = "헌터 승인 처리", description = "헌터 신청을 한 유저를 최종 승인하여 HUNTER 권한을 부여합니다.")
-    @PostMapping("/hunters/{id}/approve")
-    public ResponseEntity<Void> approveHunter(@PathVariable("id") Long hunterId) {
-        adminService.approveHunter(hunterId);
+    @PostMapping("/applications/{applicationId}/approve") // URL도 신청서 id를 받는 것으로 변경
+    public ResponseEntity<Void> approveHunter(@PathVariable("applicationId") Long applicationId) {
+        // [수정됨] 서비스 메서드 이름과 일치시킴
+        adminService.approveHunterApplication(applicationId);
         return ResponseEntity.ok().build();
     }
 }
