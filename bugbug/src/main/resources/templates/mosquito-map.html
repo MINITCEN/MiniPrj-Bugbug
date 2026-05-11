@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모기지수 지도</title>
+    <style>
+        :root {
+            --bg: #f4f7f5;
+            --panel: #ffffff;
+            --line: #d8e1db;
+            --text: #172019;
+            --muted: #68756d;
+            --brand: #1b7f49;
+            --brand-soft: rgba(27, 127, 73, 0.08);
+            --good: #9de0a5;
+            --interest: #ffd86b;
+            --warning: #ffad4c;
+            --danger: #ff685d;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: linear-gradient(180deg, #fcfdfc 0%, var(--bg) 100%);
+            color: var(--text);
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        .page {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 24px 24px 40px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            padding-bottom: 24px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 34px;
+            font-weight: 800;
+        }
+
+        .brand-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #0d9355, #0f6f43);
+            color: #fff;
+            font-size: 22px;
+        }
+
+        .meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .meta button {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: var(--panel);
+            color: var(--text);
+            padding: 10px 14px;
+            cursor: pointer;
+        }
+
+        .hero h1 {
+            margin: 0 0 8px;
+            font-size: 44px;
+            line-height: 1.04;
+        }
+
+        .hero p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 300px minmax(560px, 1fr) 360px;
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(20, 43, 29, 0.05);
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .panel-section {
+            padding: 20px;
+        }
+
+        .panel-section h2,
+        .map-header h2,
+        .detail-head h2 {
+            margin: 0 0 16px;
+            font-size: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: #fbfcfb;
+        }
+
+        .search-box input {
+            border: 0;
+            outline: none;
+            background: transparent;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        .region-list {
+            display: grid;
+            gap: 8px;
+            max-height: 280px;
+            overflow: auto;
+            margin-top: 14px;
+        }
+
+        .region-list button {
+            width: 100%;
+            border: 1px solid var(--line);
+            background: #fff;
+            border-radius: 14px;
+            padding: 10px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .region-list button.active {
+            border-color: rgba(27, 127, 73, 0.45);
+            background: var(--brand-soft);
+        }
+
+        .legend {
+            display: grid;
+            gap: 14px;
+        }
+
+        .legend-row {
+            display: grid;
+            grid-template-columns: 24px 1fr auto;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .legend-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .empty {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .map-panel {
+            overflow: hidden;
+        }
+
+        .map-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 20px 20px 0;
+        }
+
+        .map-board-wrap {
+            padding: 16px 20px 20px;
+        }
+
+        .map-board {
+            position: relative;
+            min-height: 700px;
+            border-radius: 24px;
+            border: 1px solid #dfe6e1;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(181, 204, 191, 0.18), transparent 22%),
+                radial-gradient(circle at 82% 24%, rgba(197, 205, 214, 0.22), transparent 20%),
+                linear-gradient(180deg, #f6f9f7 0%, #edf3ee 100%);
+        }
+
+        .map-board::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.45) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.45) 1px, transparent 1px);
+            background-size: 72px 72px;
+            opacity: 0.5;
+        }
+
+        .map-board::after {
+            content: "";
+            position: absolute;
+            left: 8%;
+            right: 8%;
+            top: 10%;
+            bottom: 10%;
+            border-radius: 40px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.48), rgba(255,255,255,0.16));
+            filter: blur(6px);
+            pointer-events: none;
+        }
+
+        .district-node {
+            position: absolute;
+            width: 116px;
+            min-height: 82px;
+            border: 2px solid rgba(255,255,255,0.95);
+            border-radius: 26px;
+            box-shadow: 0 12px 22px rgba(38, 55, 44, 0.12);
+            padding: 10px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-align: center;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            transition: transform .15s ease, box-shadow .15s ease, outline-color .15s ease;
+            z-index: 1;
+        }
+
+        .district-node:hover { transform: translate(-50%, -50%) scale(1.03); }
+
+        .district-node.active {
+            outline: 4px solid rgba(27, 127, 73, 0.18);
+            box-shadow: 0 16px 30px rgba(21, 50, 34, 0.2);
+        }
+
+        .district-name {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .district-index {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.94);
+            display: grid;
+            place-items: center;
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .map-legend-inline {
+            position: absolute;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            background: rgba(255,255,255,0.92);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 12px 18px;
+            font-size: 13px;
+            backdrop-filter: blur(8px);
+            z-index: 2;
+        }
+
+        .map-legend-inline span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .loading {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            background: rgba(246, 248, 247, 0.85);
+            color: var(--muted);
+            font-size: 16px;
+            z-index: 4;
+        }
+
+        .detail-panel {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-head {
+            padding: 20px 20px 12px;
+        }
+
+        .detail-body {
+            padding: 0 20px 20px;
+            display: grid;
+            gap: 16px;
+        }
+
+        .score-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .score-meta {
+            display: grid;
+            gap: 8px;
+        }
+
+        .score-meta .region {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        .score-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-value {
+            font-size: 56px;
+            line-height: 1;
+            font-weight: 900;
+        }
+
+        .score-max {
+            color: var(--muted);
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .score-badge {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            border: 3px solid #eef3ef;
+            background: linear-gradient(180deg, #fff, #f6faf7);
+            display: grid;
+            place-items: center;
+            font-size: 34px;
+        }
+
+        .weather-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .mini-card,
+        .fact-card,
+        .chart-card {
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: #fcfdfc;
+            padding: 16px;
+        }
+
+        .mini-card strong,
+        .fact-card strong,
+        .chart-card strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .mini-card .value {
+            font-size: 24px;
+            font-weight: 800;
+        }
+
+        .fact-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .fact-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .fact-row span:first-child {
+            color: var(--muted);
+        }
+
+        .fact-note {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--line);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .chart-card svg {
+            width: 100%;
+            height: 200px;
+            display: block;
+        }
+
+        .chart-axis {
+            stroke: #d8dfda;
+            stroke-width: 1;
+        }
+
+        .chart-line {
+            fill: none;
+            stroke: #ff6b57;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .chart-point {
+            fill: #ffffff;
+            stroke: #ff6b57;
+            stroke-width: 3;
+        }
+
+        .chart-label {
+            font-size: 11px;
+            fill: #69766f;
+        }
+
+        .chart-value {
+            font-size: 12px;
+            fill: #243029;
+            font-weight: 700;
+        }
+
+        @media (max-width: 1280px) {
+            .layout {
+                grid-template-columns: 280px 1fr;
+            }
+            .detail-panel {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .page { padding: 20px 14px 28px; }
+            .layout { grid-template-columns: 1fr; }
+            .topbar,
+            .map-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .map-board { min-height: 840px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="topbar">
+        <div class="brand">
+            <div class="brand-badge">🛡</div>
+            <div>버그버그</div>
+        </div>
+        <div class="meta">
+            <span id="last-updated">최종 업데이트 확인 중</span>
+            <button type="button" id="refresh-button">새로고침</button>
+        </div>
+    </div>
+
+    <div class="hero">
+        <h1>모기지수 지도</h1>
+        <p>서울 25개 자치구의 현재 모기 활동 지수와 지역별 상세 기상 정보를 한 화면에서 확인할 수 있습니다.</p>
+    </div>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <section class="panel panel-section">
+                <h2>지역 검색</h2>
+                <div class="search-box">
+                    <span>🔎</span>
+                    <input id="search-input" type="text" placeholder="구 이름 입력">
+                </div>
+                <div id="region-list" class="region-list"></div>
+            </section>
+
+            <section class="panel panel-section">
+                <h2>등급 안내</h2>
+                <div class="legend">
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--danger);"></span><span>불쾌</span><span>75 - 100</span></div>
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--warning);"></span><span>주의</span><span>50 - 74</span></div>
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--interest);"></span><span>관심</span><span>25 - 49</span></div>
+                    <div class="legend-row"><span class="legend-dot" style="background: var(--good);"></span><span>쾌적</span><span>0 - 24</span></div>
+                </div>
+            </section>
+
+            <section class="panel panel-section">
+                <h2>안내</h2>
+                <p class="empty">
+                    모기지수는 수변 비율, 주거 비율, 공원 비율과 기상 데이터를 바탕으로 계산됩니다.
+                    지도를 클릭하면 해당 자치구의 상세 정보와 최근 7일 추이를 확인할 수 있습니다.
+                </p>
+            </section>
+        </aside>
+
+        <main class="panel map-panel">
+            <div class="map-header">
+                <h2>서울 모기 활동 현황</h2>
+                <div class="meta">지도를 클릭하면 우측 패널이 즉시 갱신됩니다.</div>
+            </div>
+            <div class="map-board-wrap">
+                <div class="map-board" id="map-board">
+                    <div id="map-loading" class="loading">모기 지수 불러오는 중</div>
+                    <div class="map-legend-inline">
+                        <span><i class="legend-dot" style="background: var(--good);"></i>쾌적</span>
+                        <span><i class="legend-dot" style="background: var(--interest);"></i>관심</span>
+                        <span><i class="legend-dot" style="background: var(--warning);"></i>주의</span>
+                        <span><i class="legend-dot" style="background: var(--danger);"></i>불쾌</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="panel detail-panel">
+            <div class="detail-head">
+                <h2>지역 상세 정보</h2>
+            </div>
+            <div class="detail-body">
+                <div class="score-row">
+                    <div class="score-meta">
+                        <div id="detail-region" class="region">지역 선택</div>
+                        <div class="score-line">
+                            <span id="detail-score" class="score-value">-</span>
+                            <span class="score-max">/ 100</span>
+                        </div>
+                        <div id="detail-status" class="status-pill" style="background: #97a39c;">선택 대기</div>
+                        <div id="detail-date" class="empty">지도를 클릭해 상세 정보를 불러오세요.</div>
+                    </div>
+                    <div id="detail-icon" class="score-badge">🦟</div>
+                </div>
+
+                <div class="weather-grid">
+                    <div class="mini-card">
+                        <strong>강수 상태</strong>
+                        <div id="detail-precipitation" class="value">-</div>
+                    </div>
+                    <div class="mini-card">
+                        <strong>하늘 상태</strong>
+                        <div id="detail-sky" class="value">-</div>
+                    </div>
+                </div>
+
+                <div class="fact-card">
+                    <strong>기상 정보</strong>
+                    <div class="fact-list">
+                        <div class="fact-row"><span>기온</span><span id="detail-temp">-</span></div>
+                        <div class="fact-row"><span>습도</span><span id="detail-humidity">-</span></div>
+                        <div class="fact-row"><span>강수량</span><span id="detail-rain">-</span></div>
+                        <div class="fact-row"><span>풍속</span><span id="detail-wind">-</span></div>
+                    </div>
+                    <div id="weather-date" class="fact-note">날씨 기준 시각: -</div>
+                </div>
+
+                <div class="chart-card">
+                    <strong id="chart-title">최근 7일 모기 지수</strong>
+                    <svg id="trend-chart" viewBox="0 0 320 200" preserveAspectRatio="none"></svg>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<script>
+    const districtLayout = {
+        "도봉구": { x: 57, y: 14 },
+        "노원구": { x: 73, y: 16 },
+        "강북구": { x: 54, y: 26 },
+        "은평구": { x: 33, y: 31 },
+        "성북구": { x: 59, y: 36 },
+        "중랑구": { x: 76, y: 40 },
+        "종로구": { x: 50, y: 43 },
+        "서대문구": { x: 40, y: 50 },
+        "동대문구": { x: 68, y: 50 },
+        "중구": { x: 54, y: 55 },
+        "성동구": { x: 66, y: 60 },
+        "광진구": { x: 81, y: 61 },
+        "마포구": { x: 29, y: 58 },
+        "용산구": { x: 49, y: 64 },
+        "강서구": { x: 14, y: 65 },
+        "양천구": { x: 22, y: 78 },
+        "영등포구": { x: 38, y: 78 },
+        "구로구": { x: 29, y: 91 },
+        "동작구": { x: 50, y: 83 },
+        "관악구": { x: 43, y: 94 },
+        "서초구": { x: 58, y: 91 },
+        "강남구": { x: 74, y: 81 },
+        "송파구": { x: 89, y: 82 },
+        "강동구": { x: 96, y: 66 },
+        "금천구": { x: 41, y: 104 }
+    };
+
+    const mapBoard = document.getElementById('map-board');
+    const mapLoading = document.getElementById('map-loading');
+    const regionList = document.getElementById('region-list');
+    const searchInput = document.getElementById('search-input');
+    const refreshButton = document.getElementById('refresh-button');
+    const lastUpdated = document.getElementById('last-updated');
+
+    let currentRegions = [];
+    let selectedRegionId = null;
+
+    function statusColor(index) {
+        if (index >= 75) return { fill: 'var(--danger)', text: '불쾌' };
+        if (index >= 50) return { fill: 'var(--warning)', text: '주의' };
+        if (index >= 25) return { fill: 'var(--interest)', text: '관심' };
+        return { fill: 'var(--good)', text: '쾌적' };
+    }
+
+    function formatNumber(value, digits = 0) {
+        if (value === null || value === undefined || Number.isNaN(value)) return '-';
+        return Number(value).toFixed(digits);
+    }
+
+    function formatDateLabel(value) {
+        if (!value) return '-';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+        return `${date.getMonth() + 1}/${date.getDate()}`;
+    }
+
+    function formatWeatherBase(date, time) {
+        if (!date && !time) return '-';
+        if (!time) return `${date}`;
+        return `${date} ${time.slice(0, 2)}:${time.slice(2)}`;
+    }
+
+    function setLastUpdatedLabel(text) {
+        lastUpdated.textContent = text;
+    }
+
+    function buildRegionList(items) {
+        regionList.innerHTML = '';
+        items.forEach(item => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.dataset.regionId = item.regionId;
+            button.className = item.regionId === selectedRegionId ? 'active' : '';
+            button.innerHTML = `<span>${item.location}</span><strong>${Math.round(item.index)}</strong>`;
+            button.addEventListener('click', () => selectRegion(item.regionId));
+            regionList.appendChild(button);
+        });
+    }
+
+    function buildMap(items) {
+        Array.from(mapBoard.querySelectorAll('.district-node')).forEach(node => node.remove());
+        items.forEach(item => {
+            const position = districtLayout[item.location];
+            if (!position) return;
+            const color = statusColor(item.index);
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'district-node' + (item.regionId === selectedRegionId ? ' active' : '');
+            button.dataset.regionId = item.regionId;
+            button.style.left = `${position.x}%`;
+            button.style.top = `${position.y}%`;
+            button.style.background = color.fill;
+            button.innerHTML = `
+                <div class="district-name">${item.location}</div>
+                <div class="district-index">${Math.round(item.index)}</div>
+            `;
+            button.addEventListener('click', () => selectRegion(item.regionId));
+            mapBoard.appendChild(button);
+        });
+    }
+
+    async function loadCurrentRegions() {
+        mapLoading.style.display = 'grid';
+        const response = await fetch('/api/v1/mosquito/current');
+        if (!response.ok) throw new Error('현재 모기 지수를 불러오지 못했습니다.');
+        if (response.status === 204) return [];
+        return response.json();
+    }
+
+    async function loadRegionDetail(regionId) {
+        const [detailResponse, trendResponse] = await Promise.all([
+            fetch(`/api/v1/mosquito/detail/${regionId}`),
+            fetch(`/api/v1/mosquito/trend/${regionId}`)
+        ]);
+
+        if (!detailResponse.ok) throw new Error('지역 상세 정보를 불러오지 못했습니다.');
+        if (!trendResponse.ok) throw new Error('지역 추이 정보를 불러오지 못했습니다.');
+
+        const detail = detailResponse.status === 204 ? null : await detailResponse.json();
+        const trend = trendResponse.status === 204 ? [] : await trendResponse.json();
+        return { detail, trend };
+    }
+
+    function renderDetail(detail, trend) {
+        const regionName = detail?.regionName ?? '지역 선택';
+        const mosquitoIndex = detail?.mosquitoIndex ?? null;
+        const status = mosquitoIndex == null ? { text: '선택 대기', fill: '#97a39c' } : statusColor(mosquitoIndex);
+
+        document.getElementById('detail-region').textContent = regionName;
+        document.getElementById('detail-score').textContent = mosquitoIndex == null ? '-' : Math.round(mosquitoIndex);
+        document.getElementById('detail-status').textContent = status.text;
+        document.getElementById('detail-status').style.background = status.fill;
+        document.getElementById('detail-date').textContent =
+            detail?.mosquitoIndexDate ? `모기지수 기준일: ${detail.mosquitoIndexDate}` : '지도를 클릭해 상세 정보를 불러오세요.';
+
+        document.getElementById('detail-precipitation').textContent = detail?.precipitationType ?? '-';
+        document.getElementById('detail-sky').textContent = detail?.skyStatus ?? '-';
+        document.getElementById('detail-temp').textContent = detail?.temperature != null ? `${formatNumber(detail.temperature, 1)}°C` : '-';
+        document.getElementById('detail-humidity').textContent = detail?.humidity != null ? `${detail.humidity}%` : '-';
+        document.getElementById('detail-rain').textContent = detail?.precipitation ?? '-';
+        document.getElementById('detail-wind').textContent = detail?.windSpeed != null ? `${formatNumber(detail.windSpeed, 1)} m/s` : '-';
+        document.getElementById('weather-date').textContent = `날씨 기준 시각: ${formatWeatherBase(detail?.weatherBaseDate, detail?.weatherBaseTime)}`;
+        document.getElementById('chart-title').textContent = trend.length ? `최근 7일 모기 지수 (${regionName})` : '최근 7일 모기 지수';
+
+        renderTrendChart(trend);
+    }
+
+    function renderTrendChart(trend) {
+        const svg = document.getElementById('trend-chart');
+        svg.innerHTML = '';
+
+        const width = 320;
+        const height = 200;
+        const padding = { top: 20, right: 18, bottom: 34, left: 18 };
+
+        const axis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        axis.setAttribute('x1', String(padding.left));
+        axis.setAttribute('x2', String(width - padding.right));
+        axis.setAttribute('y1', String(height - padding.bottom));
+        axis.setAttribute('y2', String(height - padding.bottom));
+        axis.setAttribute('class', 'chart-axis');
+        svg.appendChild(axis);
+
+        if (!trend.length) {
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', '160');
+            text.setAttribute('y', '108');
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('class', 'chart-label');
+            text.textContent = '추이 데이터가 없습니다.';
+            svg.appendChild(text);
+            return;
+        }
+
+        const max = Math.max(...trend.map(item => item.index), 100);
+        const min = Math.min(...trend.map(item => item.index), 0);
+        const span = Math.max(max - min, 1);
+        const stepX = trend.length === 1 ? 0 : (width - padding.left - padding.right) / (trend.length - 1);
+
+        const points = trend.map((item, index) => {
+            const x = padding.left + stepX * index;
+            const y = height - padding.bottom - ((item.index - min) / span) * (height - padding.top - padding.bottom);
+            return { x, y, item };
+        });
+
+        const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        polyline.setAttribute('class', 'chart-line');
+        polyline.setAttribute('points', points.map(point => `${point.x},${point.y}`).join(' '));
+        svg.appendChild(polyline);
+
+        points.forEach(point => {
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', String(point.x));
+            circle.setAttribute('cy', String(point.y));
+            circle.setAttribute('r', '4');
+            circle.setAttribute('class', 'chart-point');
+            svg.appendChild(circle);
+
+            const value = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            value.setAttribute('x', String(point.x));
+            value.setAttribute('y', String(point.y - 10));
+            value.setAttribute('text-anchor', 'middle');
+            value.setAttribute('class', 'chart-value');
+            value.textContent = Math.round(point.item.index);
+            svg.appendChild(value);
+
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', String(point.x));
+            label.setAttribute('y', String(height - 10));
+            label.setAttribute('text-anchor', 'middle');
+            label.setAttribute('class', 'chart-label');
+            label.textContent = formatDateLabel(point.item.date);
+            svg.appendChild(label);
+        });
+    }
+
+    async function selectRegion(regionId) {
+        selectedRegionId = regionId;
+        buildMap(currentRegions);
+        buildRegionList(filterRegions(searchInput.value));
+
+        try {
+            const { detail, trend } = await loadRegionDetail(regionId);
+            renderDetail(detail, trend);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function filterRegions(keyword) {
+        const normalized = keyword.trim();
+        if (!normalized) return currentRegions;
+        return currentRegions.filter(item => item.location.includes(normalized));
+    }
+
+    async function refreshPage() {
+        try {
+            const regions = await loadCurrentRegions();
+            currentRegions = regions.sort((a, b) => a.location.localeCompare(b.location, 'ko'));
+            buildMap(currentRegions);
+            buildRegionList(filterRegions(searchInput.value));
+
+            setLastUpdatedLabel(`최종 업데이트 ${new Date().toLocaleString('ko-KR')}`);
+            if (currentRegions.length) {
+                const initial = selectedRegionId && currentRegions.some(item => item.regionId === selectedRegionId)
+                    ? selectedRegionId
+                    : currentRegions[0].regionId;
+                await selectRegion(initial);
+            } else {
+                renderDetail(null, []);
+            }
+        } catch (error) {
+            console.error(error);
+            setLastUpdatedLabel('모기 지수 데이터를 불러오지 못했습니다.');
+        } finally {
+            mapLoading.style.display = 'none';
+        }
+    }
+
+    searchInput.addEventListener('input', () => {
+        buildRegionList(filterRegions(searchInput.value));
+    });
+
+    searchInput.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            const filtered = filterRegions(searchInput.value);
+            if (filtered.length) {
+                selectRegion(filtered[0].regionId);
+            }
+        }
+    });
+
+    refreshButton.addEventListener('click', refreshPage);
+    refreshPage();
+</script>
+</body>
+</html>
