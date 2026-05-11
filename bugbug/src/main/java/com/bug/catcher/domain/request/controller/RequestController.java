@@ -68,7 +68,7 @@ public class RequestController {
         return requestService.readRequestDetail(id);
     }
 
-    //update request 테스트
+    //update request
     @PatchMapping("/updateRequest/{requestId}")
     @ResponseBody
     public Request updateRequestList(
@@ -79,7 +79,7 @@ public class RequestController {
         return requestService.readRequestDetail(requestId);
     }
 
-    // delete request 테스트
+    // delete request
     @DeleteMapping("/deleteRequest/{requestId}")
     @ResponseBody
     public List<Map<String, Object>> deleteRequestList(@PathVariable Long requestId, @PathVariable Long loginUserId) {

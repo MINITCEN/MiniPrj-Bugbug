@@ -29,7 +29,7 @@ public class RequestService {
 //    }
 
     //여기서부터 Request Talend 테스트
-    //create 테스트
+    //create
     @Transactional
     public void createRequest(RequestFormDto form) {
         Request request = Request.builder()
@@ -45,7 +45,7 @@ public class RequestService {
         requestRepository.save(request);
     }
 
-    //read 테스트
+    //read
     @Transactional(readOnly = true)
     public List<Map<String, Object>> readRequestList() {
         List<Request> requests = requestRepository.findAll();
@@ -64,7 +64,8 @@ public class RequestService {
         }).toList();
     }
 
-    //상세보기 테스트(조회수 증가 체크)
+    //상세보기
+    //조회 수 증가
     @Transactional
     public Request readRequestDetail(Long requestId) {
         int updatedCount = requestRepository.increaseViewCount(requestId);
@@ -75,7 +76,7 @@ public class RequestService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 의뢰를 찾을 수 없습니다."));
     }
 
-    // update 테스트
+    // update
     @Transactional
     public void updateRequest(Long requestId, Long loginUserId, RequestFormDto form) {
         int updatedCount = requestRepository.update(
@@ -92,7 +93,7 @@ public class RequestService {
         }
     }
 
-    //delete request 테스트
+    //delete
     //단, requestImage가 있을 때는 주의 필요(참조키 제약 조건 상 에러가 날 수 있음)
     @Transactional
     public void deleteRequest(Long requestId, Long loginUserId) {
