@@ -318,7 +318,7 @@
             padding: 12px 18px;
             font-size: 13px;
             backdrop-filter: blur(8px);
-            z-index: 2;
+            z-index: 1000;
         }
 
         .map-legend-inline span {

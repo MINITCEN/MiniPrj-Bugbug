@@ -38,7 +38,9 @@
     };
 
     document.addEventListener('DOMContentLoaded', init);
-    dom.refreshButton.addEventListener('click', init);
+    if (dom.refreshButton) {
+        dom.refreshButton.addEventListener('click', init);
+    }
     dom.searchInput.addEventListener('input', () => renderRegionList(filterItems()));
 
     async function init() {
@@ -374,6 +376,9 @@
     }
 
     function updateLastUpdated() {
+        if (!dom.lastUpdated) {
+            return;
+        }
         const now = new Date();
         dom.lastUpdated.textContent = `최종 업데이트 ${now.toLocaleString('ko-KR')}`;
     }
