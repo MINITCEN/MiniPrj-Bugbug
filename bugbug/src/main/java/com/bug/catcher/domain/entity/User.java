@@ -40,4 +40,9 @@ public class User {
         this.role = role;
     }
 
+    public void updateProfile(String nickname, String phoneNumber, String address) {
+        this.nickname = nickname;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+    }
 }

@@ -6,6 +6,7 @@ import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.hunter.dto.HunterProfileResponseDto;
 import com.bug.catcher.domain.hunter.repository.HunterRepository;
 import com.bug.catcher.domain.hunter.repository.SavedHunterRepository;
+import com.bug.catcher.domain.review.dto.ReviewResponseDto;
 import com.bug.catcher.domain.review.repository.ReviewRepository;
 import com.bug.catcher.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -103,5 +104,11 @@ public class HunterService {//등급 산정 엔진과 외부 공개 프로필 �
                 hunter,
                 myBookmarkedHunterIds.contains(hunter.getId())
         ));
+    }
+    //헌터가 받은 리뷰 조회
+    @Transactional(readOnly = true)
+    public Page<ReviewResponseDto> getHunterReviews(Long hunterId, Pageable pageable) {
+        return reviewRepository.findByHunterId(hunterId, pageable)
+                .map(ReviewResponseDto::new);
     }
 }

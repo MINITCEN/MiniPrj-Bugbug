@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>버그버그 - 찜한 의뢰 목록</title>
+    <style>
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .data-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        button { padding: 5px 15px; cursor: pointer; }
+        button:disabled { background-color: #eee; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>찜한 의뢰 목록</h1>
+    <a href="/mypage/dashboard">← 대시보드로 돌아가기</a>
+    <hr>
+
+    <div id="list-container">
+        <p>데이터를 불러오는 중입니다...</p>
+    </div>
+
+    <div class="pagination">
+        <button id="prev-btn" onclick="loadPage(currentPage - 1)">이전</button>
+        <span id="page-info">1 페이지</span>
+        <button id="next-btn" onclick="loadPage(currentPage + 1)">다음</button>
+    </div>
+</div>
+
+<script>
+    let currentPage = 0;
+
+    function loadPage(page) {
+        fetch(`/api/mypage/hunter/bookmarks/requests?page=${page}`)
+            .then(res => res.json())
+            .then(data => {
+                const listContainer = document.getElementById('list-container');
+                listContainer.innerHTML = '';
+
+                if (data.content.length === 0) {
+                    listContainer.innerHTML = '<p>찜한 의뢰가 없습니다.</p>';
+                } else {
+                    data.content.forEach(saved => {
+                        listContainer.innerHTML += `
+                            <div class="data-card">
+                                <div>
+                                    <h3 style="margin: 0 0 5px 0;">📌 ${saved.title}</h3>
+                                    <p style="margin: 0; color: #666; font-size: 14px;">지역: ${saved.approxLocation}</p>
+                                </div>
+                                <a href="/api/request/detail/${saved.requestId}" style="color: #4CAF50; text-decoration: none; font-weight: bold;">의뢰보기</a>
+                            </div>
+                        `;
+                    });
+                }
+
+                currentPage = data.number;
+                document.getElementById('page-info').innerText = `${currentPage + 1} / ${data.totalPages === 0 ? 1 : data.totalPages} 페이지`;
+                document.getElementById('prev-btn').disabled = data.first;
+                document.getElementById('next-btn').disabled = data.last;
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadPage(0);
+    });
+</script>
+
+</body>
+</html>

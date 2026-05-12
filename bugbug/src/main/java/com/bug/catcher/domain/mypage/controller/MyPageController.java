@@ -1,9 +1,11 @@
 package com.bug.catcher.domain.mypage.controller;
 
 import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.hunter.dto.HunterProfileResponseDto;
 import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.domain.mypage.dto.*;
 import com.bug.catcher.domain.mypage.service.MyPageService;
+import com.bug.catcher.domain.review.dto.ReviewResponseDto;
 import com.bug.catcher.domain.user.repository.UserRepository;
 import com.bug.catcher.global.auth.SessionConst;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +13,10 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
 import java.util.List;
 
@@ -35,14 +41,31 @@ public class MyPageController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @PatchMapping("/info")
+    public ResponseEntity<MyInfoResponseDto> updateMyInfo(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @RequestBody MyInfoUpdateRequestDto requestDto,
+            HttpServletRequest request) {
+
+        MyInfoResponseDto responseDto = myPageService.updateMyInfo(loginUser.getId(), requestDto);
+
+        User dbUser = userRepository.findById(loginUser.getId()).orElseThrow();
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.setAttribute(SessionConst.LOGIN_USER, dbUser);
+        }
+
+        return ResponseEntity.ok(responseDto);
+    }
+
     // 이슈2
     // 나의 의뢰 목록 조회
     @GetMapping("/requests")
-    public ResponseEntity<List<MyRequestResponseDto>> getMyRequests(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+    public ResponseEntity<Page<MyRequestResponseDto>> getMyRequests(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        List<MyRequestResponseDto> response = myPageService.getMyRequests(loginUser.getId());
+        Page<MyRequestResponseDto> response = myPageService.getMyRequests(loginUser.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -95,6 +118,15 @@ public class MyPageController {
         myPageService.deleteReview(loginUser.getId(), reviewId);
         return ResponseEntity.ok("리뷰가 삭제되었습니다.");
     }
+    // 내가 작성한 리뷰 목록 조회
+    @GetMapping("/reviews")
+    public ResponseEntity<Page<ReviewResponseDto>> getMyReviews(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<ReviewResponseDto> response = myPageService.getMyReviews(loginUser.getId(), pageable);
+        return ResponseEntity.ok(response);
+    }
 
     // 헌터 신청 팝업에서 제출 버튼을 눌렀을 때 호출
     @PostMapping("/hunter/apply")
@@ -124,21 +156,23 @@ public class MyPageController {
         return ResponseEntity.ok(responseDto);
     }
     //이슈 4
-    // 수행한 의뢰 목록 조회 (헌터 전용)
+    // 수행한 의뢰 목록 조회 (헌터 전용) - 페이징 추가
     @GetMapping("/hunter/tasks")
-    public ResponseEntity<List<HunterTaskResponseDto>> getHunterTasks(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
+    public ResponseEntity<Page<HunterTaskResponseDto>> getHunterTasks(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        List<HunterTaskResponseDto> response = myPageService.getHunterTasks(loginUser.getId());
+        Page<HunterTaskResponseDto> response = myPageService.getHunterTasks(loginUser.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 
-    // 찜한 게시물 목록 조회 (헌터 전용)
+    // 찜한 게시물 목록 조회 (헌터 전용) - 페이징 추가
     @GetMapping("/hunter/bookmarks/requests")
-    public ResponseEntity<List<HunterSavedRequestDto>> getHunterSavedRequests(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
+    public ResponseEntity<Page<HunterSavedRequestDto>> getHunterSavedRequests(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        List<HunterSavedRequestDto> response = myPageService.getHunterSavedRequests(loginUser.getId());
+        Page<HunterSavedRequestDto> response = myPageService.getHunterSavedRequests(loginUser.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -159,5 +193,13 @@ public class MyPageController {
         }
 
         return ResponseEntity.ok("헌터 등록이 성공적으로 해제되었습니다.");
+    }
+    //내 헌터 정보 조회
+    @GetMapping("/hunter/profile")
+    public ResponseEntity<HunterProfileResponseDto> getMyHunterProfile(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
+
+        HunterProfileResponseDto response = myPageService.getMyHunterProfile(loginUser.getId());
+        return ResponseEntity.ok(response);
     }
 }

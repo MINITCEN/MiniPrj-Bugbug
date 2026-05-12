@@ -10,6 +10,8 @@ public class HunterProfileResponseDto {
     private long completionCount;
     private float averageRating;
     private String gradeStory; // 등급별 재미있는 스토리 문구
+    private Integer requestCount;
+    private Integer responseCount;
 
     public HunterProfileResponseDto(Hunter hunter, long completionCount, float averageRating) {
         this.hunterId = hunter.getId();
@@ -18,6 +20,8 @@ public class HunterProfileResponseDto {
         this.completionCount = completionCount;
         this.averageRating = averageRating;
         this.gradeStory = getGradeStory(hunter.getGrade());
+        this.requestCount = hunter.getRequestCount() != null ? hunter.getRequestCount() : 0;
+        this.responseCount = hunter.getResponseCount() != null ? hunter.getResponseCount() : 0;
     }
 
     private String getGradeStory(String grade) {

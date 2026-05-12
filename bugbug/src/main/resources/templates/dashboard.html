@@ -1,0 +1,441 @@
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>버그버그 - 마이페이지</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<main class="page">
+    <aside class="sidebar">
+        <h2 class="sidebar-title">마이페이지</h2>
+
+        <a class="side-link active" href="/mypage/dashboard"><span class="mark">i</span>내 정보</a>
+
+        <div th:if="${!isHunter}">
+            <a class="side-link" href="/mypage/requests"><span class="mark">R</span>나의 의뢰 보기</a>
+            <a class="side-link" href="/mypage/reviews"><span class="mark">V</span>나의 리뷰 관리</a>
+            <a class="side-link" href="/mypage/bookmarks/hunters"><span class="mark">H</span>찜한 헌터</a>
+            <button class="side-link side-button" type="button" onclick="applyHunter()">
+                <span class="mark">+</span>헌터 등록
+            </button>
+        </div>
+
+        <div th:if="${isHunter}">
+            <a class="side-link" href="/mypage/hunter/tasks"><span class="mark">T</span>수행 의뢰</a>
+            <a class="side-link" href="/mypage/hunter/bookmarks/requests"><span class="mark">S</span>찜한 의뢰</a>
+            <button class="side-link side-button" type="button" onclick="resignHunter()">
+                <span class="mark">-</span>헌터 자격 해제
+            </button>
+        </div>
+
+        <button class="side-link side-button" type="button" onclick="logout()">
+            <span class="mark">L</span>로그아웃
+        </button>
+
+        <div class="side-cta" th:if="${!isHunter}">
+            <strong>헌터로 활동하고 싶으신가요?</strong>
+            <p>헌터로 등록하면 의뢰를 확인하고 보상을 받을 수 있어요.</p>
+            <button class="primary-btn" type="button" onclick="applyHunter()">헌터 등록하기</button>
+        </div>
+    </aside>
+
+    <section>
+        <div class="content-header">
+            <div>
+                <h1>내 정보</h1>
+                <p class="privacy-note">회원님의 정보는 본인에게만 공개됩니다.</p>
+            </div>
+            <button class="outline-btn" type="button" onclick="openProfileModal()">개인정보 변경</button>
+        </div>
+
+        <section class="section">
+            <div class="section-head">
+                <h2 class="section-title">기본 정보 <small>(본인에게만 공개)</small></h2>
+            </div>
+            <div class="profile-row">
+                <div class="avatar">
+                    <span id="profile-initial" th:text="${#strings.substring(user.nickname, 0, 1)}">회</span>
+                    <span class="camera">C</span>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <p class="label">이름</p>
+                        <p class="value" id="profile-nickname" th:text="${user.nickname}">김버그</p>
+                    </div>
+                    <div class="info-item">
+                        <p class="label">권한</p>
+                        <p class="value" th:text="${isHunter ? '헌터' : '일반 회원'}">일반 회원</p>
+                    </div>
+                    <div class="info-item">
+                        <p class="label">연락처</p>
+                        <p class="value" id="profile-phone" th:text="${user.phoneNumber != null ? user.phoneNumber : '-'}">010-0000-0000</p>
+                    </div>
+                    <div class="info-item full">
+                        <p class="label">주소</p>
+                        <p class="value" id="profile-address" th:text="${user.address != null ? user.address : '등록된 주소가 없습니다.'}">서울특별시 강남구</p>
+                    </div>
+                    <div class="info-item full">
+                        <p class="label">이메일</p>
+                        <p class="value" id="profile-email" th:text="${user.email}">bug@example.com</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" th:if="${isHunter}">
+            <div class="section-head">
+                <h2 class="section-title">공개 정보 <small>(외부에 공개됩니다)</small></h2>
+                <button class="danger-btn" type="button" onclick="resignHunter()">헌터 자격 해제</button>
+            </div>
+            <div class="public-grid">
+                <div class="grade-block">
+                    <div class="badge-shield">S</div>
+                    <div>
+                        <p class="value" id="hunter-grade">불러오는 중</p>
+                        <div class="progress"><span></span></div>
+                        <p class="label" id="hunter-completion-cnt">총 0건 완료</p>
+                    </div>
+                </div>
+                <div class="stat">
+                    <div>
+                        <p>리뷰</p>
+                        <strong id="hunter-rating">0.0</strong>
+                        <span class="stars">★★★★★</span>
+                    </div>
+                </div>
+                <div class="stat">
+                    <div>
+                        <p>요청 횟수</p>
+                        <strong id="hunter-req-count">0회</strong>
+                        <span class="meta">총 요청 완료</span>
+                    </div>
+                </div>
+                <div class="stat">
+                    <div>
+                        <p>응답 횟수</p>
+                        <strong id="hunter-res-count">0회</strong>
+                        <span class="meta">총 응답 완료</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" th:if="${!isHunter}">
+            <div class="section-head">
+                <h2 class="section-title">나의 활동</h2>
+            </div>
+            <div class="two-column">
+                <div class="mini-panel">
+                    <div class="mini-panel-head">
+                        <h3>최근 의뢰</h3>
+                        <a class="more" href="/mypage/requests">더보기</a>
+                    </div>
+                    <ul class="data-list" id="my-requests-list"><li class="empty">불러오는 중입니다.</li></ul>
+                </div>
+                <div class="mini-panel">
+                    <div class="mini-panel-head">
+                        <h3>찜한 헌터</h3>
+                        <a class="more" href="/mypage/bookmarks/hunters">더보기</a>
+                    </div>
+                    <ul class="data-list" id="my-bookmarks-list"><li class="empty">불러오는 중입니다.</li></ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" th:if="${isHunter}">
+            <div class="two-column">
+                <div class="mini-panel">
+                    <div class="mini-panel-head">
+                        <h3>리뷰 요약</h3>
+                        <a class="more" href="/mypage/reviews">리뷰 더보기</a>
+                    </div>
+                    <div class="review-bars">
+                        <span>5점</span><div class="bar"><span class="bar-fill-82"></span></div><span>108</span>
+                        <span>4점</span><div class="bar"><span class="bar-fill-34"></span></div><span>14</span>
+                        <span>3점</span><div class="bar"><span class="bar-fill-12"></span></div><span>4</span>
+                        <span>2점</span><div class="bar"><span class="bar-fill-5"></span></div><span>1</span>
+                        <span>1점</span><div class="bar"><span class="bar-fill-5"></span></div><span>1</span>
+                    </div>
+                </div>
+
+                <div class="mini-panel">
+                    <div class="mini-panel-head">
+                        <h3>최근 활동</h3>
+                        <a class="more" href="/mypage/hunter/tasks">더보기</a>
+                    </div>
+                    <ul class="data-list" id="hunter-tasks-list"><li class="empty">불러오는 중입니다.</li></ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" th:if="${isHunter}">
+            <div class="mini-panel compact">
+                <div class="mini-panel-head">
+                    <h3>찜한 의뢰</h3>
+                    <a class="more" href="/mypage/hunter/bookmarks/requests">더보기</a>
+                </div>
+                <ul class="data-list" id="hunter-saved-requests-list"><li class="empty">불러오는 중입니다.</li></ul>
+            </div>
+        </section>
+
+        <div class="safe-banner">
+            <p>
+                <strong>버그버그는 안전하고 신뢰할 수 있는 서비스를 제공합니다.</strong>
+                개인정보는 설정된 보호 범위 안에서만 사용됩니다.
+            </p>
+            <button class="outline-btn" type="button">개인정보 처리방침 보기</button>
+        </div>
+    </section>
+</main>
+
+<div class="modal-backdrop" id="profile-modal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
+        <div class="modal-head">
+            <h2 id="profile-modal-title">개인정보 변경</h2>
+            <button class="modal-close" type="button" onclick="closeProfileModal()" aria-label="닫기">x</button>
+        </div>
+
+        <form id="profile-form">
+            <label class="form-field">
+                <span>이름</span>
+                <input id="profile-input-nickname" name="nickname" type="text" maxlength="50" th:value="${user.nickname}" required>
+            </label>
+            <label class="form-field">
+                <span>연락처</span>
+                <input id="profile-input-phone" name="phoneNumber" type="tel" th:value="${user.phoneNumber}" placeholder="010-0000-0000">
+            </label>
+            <label class="form-field">
+                <span>주소</span>
+                <input id="profile-input-address" name="address" type="text" th:value="${user.address}" placeholder="주소를 입력하세요">
+            </label>
+            <label class="form-field">
+                <span>이메일</span>
+                <input type="email" th:value="${user.email}" readonly>
+            </label>
+
+            <p class="form-error" id="profile-form-error" hidden></p>
+
+            <div class="modal-actions">
+                <button class="outline-btn" type="button" onclick="closeProfileModal()">취소</button>
+                <button class="primary-btn" type="submit">저장</button>
+            </div>
+        </form>
+    </section>
+</div>
+
+<script th:inline="javascript">
+    const userRole = /*[[${user.role}]]*/ "USER";
+
+    const pageContent = (data) => Array.isArray(data) ? data : (data.content || []);
+    const shortDate = (value) => value ? String(value).replace("T", " ").slice(0, 16) : "";
+
+    function clearList(list) {
+        list.replaceChildren();
+    }
+
+    function emptyItem(text) {
+        const li = document.createElement("li");
+        li.className = "empty";
+        li.textContent = text;
+        return li;
+    }
+
+    function activityItem(title, href, status, meta) {
+        const li = document.createElement("li");
+        const left = document.createElement(href ? "a" : "span");
+        if (href) left.href = href;
+        left.textContent = title;
+
+        const right = document.createElement("span");
+        right.className = status ? "status" : "meta";
+        right.textContent = status || meta || "";
+
+        li.append(left, right);
+        return li;
+    }
+
+    function openProfileModal() {
+        document.getElementById("profile-input-nickname").value = document.getElementById("profile-nickname").textContent.trim();
+        document.getElementById("profile-input-phone").value = dashToEmpty(document.getElementById("profile-phone").textContent.trim());
+        document.getElementById("profile-input-address").value = emptyAddressToBlank(document.getElementById("profile-address").textContent.trim());
+        document.getElementById("profile-form-error").hidden = true;
+        document.getElementById("profile-modal").hidden = false;
+        document.getElementById("profile-input-nickname").focus();
+    }
+
+    function closeProfileModal() {
+        document.getElementById("profile-modal").hidden = true;
+    }
+
+    function dashToEmpty(value) {
+        return value === "-" ? "" : value;
+    }
+
+    function emptyAddressToBlank(value) {
+        return value === "등록된 주소가 없습니다." ? "" : value;
+    }
+
+    function showProfileError(message) {
+        const error = document.getElementById("profile-form-error");
+        error.textContent = message;
+        error.hidden = false;
+    }
+
+    function updateProfileView(data) {
+        document.getElementById("profile-nickname").textContent = data.nickname;
+        document.getElementById("profile-initial").textContent = data.nickname.substring(0, 1);
+        document.getElementById("profile-phone").textContent = data.phoneNumber || "-";
+        document.getElementById("profile-address").textContent = data.address || "등록된 주소가 없습니다.";
+        document.getElementById("profile-email").textContent = data.email;
+    }
+
+    function submitProfileForm(event) {
+        event.preventDefault();
+
+        const payload = {
+            nickname: document.getElementById("profile-input-nickname").value.trim(),
+            phoneNumber: document.getElementById("profile-input-phone").value.trim(),
+            address: document.getElementById("profile-input-address").value.trim()
+        };
+
+        fetch("/api/mypage/info", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+            .then(async (res) => {
+                if (!res.ok) {
+                    const message = await res.text();
+                    throw new Error(message || "개인정보 변경에 실패했습니다.");
+                }
+                return res.json();
+            })
+            .then((data) => {
+                updateProfileView(data);
+                closeProfileModal();
+                alert("개인정보가 변경되었습니다.");
+            })
+            .catch((error) => showProfileError(error.message));
+    }
+
+    function loadUserDashboard() {
+        fetch("/api/mypage/requests?size=3")
+            .then((res) => res.json())
+            .then((data) => {
+                const list = document.getElementById("my-requests-list");
+                clearList(list);
+                const items = pageContent(data);
+                if (!items.length) {
+                    list.append(emptyItem("최근 등록한 의뢰가 없습니다."));
+                    return;
+                }
+                items.forEach((req) => {
+                    list.append(activityItem(req.title, `/request/detail/${req.requestId}`, req.status, shortDate(req.createdAt)));
+                });
+            });
+
+        fetch("/api/mypage/bookmarks/hunters")
+            .then((res) => res.json())
+            .then((data) => {
+                const list = document.getElementById("my-bookmarks-list");
+                clearList(list);
+                const items = pageContent(data);
+                if (!items.length) {
+                    list.append(emptyItem("찜한 헌터가 없습니다."));
+                    return;
+                }
+                items.slice(0, 3).forEach((hunter) => {
+                    list.append(activityItem(`${hunter.hunterName} 헌터`, `/hunters/${hunter.hunterId}`, hunter.grade, `${hunter.responseCount || 0}회 응답`));
+                });
+            });
+    }
+
+    function loadHunterDashboard() {
+        fetch("/api/mypage/hunter/profile")
+            .then((res) => res.json())
+            .then((data) => {
+                document.getElementById("hunter-grade").textContent = data.grade || "헌터";
+                document.getElementById("hunter-completion-cnt").textContent = `총 ${data.completionCount || 0}건 완료`;
+                document.getElementById("hunter-rating").textContent = Number(data.averageRating || 0).toFixed(1);
+                document.getElementById("hunter-req-count").textContent = `${data.requestCount || 0}회`;
+                document.getElementById("hunter-res-count").textContent = `${data.responseCount || 0}회`;
+            });
+
+        fetch("/api/mypage/hunter/tasks?size=3")
+            .then((res) => res.json())
+            .then((data) => {
+                const list = document.getElementById("hunter-tasks-list");
+                clearList(list);
+                const items = pageContent(data);
+                if (!items.length) {
+                    list.append(emptyItem("수행 중인 의뢰가 없습니다."));
+                    return;
+                }
+                items.forEach((task) => {
+                    list.append(activityItem(task.title, `/request/detail/${task.requestId}`, task.status, task.approxLocation));
+                });
+            });
+
+        fetch("/api/mypage/hunter/bookmarks/requests?size=3")
+            .then((res) => res.json())
+            .then((data) => {
+                const list = document.getElementById("hunter-saved-requests-list");
+                clearList(list);
+                const items = pageContent(data);
+                if (!items.length) {
+                    list.append(emptyItem("찜한 의뢰가 없습니다."));
+                    return;
+                }
+                items.forEach((saved) => {
+                    list.append(activityItem(saved.title, `/request/detail/${saved.requestId}`, null, saved.approxLocation));
+                });
+            });
+    }
+
+    function applyHunter() {
+        if (!confirm("헌터 등록 신청을 진행할까요?")) return;
+
+        fetch("/api/mypage/hunter/apply", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pledgeAgreed: true })
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error("apply failed");
+                alert("헌터 신청이 접수되었습니다.");
+            })
+            .catch(() => alert("헌터 신청 처리 중 문제가 발생했습니다."));
+    }
+
+    function resignHunter() {
+        if (!confirm("헌터 자격을 해제하고 일반 회원으로 전환할까요?")) return;
+
+        fetch("/api/mypage/hunter/resign", { method: "POST" })
+            .then((res) => {
+                if (!res.ok) throw new Error("resign failed");
+                alert("헌터 자격이 해제되었습니다.");
+                window.location.reload();
+            })
+            .catch(() => alert("헌터 자격 해제 중 문제가 발생했습니다."));
+    }
+
+    function logout() {
+        fetch("/api/auth/logout", { method: "POST" })
+            .finally(() => window.location.href = "/login");
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("profile-form").addEventListener("submit", submitProfileForm);
+
+        if (userRole === "HUNTER") {
+            loadHunterDashboard();
+            return;
+        }
+        loadUserDashboard();
+    });
+</script>
+</body>
+</html>
+

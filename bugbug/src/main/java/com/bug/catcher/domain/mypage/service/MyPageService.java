@@ -1,15 +1,19 @@
 package com.bug.catcher.domain.mypage.service;
 
 import com.bug.catcher.domain.entity.*;
+import com.bug.catcher.domain.hunter.dto.HunterProfileResponseDto;
 import com.bug.catcher.domain.hunter.repository.*;
 import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.domain.mypage.dto.*;
 import com.bug.catcher.domain.request.repository.RequestRepository;
+import com.bug.catcher.domain.review.dto.ReviewResponseDto;
 import com.bug.catcher.domain.review.repository.ReviewRepository;
 import com.bug.catcher.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,14 +41,44 @@ public class MyPageService {
         //  마이페이지용 DTO로 변환하여 반환
         return new MyInfoResponseDto(user);
     }
+
+    @Transactional
+    public MyInfoResponseDto updateMyInfo(Long userId, MyInfoUpdateRequestDto requestDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
+
+        String nickname = normalizeRequired(requestDto.getNickname(), "닉네임");
+        String phoneNumber = normalizeOptional(requestDto.getPhoneNumber());
+        String address = normalizeOptional(requestDto.getAddress());
+
+        if (!user.getNickname().equals(nickname) && userRepository.existsByNickname(nickname)) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+        }
+
+        user.updateProfile(nickname, phoneNumber, address);
+        return new MyInfoResponseDto(user);
+    }
+
+    private String normalizeRequired(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException(fieldName + "은(는) 필수입니다.");
+        }
+        return value.trim();
+    }
+
+    private String normalizeOptional(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return value.trim();
+    }
+
     //이슈2
-    //  나의 의뢰 목록 보기
+    // 나의 의뢰 목록 조회 (페이징 적용)
     @Transactional(readOnly = true)
-    public List<MyRequestResponseDto> getMyRequests(Long userId) {
-        return requestRepository.findByUserIdOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(MyRequestResponseDto::new)
-                .toList();
+    public Page<MyRequestResponseDto> getMyRequests(Long userId, Pageable pageable) {
+        return requestRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
+                .map(MyRequestResponseDto::new);
     }
 
     // 찜한 헌터 목록 보기
@@ -120,6 +154,12 @@ public class MyPageService {
         //  백업해둔 헌터 ID를 이용해 등급 재산정 (리뷰가 지워졌으니 강등될 수도 있음!)
         hunterService.updateHunterLevel(targetHunterId);
     }
+    //유저가 쓴 리뷰 조회
+    @Transactional(readOnly = true)
+    public Page<ReviewResponseDto> getMyReviews(Long userId, Pageable pageable) {
+        return reviewRepository.findByUserId(userId, pageable)
+                .map(ReviewResponseDto::new);
+    }
 
     @Transactional(readOnly = true)
     public HunterFormResponseDto getHunterForm(Long userId) {
@@ -147,26 +187,24 @@ public class MyPageService {
 
         hunterApplicationRepository.save(application);
     }
-    // 1. 수행(수락)한 의뢰 목록 보기
+    // 1. 수행(수락)한 의뢰 목록 보기 (페이징 적용)
     @Transactional(readOnly = true)
-    public List<HunterTaskResponseDto> getHunterTasks(Long userId) {
+    public Page<HunterTaskResponseDto> getHunterTasks(Long userId, Pageable pageable) {
         Hunter hunter = hunterRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
 
-        return applicationRepository.findByHunterId(hunter.getId()).stream()
-                .map(HunterTaskResponseDto::new)
-                .toList();
+        return applicationRepository.findByHunterId(hunter.getId(), pageable)
+                .map(HunterTaskResponseDto::new); // Page 객체의 map() 활용
     }
 
-    // 2. 찜한 의뢰(게시물) 목록 보기
+    // 2. 찜한 의뢰(게시물) 목록 보기 (페이징 적용)
     @Transactional(readOnly = true)
-    public List<HunterSavedRequestDto> getHunterSavedRequests(Long userId) {
+    public Page<HunterSavedRequestDto> getHunterSavedRequests(Long userId, Pageable pageable) {
         Hunter hunter = hunterRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
 
-        return savedRequestRepository.findByHunterId(hunter.getId()).stream()
-                .map(HunterSavedRequestDto::new)
-                .toList();
+        return savedRequestRepository.findByHunterId(hunter.getId(), pageable)
+                .map(HunterSavedRequestDto::new);
     }
 
     // 3. 헌터 등록 해제 (Role 강등)
@@ -178,5 +216,16 @@ public class MyPageService {
         // 유저의 권한을 다시 USER로 강등
         user.updateRole("USER");
     }
+    @Transactional(readOnly = true)
+    public HunterProfileResponseDto getMyHunterProfile(Long userId) {
+        // 1. 유저 ID로 내 헌터 엔티티 찾기
+        Hunter hunter = hunterRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
 
+        // 2. 헌터 ID를 이용해 완료 횟수 및 평균 평점 가져오기
+        long completionCount = reviewRepository.countByHunterId(hunter.getId());
+        float averageRating = reviewRepository.getAverageRatingByHunterId(hunter.getId());
+
+        return new HunterProfileResponseDto(hunter, completionCount, averageRating);
+    }
 }
