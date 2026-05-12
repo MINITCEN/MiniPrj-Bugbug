@@ -50,15 +50,15 @@
                     <h2 id="login-form-title">로그인</h2>
                 </div>
 
-                <form class="login-form" method="post" action="/api/auth/login">
+                <form class="login-form" id="login-form">
                     <label class="login-form__field">
                         <span class="login-form__icon" aria-hidden="true">✉️</span>
-                        <input type="email" name="email" placeholder="이메일" autocomplete="email">
+                        <input type="email" name="email" placeholder="이메일" autocomplete="email" required>
                     </label>
 
                     <label class="login-form__field">
                         <span class="login-form__icon" aria-hidden="true">🔒</span>
-                        <input type="password" name="password" placeholder="비밀번호" autocomplete="current-password">
+                        <input type="password" name="password" placeholder="비밀번호" autocomplete="current-password" required>
                         <span class="login-form__trailing-icon" aria-hidden="true">👁️</span>
                     </label>
 
@@ -70,6 +70,7 @@
                         <a href="/password/reset" class="login-form__link">비밀번호 찾기</a>
                     </div>
 
+                    <p id="login-message" class="form-message" aria-live="polite"></p>
                     <button type="submit" class="auth-button">로그인</button>
                 </form>
 
@@ -83,5 +84,6 @@
 </main>
 
 <div th:replace="~{fragments/footer :: siteFooter()}"></div>
+<script src="/js/login.js"></script>
 </body>
 </html>
