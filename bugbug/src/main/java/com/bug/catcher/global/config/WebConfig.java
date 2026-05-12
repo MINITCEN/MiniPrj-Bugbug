@@ -25,6 +25,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/request/**",
                         "/mosquito-map",
                         "/css/**",
+                        "/js/**",
                         "/map/**",
                         "/h2-console/**",
                         "/error",
