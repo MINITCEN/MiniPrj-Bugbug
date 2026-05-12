@@ -51,6 +51,24 @@
                 return;
             }
 
+            const loginResponse = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: payload.email,
+                    password: payload.password
+                })
+            });
+
+            if (!loginResponse.ok) {
+                const loginMessage = await loginResponse.text();
+                showMessage(loginMessage || '회원가입 후 자동 로그인에 실패했습니다.', true);
+                syncSubmitState();
+                return;
+            }
+
             showMessage(message || '회원가입이 완료되었습니다.', false);
             window.location.href = redirectUrl;
         } catch (error) {

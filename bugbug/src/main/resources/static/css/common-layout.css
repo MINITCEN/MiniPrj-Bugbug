@@ -105,6 +105,18 @@
     gap: 12px;
 }
 
+.site-header__session {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.site-header__welcome {
+    color: var(--shell-muted);
+    font-size: 14px;
+    font-weight: 700;
+}
+
 .site-header__icon-button,
 .site-header__ghost-button,
 .site-header__solid-button,
@@ -244,6 +256,11 @@
 
 @media (max-width: 720px) {
     .site-header__actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .site-header__session {
         width: 100%;
         justify-content: flex-end;
     }
