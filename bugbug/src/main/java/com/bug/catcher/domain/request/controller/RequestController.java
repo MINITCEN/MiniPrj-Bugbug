@@ -1,24 +1,27 @@
 package com.bug.catcher.domain.request.controller;
 
+import com.bug.catcher.domain.entity.Request;
+import com.bug.catcher.domain.entity.User;
+import jakarta.servlet.http.HttpSession;
+import com.bug.catcher.global.auth.SessionConst;
+import org.springframework.http.MediaType;
 import com.bug.catcher.domain.request.dto.RequestFormDto;
 import com.bug.catcher.domain.request.dto.RequestDetailResponseDto;
 import com.bug.catcher.domain.request.service.RequestService;
-import org.springframework.http.MediaType;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping("/api/request")
+@RequiredArgsConstructor
 public class RequestController {
-    private RequestService requestService;
-
-    public RequestController(RequestService requestService){
-        this.requestService = requestService;
-    }
-
+    private final RequestService requestService;
 
 //    @Value("${kakao.api.key}")
 //    private String kakaoMapApiKey;
@@ -44,44 +47,72 @@ public class RequestController {
 //        model.addAttribute("kakaoMapKey", kakaoMapApiKey);
 //        return "requestForm";
 //    }
+    //로그인 된 사용자 꺼내오기
+    private Long getLoginUserId(HttpSession session) {
+        Object loginUserId = session.getAttribute("loginUserId");
+
+        if (loginUserId == null) {
+            throw new IllegalStateException("로그인이 필요합니다.");
+        }
+        if (loginUserId instanceof Long) {
+            return (Long) loginUserId;
+        }
+        if (loginUserId instanceof Integer) {
+            return ((Integer) loginUserId).longValue();
+        }
+        if (loginUserId instanceof String) {
+            return Long.valueOf((String) loginUserId);
+        }
+        throw new IllegalStateException("현재 아이디의 사용자가 없습니다!");
+    }
+
 
     //create request
-    @PostMapping(path = "/createRequest",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ResponseBody
-    public List<Map<String, Object>> createRequest(@ModelAttribute RequestFormDto form) {
-        requestService.createRequest(form);
+    @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public List<Map<String, Object>> createRequest(
+            @ModelAttribute RequestFormDto form,
+            HttpSession session
+    ) {
+        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+        if (loginUser == null) {
+            throw new IllegalStateException("로그인이 필요합니다.");
+        }
+        requestService.createRequest(loginUser.getId(), form);
         System.out.println("등록 성공");
         return requestService.readRequestList();
     }
 
     //read request(전체 게시판)
-    @GetMapping("/readWholeRequests")
-    @ResponseBody
+    @GetMapping(value = "/wholeList")
     public List<Map<String, Object>> readRequestList() {
         System.out.println("조회 성공");
         return requestService.readRequestList();
     }
 
     // 상세보기
-    @GetMapping("/requestDetail/{id}")
-    @ResponseBody
+    @GetMapping(value = "/detail/{id}")
     public RequestDetailResponseDto requestDetail(@PathVariable Long id) {
         return requestService.readRequestDetail(id);
     }
 
     // update request
-    @PatchMapping("/updateRequest/{requestId}")
-    @ResponseBody
-    public RequestDetailResponseDto updateRequest(@PathVariable Long requestId, @RequestParam Long loginUserId, @RequestBody RequestFormDto form) {
-        requestService.updateRequest(requestId, loginUserId, form);
+    @PatchMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public RequestDetailResponseDto updateRequest(@PathVariable Long requestId, @ModelAttribute RequestFormDto form, HttpSession session) {
+        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+        requestService.updateRequest(requestId, loginUser.getId(), form);
+        System.out.println("수정 성공");
         return requestService.readRequestDetail(requestId);
     }
 
     // delete request
-    @DeleteMapping("/deleteRequest/{requestId}")
-    @ResponseBody
-    public List<Map<String, Object>> deleteRequestList(@PathVariable Long requestId, @PathVariable Long loginUserId) {
-        requestService.deleteRequest(requestId, loginUserId);
+    @DeleteMapping(value = "/remove/{requestId}")
+    public List<Map<String, Object>> deleteRequestList(@PathVariable Long requestId, HttpSession session) {
+        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+        if (loginUser == null) {
+            throw new IllegalStateException("로그인이 필요합니다.");
+        }
+
+        requestService.deleteRequest(requestId, loginUser.getId());
         return requestService.readRequestList();
     }
 }

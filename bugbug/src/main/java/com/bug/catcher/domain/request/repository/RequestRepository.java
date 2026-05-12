@@ -1,13 +1,14 @@
 package com.bug.catcher.domain.request.repository;
 
 import com.bug.catcher.domain.entity.Request;
-import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
     @Modifying
@@ -28,11 +29,14 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
             LocalDateTime occurrenceTime
     );
 
+    Optional<Request> findByIdAndUser_Id(Long requestId, Long userId);
+
+    @Query("select r.videoUrl from Request r where r.id = :requestId and r.user.id = :loginUserId")
+    String findVideoUrlByRequestIdAndUserId(Long requestId, Long loginUserId);
+
     @Modifying
-    @Query("delete " +
-            "from Request r " +
-            "where r.id = :requestId and r.user.id = :loginUserId")
-    int delete(Long requestId, Long loginUserId);
+    @Query("update Request r set r.videoUrl = :videoUrl where r.id = :requestId and r.user.id = :loginUserId")
+    int updateVideoUrl(Long requestId, Long loginUserId, String videoUrl);
 
     List<Request> findByUserIdOrderByCreatedAtDesc(Long userId);
 }

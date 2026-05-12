@@ -33,4 +33,10 @@ public class RequestFormDto {
 
     // 동영상 한 개 업로드
     private MultipartFile videoFile;
+
+    // 수정 화면에서 삭제하지 않고 유지한 기존 이미지 URL 목록
+    private List<String> imageUrls = new ArrayList<>();
+
+    // 수정 화면에서 삭제하지 않고 유지한 기존 비디오 URL
+    private String videoUrl;
 }

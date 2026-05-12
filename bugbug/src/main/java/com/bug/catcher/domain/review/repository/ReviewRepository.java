@@ -15,4 +15,10 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             @Param("rating") Float rating,
             @Param("content") String content
     );
+    // 헌터의 총 완료(리뷰) 횟수 계산
+    long countByHunterId(Long hunterId);
+
+    // 헌터의 평균 평점 계산 (리뷰가 하나도 없으면 0.0 반환)
+    @Query("SELECT COALESCE(AVG(r.rating), 0.0) FROM Review r WHERE r.hunter.id = :hunterId")
+    Float getAverageRatingByHunterId(@Param("hunterId") Long hunterId);
 }

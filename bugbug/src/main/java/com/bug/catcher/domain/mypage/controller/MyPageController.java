@@ -1,6 +1,7 @@
 package com.bug.catcher.domain.mypage.controller;
 
 import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.domain.mypage.dto.*;
 import com.bug.catcher.domain.mypage.service.MyPageService;
 import com.bug.catcher.domain.user.repository.UserRepository;
@@ -121,5 +122,42 @@ public class MyPageController {
 
         DashboardResponseDto responseDto = new DashboardResponseDto(sessionUser.getRole(), sessionUser.getNickname());
         return ResponseEntity.ok(responseDto);
+    }
+    //이슈 4
+    // 수행한 의뢰 목록 조회 (헌터 전용)
+    @GetMapping("/hunter/tasks")
+    public ResponseEntity<List<HunterTaskResponseDto>> getHunterTasks(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
+
+        List<HunterTaskResponseDto> response = myPageService.getHunterTasks(loginUser.getId());
+        return ResponseEntity.ok(response);
+    }
+
+    // 찜한 게시물 목록 조회 (헌터 전용)
+    @GetMapping("/hunter/bookmarks/requests")
+    public ResponseEntity<List<HunterSavedRequestDto>> getHunterSavedRequests(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
+
+        List<HunterSavedRequestDto> response = myPageService.getHunterSavedRequests(loginUser.getId());
+        return ResponseEntity.ok(response);
+    }
+
+    // 헌터 등록 해제 (일반 유저로 돌아가기)
+    @PostMapping("/hunter/resign")
+    public ResponseEntity<String> resignHunter(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            HttpServletRequest request) {
+
+        // 1. DB의 Role 강등 처리
+        myPageService.resignHunter(loginUser.getId());
+
+        // 2. 세션 동기화 (즉시 일반 유저 마이페이지로 바뀌도록 현재 세션도 갱신)
+        User dbUser = userRepository.findById(loginUser.getId()).orElseThrow();
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.setAttribute(SessionConst.LOGIN_USER, dbUser);
+        }
+
+        return ResponseEntity.ok("헌터 등록이 성공적으로 해제되었습니다.");
     }
 }

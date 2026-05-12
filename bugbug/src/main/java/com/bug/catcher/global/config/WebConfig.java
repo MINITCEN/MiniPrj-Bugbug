@@ -27,6 +27,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "/css/**",
                         "/js/**",
                         "/map/**",
+
+                        "/api/request/wholeList",
+
                         "/h2-console/**",
                         "/error",
                         "/uploads/**",// 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.

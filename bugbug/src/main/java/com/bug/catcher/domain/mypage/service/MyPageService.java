@@ -1,9 +1,8 @@
 package com.bug.catcher.domain.mypage.service;
 
 import com.bug.catcher.domain.entity.*;
-import com.bug.catcher.domain.hunter.repository.HunterApplicationRepository;
-import com.bug.catcher.domain.hunter.repository.HunterRepository;
-import com.bug.catcher.domain.hunter.repository.SavedHunterRepository;
+import com.bug.catcher.domain.hunter.repository.*;
+import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.domain.mypage.dto.*;
 import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.domain.review.repository.ReviewRepository;
@@ -25,6 +24,9 @@ public class MyPageService {
     private final HunterRepository hunterRepository;
     private final ReviewRepository reviewRepository;
     private final HunterApplicationRepository hunterApplicationRepository;
+    private final ApplicationRepository applicationRepository;
+    private final SavedRequestRepository savedRequestRepository;
+    private final HunterService hunterService;
 
     @Transactional(readOnly = true)
     public MyInfoResponseDto getMyInfo(Long userId) {
@@ -76,6 +78,8 @@ public class MyPageService {
                 .build();
 
         reviewRepository.save(review);
+        //리뷰가 생성되었으니 해당 헌터의 등급 갱신
+        hunterService.updateHunterLevel(requestDto.getHunterId());
     }
     // 리뷰 수정
     @Transactional
@@ -94,6 +98,8 @@ public class MyPageService {
                 requestDto.getRating(),
                 requestDto.getReviewContent()
         );
+        // 평점이 바뀌었으니 헌터의 등급 갱신
+        hunterService.updateHunterLevel(review.getHunter().getId());
     }
 
     // 리뷰 삭제
@@ -101,13 +107,18 @@ public class MyPageService {
     public void deleteReview(Long userId, Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 리뷰입니다."));
-
-        //  삭제 권한 확인
+        // 삭제 권한 확인
         if (!review.getRequest().getUser().getId().equals(userId)) {
             throw new IllegalArgumentException("본인이 작성한 리뷰만 삭제할 수 있습니다.");
         }
+        // [핵심] 삭제하기 전에 어떤 헌터의 리뷰였는지 ID를 미리 백업해 둡니다.
+        Long targetHunterId = review.getHunter().getId();
 
+        // 리뷰 삭제 실행
         reviewRepository.delete(review);
+
+        //  백업해둔 헌터 ID를 이용해 등급 재산정 (리뷰가 지워졌으니 강등될 수도 있음!)
+        hunterService.updateHunterLevel(targetHunterId);
     }
 
     @Transactional(readOnly = true)
@@ -121,7 +132,7 @@ public class MyPageService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
 
-        // 이미 신청한 내역이 있는지(대기 중인지) 검증하는 로직 추가 권장
+        // 이미 신청한 내역이 있는지(대기 중인지) 검증하는 로직
          if (hunterApplicationRepository.existsByUserAndStatus(user, ApplicationStatus.PENDING)) {
              throw new IllegalArgumentException("이미 심사 대기 중인 신청서가 있습니다.");
          }
@@ -135,6 +146,37 @@ public class MyPageService {
                 .build();
 
         hunterApplicationRepository.save(application);
+    }
+    // 1. 수행(수락)한 의뢰 목록 보기
+    @Transactional(readOnly = true)
+    public List<HunterTaskResponseDto> getHunterTasks(Long userId) {
+        Hunter hunter = hunterRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
+
+        return applicationRepository.findByHunterId(hunter.getId()).stream()
+                .map(HunterTaskResponseDto::new)
+                .toList();
+    }
+
+    // 2. 찜한 의뢰(게시물) 목록 보기
+    @Transactional(readOnly = true)
+    public List<HunterSavedRequestDto> getHunterSavedRequests(Long userId) {
+        Hunter hunter = hunterRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
+
+        return savedRequestRepository.findByHunterId(hunter.getId()).stream()
+                .map(HunterSavedRequestDto::new)
+                .toList();
+    }
+
+    // 3. 헌터 등록 해제 (Role 강등)
+    @Transactional
+    public void resignHunter(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보를 찾을 수 없습니다."));
+
+        // 유저의 권한을 다시 USER로 강등
+        user.updateRole("USER");
     }
 
 }
