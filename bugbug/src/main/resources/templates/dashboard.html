@@ -18,6 +18,10 @@
         .stat-box p { color: #888; font-size: 14px; margin: 0; }
         .badge { display: inline-block; padding: 5px 10px; background-color: #e8f5e9; color: #2e7d32; border-radius: 20px; font-weight: bold; font-size: 12px; margin-bottom: 10px;}
 
+        /* 헌터 해제 버튼 */
+        .resign-btn { background-color: #ff4c4c; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: background 0.3s; }
+        .resign-btn:hover { background-color: #e60000; }
+
         /* 리스트 2단 배치용 */
         .list-grid { display: flex; gap: 30px; margin-top: 30px; }
         .list-column { flex: 1; }
@@ -25,6 +29,10 @@
         ul { list-style: none; padding: 0; margin: 0; }
         ul li { padding: 12px 0; border-bottom: 1px dashed #eee; color: #555; }
         ul li:last-child { border-bottom: none; }
+
+        /* 리스트 내 링크 스타일 */
+        ul li a { text-decoration: none; color: #333; font-weight: 500; transition: color 0.2s; }
+        ul li a:hover { color: #4CAF50; }
     </style>
 </head>
 <body>
@@ -68,8 +76,13 @@
 
 
     <div th:if="${user.role == 'HUNTER'}">
-        <h1>내 정보</h1>
-        <p style="color: #666; font-size: 14px;">🔒 회원님의 정보는 본인에게만 공개됩니다.</p>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+            <div>
+                <h1>내 정보</h1>
+                <p style="color: #666; font-size: 14px;">🔒 회원님의 정보는 본인에게만 공개됩니다.</p>
+            </div>
+            <button class="resign-btn" onclick="resignHunter()">헌터 자격 해제</button>
+        </div>
 
         <div class="dashboard-section">
             <div class="section-header">
@@ -124,7 +137,7 @@
                 <div class="list-column">
                     <div class="section-header">
                         <h3>찜한 의뢰 목록</h3>
-                        <a href="#" class="more-btn">더보기 ></a>
+                        <a href="/mypage/hunter/bookmarks/requests" class="more-btn">더보기 ></a>
                     </div>
                     <ul id="hunter-saved-requests-list">
                         <li>데이터를 불러오는 중입니다...</li>
@@ -138,6 +151,33 @@
 </div>
 
 <script>
+    // 헌터 자격 해제 기능
+    function resignHunter() {
+        if (!confirm('정말 헌터 자격을 해제하시겠습니까?\n해제 시 일반 유저로 돌아가며 헌터 기능이 제한됩니다.')) {
+            return;
+        }
+
+        fetch('/api/mypage/hunter/resign', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert('헌터 자격이 성공적으로 해제되었습니다.');
+                    // 권한이 변경되었으므로 페이지를 새로고침하여 일반 유저 대시보드를 띄움
+                    window.location.reload();
+                } else {
+                    alert('헌터 해제 처리 중 오류가 발생했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('서버와 통신 중 문제가 발생했습니다.');
+            });
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         const userRole = "[[${user.role}]]";
 
@@ -146,7 +186,7 @@
             fetch('/api/mypage/requests?size=3').then(res => res.json()).then(data => {
                 const listEl = document.getElementById('my-requests-list');
                 listEl.innerHTML = data.content.length ? '' : '<li>최근 등록한 의뢰가 없습니다.</li>';
-                data.content.forEach(req => listEl.innerHTML += `<li>[${req.status}] ${req.title}</li>`);
+                data.content.forEach(req => listEl.innerHTML += `<li><a href="/request/detail/${req.requestId}">[${req.status}] ${req.title}</a></li>`);
             });
 
             fetch('/api/mypage/reviews?size=3').then(res => res.json()).then(data => {
@@ -158,7 +198,7 @@
             fetch('/api/mypage/bookmarks/hunters?size=3').then(res => res.json()).then(data => {
                 const listEl = document.getElementById('my-bookmarks-list');
                 listEl.innerHTML = data.content.length ? '' : '<li>찜한 헌터가 없습니다.</li>';
-                data.content.forEach(hunter => listEl.innerHTML += `<li>${hunter.name} 헌터 (평점: ${hunter.rating}점)</li>`);
+                data.content.forEach(hunter => listEl.innerHTML += `<li><a href="/hunters/${hunter.hunterId}">${hunter.name} 헌터</a> (평점: ${hunter.rating}점)</li>`);
             });
 
         } else if (userRole === 'HUNTER') {
@@ -175,7 +215,7 @@
                     document.getElementById('hunter-res-count').innerText = `${data.responseCount}회`;
                 });
 
-            // 2. 최근 수행한 의뢰 가져오기
+            // 2. 최근 수행한 의뢰 가져오기 (클릭 시 상세 이동 적용)
             fetch('/api/mypage/hunter/tasks?size=3')
                 .then(res => res.json())
                 .then(data => {
@@ -186,14 +226,16 @@
                         return;
                     }
                     data.content.forEach(task => {
+                        // 의뢰 상세 페이지로 이동하는 링크 <a> 추가
                         taskList.innerHTML += `
-                            <li style="display: flex; justify-content: space-between;">
-                                <span>✔️ [${task.status}] ${task.title}</span>
+                            <li style="display: flex; justify-content: space-between; align-items: center;">
+                                <a href="/request/detail/${task.requestId}">✔️ [${task.status}] ${task.title}</a>
+                                <span style="color: #999; font-size: 13px;">${task.approxLocation}</span>
                             </li>`;
                     });
                 });
 
-            // 3. 찜한 의뢰(게시글) 목록 가져오기
+            // 3. 찜한 의뢰(게시글) 목록 가져오기 (클릭 시 상세 이동 적용)
             fetch('/api/mypage/hunter/bookmarks/requests?size=3')
                 .then(res => res.json())
                 .then(data => {
@@ -204,11 +246,11 @@
                         return;
                     }
                     data.content.forEach(saved => {
-                        // HunterSavedRequestDto 구조에 맞춰 렌더링 (title, approxLocation)
+                        // 의뢰 상세 페이지로 이동하는 링크 <a> 추가
                         savedList.innerHTML += `
                             <li style="display: flex; flex-direction: column;">
-                                <strong>📌 ${saved.title}</strong>
-                                <span style="color: #999; font-size: 13px;">📍 ${saved.approxLocation}</span>
+                                <a href="/request/detail/${saved.requestId}"><strong>📌 ${saved.title}</strong></a>
+                                <span style="color: #999; font-size: 13px; margin-top: 5px;">📍 ${saved.approxLocation}</span>
                             </li>`;
                     });
                 });

@@ -49,4 +49,19 @@ public class MyPageViewController {
         if (loginUser == null) return "redirect:/login";
         return "bookmark-list"; // templates/bookmark-list.html
     }
+    // 4. 수행한 의뢰 전체 목록 화면 (헌터 전용) [추가]
+    @GetMapping("/hunter/tasks")
+    public String hunterTaskListView(
+            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
+        if (loginUser == null) return "redirect:/login";
+        return "hunter-task-list"; // templates/hunter-task-list.html
+    }
+
+    // 5. 찜한 의뢰 전체 목록 화면 (헌터 전용) [추가]
+    @GetMapping("/hunter/bookmarks/requests")
+    public String hunterBookmarkListView(
+            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
+        if (loginUser == null) return "redirect:/login";
+        return "hunter-bookmark-list"; // templates/hunter-bookmark-list.html
+    }
 }
