@@ -162,6 +162,10 @@
             background: var(--brand-soft);
         }
 
+        .region-list button:disabled {
+            cursor: default;
+        }
+
         .legend {
             display: grid;
             gap: 14px;
@@ -200,6 +204,22 @@
             display: inline-block;
         }
 
+        .legend-dot-good {
+            background: var(--good);
+        }
+
+        .legend-dot-interest {
+            background: var(--interest);
+        }
+
+        .legend-dot-warning {
+            background: var(--warning);
+        }
+
+        .legend-dot-danger {
+            background: var(--danger);
+        }
+
         .empty {
             color: var(--muted);
             font-size: 14px;
@@ -234,66 +254,54 @@
                 linear-gradient(180deg, #f6f9f7 0%, #edf3ee 100%);
         }
 
-        .map-svg {
+        .map-root {
             display: block;
             width: 100%;
             height: 760px;
         }
 
-        .district-shape {
-            stroke: rgba(255, 255, 255, 0.96);
-            stroke-width: 2.4;
-            cursor: pointer;
-            transition: opacity .15s ease, stroke-width .15s ease, filter .15s ease;
-        }
-
-        .district-shape:hover {
-            filter: brightness(1.03);
-        }
-
-        .district-shape.active {
-            filter: brightness(1.04);
-        }
-
-        .district-outline {
-            fill: none;
-            stroke: #0b5f36;
-            stroke-width: 5.5;
-            stroke-linejoin: round;
-            stroke-linecap: round;
-            pointer-events: none;
+        .map-root.leaflet-container {
+            background: transparent;
         }
 
         .district-label {
-            cursor: pointer;
-        }
-
-        .district-label rect {
-            fill: rgba(255, 255, 255, 0.95);
-            stroke: rgba(23, 32, 25, 0.12);
-            stroke-width: 1.4;
-        }
-
-        .district-label text {
-            text-anchor: middle;
-            dominant-baseline: middle;
-            fill: var(--text);
-            pointer-events: none;
-        }
-
-        .district-label .label-name {
-            font-size: 9px;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+            color: var(--text);
+            font-size: 12px;
             font-weight: 700;
+            padding: 0;
         }
 
-        .district-label .label-index {
-            font-size: 13px;
-            font-weight: 800;
+        .district-label::before {
+            display: none;
         }
 
-        .district-label.active rect {
-            stroke: #0b5f36;
-            stroke-width: 2.2;
+        .district-label-text {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 52px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(23, 32, 25, 0.12);
+            box-shadow: 0 8px 18px rgba(20, 43, 29, 0.10);
+            white-space: nowrap;
+        }
+
+        .map-root .leaflet-interactive {
+            transition: fill-opacity .15s ease, weight .15s ease, opacity .15s ease;
+        }
+
+        .map-root .leaflet-control-zoom {
+            border: 1px solid var(--line);
+            box-shadow: 0 8px 18px rgba(20, 43, 29, 0.10);
+        }
+
+        .map-root .leaflet-control-zoom a {
+            color: var(--text);
         }
 
         .map-legend-inline {
@@ -390,6 +398,7 @@
             font-size: 12px;
             font-weight: 700;
             color: #fff;
+            background: #a5b2ab;
         }
 
         .score-badge {
@@ -528,7 +537,7 @@
             }
 
             .map-board,
-            .map-svg {
+            .map-root {
                 min-height: 820px;
                 height: 820px;
             }
