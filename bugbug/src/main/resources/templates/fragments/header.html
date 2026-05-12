@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="siteHeader(activePage)" class="site-header">
+    <div class="site-header__inner">
+        <a href="/" class="site-header__brand" aria-label="버그버그 홈">
+            <span class="site-header__brand-badge" aria-hidden="true">🛡️</span>
+            <span class="site-header__brand-text">버그버그</span>
+        </a>
+
+        <nav class="site-header__nav" aria-label="주요 메뉴">
+            <a href="/service-intro"
+               class="site-header__nav-link"
+               th:classappend="${activePage == 'service-intro'} ? ' is-active' : ''">서비스 소개</a>
+            <a href="/hunter"
+               class="site-header__nav-link"
+               th:classappend="${activePage == 'hunter'} ? ' is-active' : ''">헌터 찾기</a>
+            <a href="/mosquito-map"
+               class="site-header__nav-link"
+               th:classappend="${activePage == 'mosquito-map'} ? ' is-active' : ''">모기지수 지도</a>
+            <a href="/guide"
+               class="site-header__nav-link"
+               th:classappend="${activePage == 'guide'} ? ' is-active' : ''">이용 방법</a>
+        </nav>
+
+        <div class="site-header__actions">
+            <button type="button" class="site-header__icon-button" aria-label="알림">
+                <span aria-hidden="true">🔔</span>
+            </button>
+            <a href="/login" class="site-header__ghost-button">로그인</a>
+            <a href="/signup" class="site-header__solid-button">회원가입</a>
+        </div>
+    </div>
+</header>
+</body>
+</html>

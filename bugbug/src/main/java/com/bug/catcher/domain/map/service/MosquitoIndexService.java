@@ -70,4 +70,12 @@ public class MosquitoIndexService {
     log.info("{} 자치구별 모기 지수 생성 및 저장 완료", date);
   }
 
+  @Transactional
+  public void backfillRecentDays(int days) {
+    LocalDate today = LocalDate.now();
+    for (int offset = days - 1; offset >= 0; offset--) {
+      calculateAndSaveDailyIndex(today.minusDays(offset));
+    }
+  }
+
 }

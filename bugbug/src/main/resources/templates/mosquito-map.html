@@ -1,0 +1,160 @@
+﻿<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모기지수 지도</title>
+    <link rel="stylesheet" href="/css/common-layout.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+    <link rel='stylesheet' href='/css/mosquito-map.css'>
+</head>
+<body>
+<div th:replace="~{fragments/header :: siteHeader('mosquito-map')}"></div>
+<div class="page">
+    <div class="hero">
+        <h1>모기지수 지도</h1>
+        <p>서울 25개 자치구의 현재 모기 활동 지수와 지수 단계, 상세 기상 정보를 한 화면에서 확인합니다.</p>
+    </div>
+
+    <div class="layout">
+        <aside class="sidebar">
+            <section class="panel panel-section">
+                <h2>지역 검색</h2>
+                <div class="search-box">
+                    <span>⌕</span>
+                    <input id="search-input" type="text" placeholder="구 이름 입력">
+                </div>
+                <div id="region-list" class="region-list"></div>
+            </section>
+
+            <section class="panel panel-section">
+                <h2>모기지수 등급 안내</h2>
+                <div class="legend">
+                    <div class="legend-row">
+                        <span class="legend-dot legend-dot-danger"></span>
+                        <div class="legend-copy">
+                            <div class="legend-head"><span>불쾌</span><span>75 - 100</span></div>
+                            <div class="legend-desc">모기 활동이 매우 활발해 불쾌감이 크게 느껴지는 단계입니다.</div>
+                        </div>
+                    </div>
+                    <div class="legend-row">
+                        <span class="legend-dot legend-dot-warning"></span>
+                        <div class="legend-copy">
+                            <div class="legend-head"><span>주의</span><span>50 - 74</span></div>
+                            <div class="legend-desc">실외 활동 시 모기 노출 가능성이 높아 주의가 필요한 구간입니다.</div>
+                        </div>
+                    </div>
+                    <div class="legend-row">
+                        <span class="legend-dot legend-dot-interest"></span>
+                        <div class="legend-copy">
+                            <div class="legend-head"><span>관심</span><span>25 - 49</span></div>
+                            <div class="legend-desc">모기 활동이 시작되는 구간으로 기본적인 대비를 권장합니다.</div>
+                        </div>
+                    </div>
+                    <div class="legend-row">
+                        <span class="legend-dot legend-dot-good"></span>
+                        <div class="legend-copy">
+                            <div class="legend-head"><span>쾌적</span><span>0 - 24</span></div>
+                            <div class="legend-desc">모기 활동이 낮은 편이라 비교적 쾌적한 상태입니다.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel panel-section">
+                <h2>안내</h2>
+                <p class="empty">
+                    지도에서 자치구를 클릭하면 모기지수, 날씨 기준 시각, 기온, 습도, 최근 7일 추이를 함께 확인할 수 있습니다.
+                </p>
+            </section>
+        </aside>
+
+        <main class="panel map-panel">
+            <div class="map-header">
+                <h2>서울 모기 활동 현황</h2>
+                <div class="meta">색이 진한 지역일수록 지수가 높으며, 클릭하면 오른쪽 설명이 갱신됩니다.</div>
+            </div>
+            <div class="map-board-wrap">
+                <div class="map-board">
+                    <div id="map-loading" class="loading">모기 지도를 불러오는 중</div>
+                    <div id="map-root" class="map-root" aria-label="서울 자치구 모기지수 지도"></div>
+                    <div class="map-legend-inline">
+                        <span><i class="legend-dot legend-dot-good"></i>쾌적</span>
+                        <span><i class="legend-dot legend-dot-interest"></i>관심</span>
+                        <span><i class="legend-dot legend-dot-warning"></i>주의</span>
+                        <span><i class="legend-dot legend-dot-danger"></i>불쾌</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <aside class="panel detail-panel">
+            <div class="detail-head">
+                <h2>지역 상세 정보</h2>
+            </div>
+            <div class="detail-body">
+                <div class="score-row">
+                    <div class="score-meta">
+                        <div id="detail-region" class="region">지역 선택</div>
+                        <div class="score-line">
+                            <span id="detail-score" class="score-value">--</span>
+                            <span class="score-max">/ 100</span>
+                        </div>
+                        <div id="detail-status" class="status-pill">대기</div>
+                    </div>
+                    <div id="detail-ring" class="score-badge">
+                        <div class="score-badge-inner">
+                            <span id="detail-emoji">🦟</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="weather-grid">
+                    <div class="mini-card">
+                        <strong>기온</strong>
+                        <div id="detail-temp" class="value">--</div>
+                    </div>
+                    <div class="mini-card">
+                        <strong>습도</strong>
+                        <div id="detail-humidity" class="value">--</div>
+                    </div>
+                </div>
+
+                <div class="fact-card">
+                    <strong>날씨 정보</strong>
+                    <div class="fact-list">
+                        <div class="fact-row"><span>모기지수 기준일</span><span id="detail-date">-</span></div>
+                        <div class="fact-row"><span>날씨 기준 시각</span><span id="weather-date">-</span></div>
+                        <div class="fact-row"><span>강수</span><span id="detail-rain">-</span></div>
+                        <div class="fact-row"><span>강수 형태</span><span id="detail-rain-type">-</span></div>
+                        <div class="fact-row"><span>하늘 상태</span><span id="detail-sky">-</span></div>
+                        <div class="fact-row"><span>풍속</span><span id="detail-wind">-</span></div>
+                    </div>
+                    <div class="fact-note">날씨 정보는 예보 발표 시각 기준으로 표시됩니다.</div>
+                </div>
+
+                <div class="chart-card">
+                    <strong>최근 7일 모기지수</strong>
+                    <svg id="trend-chart" viewBox="0 0 320 200" aria-label="최근 7일 모기지수 차트"></svg>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+
+<script>
+    window.mosquitoMapConfig = {
+        currentApiUrl: '/api/v1/mosquito/current',
+        detailApiBase: '/api/v1/mosquito/detail',
+        trendApiBase: '/api/v1/mosquito/trend',
+        geoJsonUrl: '/map/seoul-districts.geojson'
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/mosquito-map.js"></script>
+</body>
+</html>
+
+
+
