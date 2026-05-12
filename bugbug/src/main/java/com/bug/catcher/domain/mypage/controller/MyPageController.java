@@ -4,6 +4,7 @@ import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.domain.mypage.dto.*;
 import com.bug.catcher.domain.mypage.service.MyPageService;
+import com.bug.catcher.domain.review.dto.ReviewResponseDto;
 import com.bug.catcher.domain.user.repository.UserRepository;
 import com.bug.catcher.global.auth.SessionConst;
 import jakarta.servlet.http.HttpServletRequest;
@@ -98,6 +99,15 @@ public class MyPageController {
 
         myPageService.deleteReview(loginUser.getId(), reviewId);
         return ResponseEntity.ok("리뷰가 삭제되었습니다.");
+    }
+    // 내가 작성한 리뷰 목록 조회
+    @GetMapping("/reviews")
+    public ResponseEntity<Page<ReviewResponseDto>> getMyReviews(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<ReviewResponseDto> response = myPageService.getMyReviews(loginUser.getId(), pageable);
+        return ResponseEntity.ok(response);
     }
 
     // 헌터 신청 팝업에서 제출 버튼을 눌렀을 때 호출

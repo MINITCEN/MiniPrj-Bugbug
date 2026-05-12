@@ -3,6 +3,7 @@ package com.bug.catcher.domain.hunter.controller;
 import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.hunter.dto.HunterProfileResponseDto;
 import com.bug.catcher.domain.hunter.service.HunterService;
+import com.bug.catcher.domain.review.dto.ReviewResponseDto;
 import com.bug.catcher.global.auth.SessionConst;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,15 @@ public class HunterController {
             @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
 
         Page<HunterListResponseDto> response = hunterService.getHunterList(loginUser.getId(), pageable);
+        return ResponseEntity.ok(response);
+    }
+    // 특정 헌터가 받은 리뷰 목록 조회 (로그인 안 해도 볼 수 있음)
+    @GetMapping("/{hunterId}/reviews")
+    public ResponseEntity<Page<ReviewResponseDto>> getHunterReviews(
+            @PathVariable Long hunterId,
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<ReviewResponseDto> response = hunterService.getHunterReviews(hunterId, pageable);
         return ResponseEntity.ok(response);
     }
 }

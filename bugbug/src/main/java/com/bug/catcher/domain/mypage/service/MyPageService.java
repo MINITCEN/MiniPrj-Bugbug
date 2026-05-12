@@ -5,6 +5,7 @@ import com.bug.catcher.domain.hunter.repository.*;
 import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.domain.mypage.dto.*;
 import com.bug.catcher.domain.request.repository.RequestRepository;
+import com.bug.catcher.domain.review.dto.ReviewResponseDto;
 import com.bug.catcher.domain.review.repository.ReviewRepository;
 import com.bug.catcher.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -121,6 +122,12 @@ public class MyPageService {
 
         //  백업해둔 헌터 ID를 이용해 등급 재산정 (리뷰가 지워졌으니 강등될 수도 있음!)
         hunterService.updateHunterLevel(targetHunterId);
+    }
+    //유저가 쓴 리뷰 조회
+    @Transactional(readOnly = true)
+    public Page<ReviewResponseDto> getMyReviews(Long userId, Pageable pageable) {
+        return reviewRepository.findByUserId(userId, pageable)
+                .map(ReviewResponseDto::new);
     }
 
     @Transactional(readOnly = true)
