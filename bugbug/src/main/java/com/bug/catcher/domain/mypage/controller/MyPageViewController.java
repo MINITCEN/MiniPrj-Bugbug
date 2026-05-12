@@ -26,4 +26,27 @@ public class MyPageViewController {
         model.addAttribute("user", loginUser);
         return "dashboard";
     }
+    // 1. 나의 의뢰 전체 목록 화면
+    @GetMapping("/requests")
+    public String requestListView(
+            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
+        if (loginUser == null) return "redirect:/login";
+        return "request-list"; // templates/request-list.html
+    }
+
+    // 2. 나의 리뷰 관리 전체 목록 화면
+    @GetMapping("/reviews")
+    public String reviewListView(
+            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
+        if (loginUser == null) return "redirect:/login";
+        return "review-list"; // templates/review-list.html
+    }
+
+    // 3. 찜한 헌터 전체 목록 화면
+    @GetMapping("/bookmarks/hunters")
+    public String bookmarkListView(
+            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
+        if (loginUser == null) return "redirect:/login";
+        return "bookmark-list"; // templates/bookmark-list.html
+    }
 }

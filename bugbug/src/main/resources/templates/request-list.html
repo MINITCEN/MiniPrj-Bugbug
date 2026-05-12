@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>버그버그 - 나의 의뢰 전체 목록</title>
+    <style>
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .request-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        button { padding: 5px 15px; cursor: pointer; }
+        button:disabled { background-color: #eee; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>나의 의뢰 목록</h1>
+    <a href="/mypage/dashboard">← 대시보드로 돌아가기</a>
+    <hr>
+
+    <div id="list-container">
+        <p>데이터를 불러오는 중입니다...</p>
+    </div>
+
+    <div class="pagination">
+        <button id="prev-btn" onclick="loadPage(currentPage - 1)">이전</button>
+        <span id="page-info">1 페이지</span>
+        <button id="next-btn" onclick="loadPage(currentPage + 1)">다음</button>
+    </div>
+</div>
+
+<script>
+    let currentPage = 0; // 스프링의 Pageable은 0페이지부터 시작합니다!
+
+    // 특정 페이지의 데이터를 불러오는 함수
+    function loadPage(page) {
+        // size=10 (기본값)으로 10개씩 가져오고, page 파라미터를 넘겨줍니다.
+        fetch(`/api/mypage/requests?page=${page}`)
+            .then(res => res.json())
+            .then(data => {
+                const listContainer = document.getElementById('list-container');
+                listContainer.innerHTML = ''; // 기존 데이터 지우기
+
+                // 데이터가 없을 때
+                if (data.content.length === 0) {
+                    listContainer.innerHTML = '<p>등록한 의뢰가 없습니다.</p>';
+                } else {
+                    // 데이터가 있을 때 (카드 형태로 그리기)
+                    data.content.forEach(req => {
+                        listContainer.innerHTML += `
+                            <div class="request-card">
+                                <h3>[${req.status}] ${req.title}</h3>
+                                <p>작성일: ${req.createdAt} | 조회수: ${req.viewCount}</p>
+                            </div>
+                        `;
+                    });
+                }
+
+                // 페이징 버튼 상태 업데이트 (맨 앞이거나 맨 뒤면 버튼 비활성화)
+                currentPage = data.number;
+                document.getElementById('page-info').innerText = `${currentPage + 1} / ${data.totalPages === 0 ? 1 : data.totalPages} 페이지`;
+                document.getElementById('prev-btn').disabled = data.first;
+                document.getElementById('next-btn').disabled = data.last;
+            });
+    }
+
+    // 화면이 처음 켜질 때 0페이지(첫 페이지) 로드
+    document.addEventListener("DOMContentLoaded", () => {
+        loadPage(0);
+    });
+</script>
+
+</body>
+</html>

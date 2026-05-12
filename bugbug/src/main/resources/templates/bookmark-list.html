@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>버그버그 - 찜한 헌터 목록</title>
+    <style>
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .data-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        button { padding: 5px 15px; cursor: pointer; }
+        button:disabled { background-color: #eee; cursor: not-allowed; }
+        .hunter-btn { padding: 8px 12px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; text-decoration: none; font-size: 14px;}
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>최근 찜한 헌터</h1>
+    <a href="/mypage/dashboard">← 대시보드로 돌아가기</a>
+    <hr>
+
+    <div id="list-container">
+        <p>데이터를 불러오는 중입니다...</p>
+    </div>
+
+    <div class="pagination">
+        <button id="prev-btn" onclick="loadPage(currentPage - 1)">이전</button>
+        <span id="page-info">1 페이지</span>
+        <button id="next-btn" onclick="loadPage(currentPage + 1)">다음</button>
+    </div>
+</div>
+
+<script>
+    let currentPage = 0;
+
+    function loadPage(page) {
+        // 💡 API 주소를 찜한 헌터 목록으로 변경!
+        fetch(`/api/mypage/bookmarks/hunters?page=${page}`)
+            .then(res => res.json())
+            .then(data => {
+                const listContainer = document.getElementById('list-container');
+                listContainer.innerHTML = '';
+
+                if (data.content.length === 0) {
+                    listContainer.innerHTML = '<p>찜한 헌터가 없습니다.</p>';
+                } else {
+                    data.content.forEach(hunter => {
+                        // 💡 헌터 데이터에 맞게 화면 그리기 (프로필 보러가기 버튼 추가)
+                        listContainer.innerHTML += `
+                            <div class="data-card">
+                                <div>
+                                    <h3 style="margin: 0 0 10px 0;">${hunter.name} 헌터</h3>
+                                    <p style="margin: 0; color: #666;">평균 평점: ⭐ ${hunter.rating}점</p>
+                                </div>
+                                <a href="/hunters/${hunter.id}" class="hunter-btn">프로필 보기</a>
+                            </div>
+                        `;
+                    });
+                }
+
+                currentPage = data.number;
+                document.getElementById('page-info').innerText = `${currentPage + 1} / ${data.totalPages === 0 ? 1 : data.totalPages} 페이지`;
+                document.getElementById('prev-btn').disabled = data.first;
+                document.getElementById('next-btn').disabled = data.last;
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadPage(0);
+    });
+</script>
+
+</body>
+</html>

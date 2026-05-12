@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>버그버그 - 나의 리뷰 관리</title>
+    <style>
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .data-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
+        button { padding: 5px 15px; cursor: pointer; }
+        button:disabled { background-color: #eee; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>나의 리뷰 관리</h1>
+    <a href="/mypage/dashboard">← 대시보드로 돌아가기</a>
+    <hr>
+
+    <div id="list-container">
+        <p>데이터를 불러오는 중입니다...</p>
+    </div>
+
+    <div class="pagination">
+        <button id="prev-btn" onclick="loadPage(currentPage - 1)">이전</button>
+        <span id="page-info">1 페이지</span>
+        <button id="next-btn" onclick="loadPage(currentPage + 1)">다음</button>
+    </div>
+</div>
+
+<script>
+    let currentPage = 0;
+
+    function loadPage(page) {
+        // 💡 API 주소를 리뷰 목록으로 변경!
+        fetch(`/api/mypage/reviews?page=${page}`)
+            .then(res => res.json())
+            .then(data => {
+                const listContainer = document.getElementById('list-container');
+                listContainer.innerHTML = '';
+
+                if (data.content.length === 0) {
+                    listContainer.innerHTML = '<p>작성한 리뷰가 없습니다.</p>';
+                } else {
+                    data.content.forEach(review => {
+                        // 💡 리뷰 데이터에 맞게 화면 그리기
+                        listContainer.innerHTML += `
+                            <div class="data-card">
+                                <h3>${review.hunterName} 헌터님께 남긴 리뷰</h3>
+                                <p style="color: #ff9800; font-weight: bold;">⭐ ${review.rating}점</p>
+                                <p>${review.content}</p>
+                            </div>
+                        `;
+                    });
+                }
+
+                currentPage = data.number;
+                document.getElementById('page-info').innerText = `${currentPage + 1} / ${data.totalPages === 0 ? 1 : data.totalPages} 페이지`;
+                document.getElementById('prev-btn').disabled = data.first;
+                document.getElementById('next-btn').disabled = data.last;
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadPage(0);
+    });
+</script>
+
+</body>
+</html>
