@@ -11,8 +11,7 @@
         selectedRegionId: null,
         map: null,
         districtLayer: null,
-        layerByRegionId: new Map(),
-        labelLayer: null
+        selectedOutlineLayer: null
     };
 
     const dom = {
@@ -44,11 +43,8 @@
 
     async function init() {
         setLoading(true);
-        try {
-            if (!window.L) {
-                throw new Error('Leaflet is not available.');
-            }
 
+        try {
             state.geoJson = await fetchJson(geoJsonUrl);
 
             try {
@@ -83,6 +79,118 @@
         }
     }
 
+    function renderMap() {
+        const features = state.geoJson?.features || [];
+        if (!features.length) {
+            renderEmptyMap('지도 자산을 찾지 못했습니다.');
+            return;
+        }
+
+        destroyMap();
+
+        state.map = L.map(dom.mapRoot, {
+            attributionControl: false,
+            zoomControl: true,
+            scrollWheelZoom: true,
+            doubleClickZoom: false
+        });
+
+        const itemByName = new Map(state.items.map(item => [item.location, item]));
+
+        state.districtLayer = L.geoJSON(state.geoJson, {
+            style: feature => {
+                const item = itemByName.get(feature?.properties?.SIG_KOR_NM);
+                return buildDistrictStyle(item?.index);
+            },
+            onEachFeature: (feature, layer) => {
+                const item = itemByName.get(feature?.properties?.SIG_KOR_NM);
+                const labelText = item
+                    ? `${item.location} ${formatIndex(item.index)}`
+                    : (feature?.properties?.SIG_KOR_NM || '');
+
+                layer.bindTooltip(
+                    `<span class="district-label-text">${labelText}</span>`,
+                    {
+                        permanent: true,
+                        direction: 'center',
+                        className: 'district-label',
+                        opacity: 1
+                    }
+                );
+
+                if (item?.regionId != null) {
+                    layer.on('click', () => selectRegion(item.regionId));
+                }
+            }
+        }).addTo(state.map);
+
+        state.map.fitBounds(state.districtLayer.getBounds(), { padding: [20, 20] });
+        drawSelectedOutline();
+    }
+
+    function destroyMap() {
+        if (state.map) {
+            state.map.remove();
+            state.map = null;
+        }
+        state.districtLayer = null;
+        state.selectedOutlineLayer = null;
+    }
+
+    function buildDistrictStyle(index) {
+        return {
+            fillColor: getColorByIndex(index),
+            fillOpacity: 0.84,
+            color: 'rgba(255, 255, 255, 0.96)',
+            weight: 2,
+            opacity: 1
+        };
+    }
+
+    function buildSelectedOutlineStyle() {
+        return {
+            fill: false,
+            color: '#0b5f36',
+            weight: 4,
+            opacity: 1
+        };
+    }
+
+    function drawSelectedOutline() {
+        if (!state.map) {
+            return;
+        }
+
+        if (state.selectedOutlineLayer) {
+            state.map.removeLayer(state.selectedOutlineLayer);
+            state.selectedOutlineLayer = null;
+        }
+
+        const feature = findFeatureByRegionId(state.selectedRegionId);
+        if (!feature) {
+            return;
+        }
+
+        state.selectedOutlineLayer = L.geoJSON(feature, {
+            style: buildSelectedOutlineStyle
+        }).addTo(state.map);
+    }
+
+    function findFeatureByRegionId(regionId) {
+        if (regionId == null) {
+            return null;
+        }
+
+        const selectedItem = state.items.find(item => item.regionId === regionId);
+        if (!selectedItem) {
+            return null;
+        }
+
+        return (state.geoJson?.features || []).find(
+            feature => feature?.properties?.SIG_KOR_NM === selectedItem.location
+        ) || null;
+    }
+
     function filterItems() {
         const keyword = dom.searchInput.value.trim();
         if (!keyword) {
@@ -113,175 +221,25 @@
             button.type = 'button';
             button.className = item.regionId === state.selectedRegionId ? 'active' : '';
             button.innerHTML = `<span>${item.location}</span><strong>${formatIndex(item.index)}</strong>`;
+
             if (item.regionId != null) {
                 button.addEventListener('click', () => selectRegion(item.regionId));
             } else {
                 button.disabled = true;
             }
+
             dom.regionList.appendChild(button);
         });
     }
 
-    function renderMap() {
-        const features = state.geoJson?.features || [];
-        if (!features.length) {
-            renderEmptyMap('지도 자산을 찾지 못했습니다.');
-            return;
-        }
-
-        const itemByName = new Map(state.items.map(item => [item.location, item]));
-        destroyMap();
-
-        state.map = L.map(dom.mapRoot, {
-            attributionControl: false,
-            zoomControl: true,
-            dragging: true,
-            scrollWheelZoom: true,
-            doubleClickZoom: false,
-            boxZoom: false,
-            keyboard: true
-        });
-
-        const layer = L.geoJSON(state.geoJson, {
-            style: feature => buildDistrictStyle(itemByName.get(feature?.properties?.SIG_KOR_NM)),
-            onEachFeature: (feature, districtLayer) => {
-                const name = feature?.properties?.SIG_KOR_NM;
-                const item = itemByName.get(name);
-
-                if (item?.regionId != null) {
-                    state.layerByRegionId.set(item.regionId, districtLayer);
-                    districtLayer.on({
-                        click: () => selectRegion(item.regionId),
-                        mouseover: () => {
-                            if (item.regionId !== state.selectedRegionId) {
-                                districtLayer.setStyle(getDistrictStyle(item.index, false, true));
-                            }
-                        },
-                        mouseout: () => {
-                            const isSelected = item.regionId === state.selectedRegionId;
-                            districtLayer.setStyle(getDistrictStyle(item.index, isSelected, false));
-                        }
-                    });
-                }
-            }
-        }).addTo(state.map);
-
-        state.districtLayer = layer;
-        state.labelLayer = L.layerGroup().addTo(state.map);
-        renderDistrictLabels(itemByName);
-        state.map.fitBounds(layer.getBounds(), { padding: [20, 20] });
-        syncSelectionState();
-    }
-
-    function destroyMap() {
-        state.layerByRegionId.clear();
-        state.districtLayer = null;
-        state.labelLayer = null;
-        if (state.map) {
-            state.map.remove();
-            state.map = null;
-        }
-    }
-
-    function renderDistrictLabels(itemByName) {
-        if (!state.labelLayer) {
-            return;
-        }
-
-        state.labelLayer.clearLayers();
-
-        state.geoJson.features.forEach(feature => {
-            const name = feature?.properties?.SIG_KOR_NM;
-            const item = itemByName.get(name);
-            if (!item) {
-                return;
-            }
-
-            const center = getFeatureCenter(feature);
-            if (!center) {
-                return;
-            }
-
-            const marker = L.marker(center, {
-                interactive: false,
-                icon: L.divIcon({
-                    className: 'district-label',
-                    html: `<span class="district-label-text">${name} ${formatIndex(item.index)}</span>`,
-                    iconSize: null
-                })
-            });
-
-            marker.addTo(state.labelLayer);
-        });
-    }
-
-    function getFeatureCenter(feature) {
-        const coordinates = feature?.geometry?.coordinates;
-        const type = feature?.geometry?.type;
-
-        if (!coordinates || !type) {
-            return null;
-        }
-
-        if (type === 'Polygon') {
-            return getRingCenter(coordinates[0]);
-        }
-
-        if (type === 'MultiPolygon') {
-            const ring = coordinates
-                .map(polygon => polygon[0])
-                .filter(Boolean)
-                .sort((a, b) => b.length - a.length)[0];
-            return getRingCenter(ring);
-        }
-
-        return null;
-    }
-
-    function getRingCenter(ring) {
-        if (!Array.isArray(ring) || !ring.length) {
-            return null;
-        }
-
-        let minLng = Infinity;
-        let maxLng = -Infinity;
-        let minLat = Infinity;
-        let maxLat = -Infinity;
-
-        ring.forEach(point => {
-            const lng = point[0];
-            const lat = point[1];
-            minLng = Math.min(minLng, lng);
-            maxLng = Math.max(maxLng, lng);
-            minLat = Math.min(minLat, lat);
-            maxLat = Math.max(maxLat, lat);
-        });
-
-        return [(minLat + maxLat) / 2, (minLng + maxLng) / 2];
-    }
-
-    function buildDistrictStyle(item) {
-        return getDistrictStyle(item?.index, item?.regionId === state.selectedRegionId, false);
-    }
-
-    function getDistrictStyle(index, selected, hovered) {
-        return {
-            fillColor: getColorByIndex(index),
-            fillOpacity: hovered ? 0.92 : 0.84,
-            color: selected ? '#0b5f36' : 'rgba(255, 255, 255, 0.96)',
-            weight: selected ? 4 : hovered ? 3 : 2,
-            opacity: 1
-        };
-    }
-
     async function selectRegion(regionId) {
         state.selectedRegionId = regionId;
-        syncSelectionState();
+        drawSelectedOutline();
         renderRegionList(filterItems());
 
-        const selectedLayer = state.layerByRegionId.get(regionId);
-        if (selectedLayer && state.map) {
-            state.map.fitBounds(selectedLayer.getBounds(), {
+        const feature = findFeatureByRegionId(regionId);
+        if (feature && state.map) {
+            state.map.fitBounds(L.geoJSON(feature).getBounds(), {
                 padding: [40, 40],
                 maxZoom: 12
             });
@@ -300,23 +258,6 @@
             renderDetailFallback(selected?.location);
             renderTrendChart([]);
         }
-    }
-
-    function syncSelectionState() {
-        state.items.forEach(item => {
-            if (item.regionId == null) {
-                return;
-            }
-            const layer = state.layerByRegionId.get(item.regionId);
-            if (!layer) {
-                return;
-            }
-            const selected = item.regionId === state.selectedRegionId;
-            layer.setStyle(getDistrictStyle(item.index, selected, false));
-            if (selected) {
-                layer.bringToFront();
-            }
-        });
     }
 
     function renderDetail(detail) {
@@ -419,9 +360,7 @@
     }
 
     function renderEmptyMap(message) {
-        if (state.map) {
-            destroyMap();
-        }
+        destroyMap();
         dom.mapRoot.innerHTML = '';
         dom.mapLoading.textContent = message;
         dom.mapLoading.style.display = 'grid';
