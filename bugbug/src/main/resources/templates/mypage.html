@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 | 버그버그</title>
+    <link rel="stylesheet" href="/css/common-layout.css">
+    <style>
+        body {
+            margin: 0;
+            background: #f7faf8;
+            color: #172019;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        .mypage-shell {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 56px 24px 80px;
+        }
+
+        .mypage-card {
+            background: #fff;
+            border: 1px solid #e6ebe7;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 18px 48px rgba(20, 43, 29, 0.08);
+        }
+
+        .mypage-card h1 {
+            margin: 0 0 10px;
+            font-size: 36px;
+        }
+
+        .mypage-card p {
+            margin: 0;
+            color: #6e7a72;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/header :: siteHeader('none')}"></div>
+<main class="mypage-shell">
+    <section class="mypage-card">
+        <h1>마이페이지</h1>
+        <p>마이페이지 화면은 준비 중입니다. 현재는 로그인 상태 확인과 이동 경로 연결용 임시 페이지입니다.</p>
+    </section>
+</main>
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+<script src="/js/common-layout.js"></script>
+</body>
+</html>

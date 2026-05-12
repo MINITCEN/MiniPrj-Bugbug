@@ -127,6 +127,10 @@ body {
     flex-direction: column;
 }
 
+.auth-card__head {
+    margin-bottom: 18px;
+}
+
 .auth-card--signup {
     border-left: 1px solid rgba(23, 32, 25, 0.08);
 }
@@ -144,7 +148,7 @@ body {
     content: "";
     position: absolute;
     left: 0;
-    bottom: -8px;
+    bottom: -10px;
     width: 34px;
     height: 4px;
     border-radius: 999px;
@@ -152,6 +156,12 @@ body {
 }
 
 .login-form {
+    margin-top: 34px;
+    display: grid;
+    gap: 16px;
+}
+
+.signup-form {
     margin-top: 34px;
     display: grid;
     gap: 16px;
