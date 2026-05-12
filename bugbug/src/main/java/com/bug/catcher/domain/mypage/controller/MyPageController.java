@@ -41,6 +41,23 @@ public class MyPageController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @PatchMapping("/info")
+    public ResponseEntity<MyInfoResponseDto> updateMyInfo(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @RequestBody MyInfoUpdateRequestDto requestDto,
+            HttpServletRequest request) {
+
+        MyInfoResponseDto responseDto = myPageService.updateMyInfo(loginUser.getId(), requestDto);
+
+        User dbUser = userRepository.findById(loginUser.getId()).orElseThrow();
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.setAttribute(SessionConst.LOGIN_USER, dbUser);
+        }
+
+        return ResponseEntity.ok(responseDto);
+    }
+
     // 이슈2
     // 나의 의뢰 목록 조회
     @GetMapping("/requests")

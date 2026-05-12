@@ -1,7 +1,11 @@
 package com.bug.catcher.domain.mypage.controller;
 
 import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.user.repository.UserRepository;
 import com.bug.catcher.global.auth.SessionConst;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,58 +14,71 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 
 @Controller
 @RequestMapping("/mypage")
+@RequiredArgsConstructor
 public class MyPageViewController {
+
+    private final UserRepository userRepository;
+
+    @GetMapping
+    public String myPage() {
+        return "redirect:/mypage/dashboard";
+    }
 
     @GetMapping("/dashboard")
     public String dashboardView(
             @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser,
+            HttpServletRequest request,
             Model model) {
 
-        // 로그인 안 한 상태면 로그인 페이지로 가기
         if (loginUser == null) {
             return "redirect:/login";
         }
 
-        // 타임리프에서 쓸 수 있도록 유저 정보 전달 (이름, 권한 등)
-        model.addAttribute("user", loginUser);
+        User currentUser = userRepository.findById(loginUser.getId())
+                .orElse(loginUser);
+
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.setAttribute(SessionConst.LOGIN_USER, currentUser);
+        }
+
+        model.addAttribute("user", currentUser);
+        model.addAttribute("isHunter", "HUNTER".equals(currentUser.getRole()));
         return "dashboard";
     }
-    // 1. 나의 의뢰 전체 목록 화면
+
     @GetMapping("/requests")
     public String requestListView(
             @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
         if (loginUser == null) return "redirect:/login";
-        return "request-list"; // templates/request-list.html
+        return "request-list";
     }
 
-    // 2. 나의 리뷰 관리 전체 목록 화면
     @GetMapping("/reviews")
     public String reviewListView(
             @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
         if (loginUser == null) return "redirect:/login";
-        return "review-list"; // templates/review-list.html
+        return "review-list";
     }
 
-    // 3. 찜한 헌터 전체 목록 화면
     @GetMapping("/bookmarks/hunters")
     public String bookmarkListView(
             @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
         if (loginUser == null) return "redirect:/login";
-        return "bookmark-list"; // templates/bookmark-list.html
+        return "bookmark-list";
     }
-    // 4. 수행한 의뢰 전체 목록 화면 (헌터 전용) [추가]
+
     @GetMapping("/hunter/tasks")
     public String hunterTaskListView(
             @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
         if (loginUser == null) return "redirect:/login";
-        return "hunter-task-list"; // templates/hunter-task-list.html
+        return "hunter-task-list";
     }
 
-    // 5. 찜한 의뢰 전체 목록 화면 (헌터 전용) [추가]
     @GetMapping("/hunter/bookmarks/requests")
     public String hunterBookmarkListView(
             @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
         if (loginUser == null) return "redirect:/login";
-        return "hunter-bookmark-list"; // templates/hunter-bookmark-list.html
+        return "hunter-bookmark-list";
     }
 }

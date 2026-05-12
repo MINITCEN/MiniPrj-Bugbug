@@ -41,6 +41,38 @@ public class MyPageService {
         //  마이페이지용 DTO로 변환하여 반환
         return new MyInfoResponseDto(user);
     }
+
+    @Transactional
+    public MyInfoResponseDto updateMyInfo(Long userId, MyInfoUpdateRequestDto requestDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
+
+        String nickname = normalizeRequired(requestDto.getNickname(), "닉네임");
+        String phoneNumber = normalizeOptional(requestDto.getPhoneNumber());
+        String address = normalizeOptional(requestDto.getAddress());
+
+        if (!user.getNickname().equals(nickname) && userRepository.existsByNickname(nickname)) {
+            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+        }
+
+        user.updateProfile(nickname, phoneNumber, address);
+        return new MyInfoResponseDto(user);
+    }
+
+    private String normalizeRequired(String value, String fieldName) {
+        if (value == null || value.trim().isEmpty()) {
+            throw new IllegalArgumentException(fieldName + "은(는) 필수입니다.");
+        }
+        return value.trim();
+    }
+
+    private String normalizeOptional(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return value.trim();
+    }
+
     //이슈2
     // 나의 의뢰 목록 조회 (페이징 적용)
     @Transactional(readOnly = true)
