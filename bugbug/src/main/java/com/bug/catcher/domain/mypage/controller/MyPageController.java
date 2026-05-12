@@ -11,6 +11,10 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 
 import java.util.List;
 
@@ -124,21 +128,23 @@ public class MyPageController {
         return ResponseEntity.ok(responseDto);
     }
     //이슈 4
-    // 수행한 의뢰 목록 조회 (헌터 전용)
+    // 수행한 의뢰 목록 조회 (헌터 전용) - 페이징 추가
     @GetMapping("/hunter/tasks")
-    public ResponseEntity<List<HunterTaskResponseDto>> getHunterTasks(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
+    public ResponseEntity<Page<HunterTaskResponseDto>> getHunterTasks(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        List<HunterTaskResponseDto> response = myPageService.getHunterTasks(loginUser.getId());
+        Page<HunterTaskResponseDto> response = myPageService.getHunterTasks(loginUser.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 
-    // 찜한 게시물 목록 조회 (헌터 전용)
+    // 찜한 게시물 목록 조회 (헌터 전용) - 페이징 추가
     @GetMapping("/hunter/bookmarks/requests")
-    public ResponseEntity<List<HunterSavedRequestDto>> getHunterSavedRequests(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
+    public ResponseEntity<Page<HunterSavedRequestDto>> getHunterSavedRequests(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        List<HunterSavedRequestDto> response = myPageService.getHunterSavedRequests(loginUser.getId());
+        Page<HunterSavedRequestDto> response = myPageService.getHunterSavedRequests(loginUser.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 

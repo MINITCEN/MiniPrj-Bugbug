@@ -10,6 +10,8 @@ import com.bug.catcher.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -147,26 +149,24 @@ public class MyPageService {
 
         hunterApplicationRepository.save(application);
     }
-    // 1. 수행(수락)한 의뢰 목록 보기
+    // 1. 수행(수락)한 의뢰 목록 보기 (페이징 적용)
     @Transactional(readOnly = true)
-    public List<HunterTaskResponseDto> getHunterTasks(Long userId) {
+    public Page<HunterTaskResponseDto> getHunterTasks(Long userId, Pageable pageable) {
         Hunter hunter = hunterRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
 
-        return applicationRepository.findByHunterId(hunter.getId()).stream()
-                .map(HunterTaskResponseDto::new)
-                .toList();
+        return applicationRepository.findByHunterId(hunter.getId(), pageable)
+                .map(HunterTaskResponseDto::new); // Page 객체의 map() 활용
     }
 
-    // 2. 찜한 의뢰(게시물) 목록 보기
+    // 2. 찜한 의뢰(게시물) 목록 보기 (페이징 적용)
     @Transactional(readOnly = true)
-    public List<HunterSavedRequestDto> getHunterSavedRequests(Long userId) {
+    public Page<HunterSavedRequestDto> getHunterSavedRequests(Long userId, Pageable pageable) {
         Hunter hunter = hunterRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
 
-        return savedRequestRepository.findByHunterId(hunter.getId()).stream()
-                .map(HunterSavedRequestDto::new)
-                .toList();
+        return savedRequestRepository.findByHunterId(hunter.getId(), pageable)
+                .map(HunterSavedRequestDto::new);
     }
 
     // 3. 헌터 등록 해제 (Role 강등)
