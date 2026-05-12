@@ -1,6 +1,7 @@
 package com.bug.catcher.domain.mypage.controller;
 
 import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.hunter.dto.HunterProfileResponseDto;
 import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.domain.mypage.dto.*;
 import com.bug.catcher.domain.mypage.service.MyPageService;
@@ -175,5 +176,13 @@ public class MyPageController {
         }
 
         return ResponseEntity.ok("헌터 등록이 성공적으로 해제되었습니다.");
+    }
+    //내 헌터 정보 조회
+    @GetMapping("/hunter/profile")
+    public ResponseEntity<HunterProfileResponseDto> getMyHunterProfile(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
+
+        HunterProfileResponseDto response = myPageService.getMyHunterProfile(loginUser.getId());
+        return ResponseEntity.ok(response);
     }
 }

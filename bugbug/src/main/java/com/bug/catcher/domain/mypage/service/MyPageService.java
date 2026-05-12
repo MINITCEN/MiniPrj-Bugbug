@@ -1,6 +1,7 @@
 package com.bug.catcher.domain.mypage.service;
 
 import com.bug.catcher.domain.entity.*;
+import com.bug.catcher.domain.hunter.dto.HunterProfileResponseDto;
 import com.bug.catcher.domain.hunter.repository.*;
 import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.domain.mypage.dto.*;
@@ -183,5 +184,16 @@ public class MyPageService {
         // 유저의 권한을 다시 USER로 강등
         user.updateRole("USER");
     }
+    @Transactional(readOnly = true)
+    public HunterProfileResponseDto getMyHunterProfile(Long userId) {
+        // 1. 유저 ID로 내 헌터 엔티티 찾기
+        Hunter hunter = hunterRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
 
+        // 2. 헌터 ID를 이용해 완료 횟수 및 평균 평점 가져오기
+        long completionCount = reviewRepository.countByHunterId(hunter.getId());
+        float averageRating = reviewRepository.getAverageRatingByHunterId(hunter.getId());
+
+        return new HunterProfileResponseDto(hunter, completionCount, averageRating);
+    }
 }

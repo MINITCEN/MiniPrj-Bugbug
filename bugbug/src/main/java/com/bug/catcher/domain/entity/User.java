@@ -39,5 +39,4 @@ public class User {
     public void updateRole(String role) {
         this.role = role;
     }
-
 }

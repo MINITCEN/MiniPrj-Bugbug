@@ -4,126 +4,212 @@
     <meta charset="UTF-8">
     <title>버그버그 - 마이페이지</title>
     <style>
-        .dashboard-section { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 8px; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; }
-        .more-btn { text-decoration: none; color: #4CAF50; font-weight: bold; }
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f9f9f9; padding: 20px; }
+        h1, h2, h3 { margin-top: 0; }
+        .dashboard-container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .dashboard-section { border: 1px solid #eaeaea; padding: 20px; margin-bottom: 25px; border-radius: 8px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+        .more-btn { text-decoration: none; color: #4CAF50; font-weight: bold; font-size: 14px; }
+
+        /* 헌터 프로필 전용 스타일 */
+        .hunter-stat-grid { display: flex; gap: 20px; margin-bottom: 20px; }
+        .stat-box { flex: 1; border: 1px solid #f0f0f0; background-color: #fafafa; padding: 20px; text-align: center; border-radius: 12px; }
+        .stat-box h3 { font-size: 24px; color: #333; margin: 10px 0 0 0; }
+        .stat-box p { color: #888; font-size: 14px; margin: 0; }
+        .badge { display: inline-block; padding: 5px 10px; background-color: #e8f5e9; color: #2e7d32; border-radius: 20px; font-weight: bold; font-size: 12px; margin-bottom: 10px;}
+
+        /* 리스트 2단 배치용 */
+        .list-grid { display: flex; gap: 30px; margin-top: 30px; }
+        .list-column { flex: 1; }
+
+        ul { list-style: none; padding: 0; margin: 0; }
+        ul li { padding: 12px 0; border-bottom: 1px dashed #eee; color: #555; }
+        ul li:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
 
-<h1>마이페이지 대시보드</h1>
+<div class="dashboard-container">
 
-<div class="dashboard-section">
-    <h2>기본 정보</h2>
-    <p>이름(닉네임): <span th:text="${user.nickname}">홍길동</span></p>
-    <p>이메일: <span th:text="${user.email}">example@email.com</span></p>
-    <p>전화번호: <span th:text="${user.phoneNumber}">010-0000-0000</span></p>
-    <p>주소: <span th:text="${user.address}">서울시 강남구...</span></p>
-</div>
+    <div th:if="${user.role == 'USER'}">
+        <h1>마이페이지 대시보드</h1>
 
-<div class="dashboard-section">
-    <div class="section-header">
-        <h2>최근 나의 의뢰</h2>
-        <a href="/mypage/requests" class="more-btn">더보기 ></a>
+        <div class="dashboard-section">
+            <h2>기본 정보</h2>
+            <p>이름(닉네임): <span th:text="${user.nickname}">홍길동</span></p>
+            <p>이메일: <span th:text="${user.email}">example@email.com</span></p>
+            <p>전화번호: <span th:text="${user.phoneNumber}">010-0000-0000</span></p>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2>최근 나의 의뢰</h2>
+                <a href="/mypage/requests" class="more-btn">더보기 ></a>
+            </div>
+            <ul id="my-requests-list"><li>데이터를 불러오는 중입니다...</li></ul>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2>나의 리뷰 관리</h2>
+                <a href="/mypage/reviews" class="more-btn">더보기 ></a>
+            </div>
+            <ul id="my-reviews-list"><li>데이터를 불러오는 중입니다...</li></ul>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2>최근 찜한 헌터</h2>
+                <a href="/mypage/bookmarks/hunters" class="more-btn">더보기 ></a>
+            </div>
+            <ul id="my-bookmarks-list"><li>데이터를 불러오는 중입니다...</li></ul>
+        </div>
     </div>
-    <ul id="my-requests-list">
-        <li>데이터를 불러오는 중입니다...</li>
-    </ul>
-</div>
 
-<div class="dashboard-section">
-    <div class="section-header">
-        <h2>나의 리뷰 관리</h2>
-        <a href="/mypage/reviews" class="more-btn">더보기 ></a>
+
+    <div th:if="${user.role == 'HUNTER'}">
+        <h1>내 정보</h1>
+        <p style="color: #666; font-size: 14px;">🔒 회원님의 정보는 본인에게만 공개됩니다.</p>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2 style="font-size: 18px; color: #4CAF50;">기본 정보 (본인에게만 공개)</h2>
+            </div>
+            <div style="display: flex; align-items: center; gap: 30px;">
+                <div style="width: 80px; height: 80px; background-color: #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; color: white;">👤</div>
+                <div>
+                    <p style="margin: 5px 0;"><strong>이름(닉네임):</strong> <span th:text="${user.nickname}">홍길동</span></p>
+                    <p style="margin: 5px 0;"><strong>이메일:</strong> <span th:text="${user.email}">example@email.com</span></p>
+                    <p style="margin: 5px 0;"><strong>주소:</strong> <span th:text="${user.address}">서울특별시 강남구</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2 style="font-size: 18px; color: #4CAF50;">공개 정보 (외부에 공개됩니다) 🔗</h2>
+            </div>
+
+            <div class="hunter-stat-grid">
+                <div class="stat-box">
+                    <span class="badge">현재 등급</span>
+                    <h3 id="hunter-grade">로딩중...</h3>
+                    <p id="hunter-completion-cnt">총 0건 완료</p>
+                </div>
+                <div class="stat-box">
+                    <p>리뷰 평점</p>
+                    <h3 id="hunter-rating">⭐ 0.0</h3>
+                </div>
+                <div class="stat-box">
+                    <p>요청 횟수</p>
+                    <h3 id="hunter-req-count">0회</h3>
+                </div>
+                <div class="stat-box">
+                    <p>응답 횟수</p>
+                    <h3 id="hunter-res-count">0회</h3>
+                </div>
+            </div>
+
+            <div class="list-grid">
+                <div class="list-column">
+                    <div class="section-header">
+                        <h3>최근 수행한 의뢰</h3>
+                        <a href="/mypage/hunter/tasks" class="more-btn">더보기 ></a>
+                    </div>
+                    <ul id="hunter-tasks-list">
+                        <li>데이터를 불러오는 중입니다...</li>
+                    </ul>
+                </div>
+
+                <div class="list-column">
+                    <div class="section-header">
+                        <h3>찜한 의뢰 목록</h3>
+                        <a href="#" class="more-btn">더보기 ></a>
+                    </div>
+                    <ul id="hunter-saved-requests-list">
+                        <li>데이터를 불러오는 중입니다...</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
     </div>
-    <ul id="my-reviews-list">
-        <li>데이터를 불러오는 중입니다...</li>
-    </ul>
-</div>
 
-<div class="dashboard-section">
-    <div class="section-header">
-        <h2>최근 찜한 헌터</h2>
-        <a href="/mypage/bookmarks/hunters" class="more-btn">더보기 ></a>
-    </div>
-    <ul id="my-bookmarks-list">
-        <li>데이터를 불러오는 중입니다...</li>
-    </ul>
 </div>
-
-<div th:if="${user.role == 'HUNTER'}" class="dashboard-section" style="background-color: #f4fcf4;">
-    <div class="section-header">
-        <h2>[헌터 전용] 최근 수행한 의뢰</h2>
-        <a href="/mypage/hunter/tasks" class="more-btn">더보기 ></a>
-    </div>
-    <ul id="hunter-tasks-list">
-        <li>데이터를 불러오는 중입니다...</li>
-    </ul>
-</div>
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        const userRole = "[[${user.role}]]";
 
-        // 1. 나의 의뢰 가져오기
-        fetch('/api/mypage/requests?size=3')
-            .then(res => res.json())
-            .then(data => {
+        if (userRole === 'USER') {
+            // [일반 유저 로직]
+            fetch('/api/mypage/requests?size=3').then(res => res.json()).then(data => {
                 const listEl = document.getElementById('my-requests-list');
-                listEl.innerHTML = '';
-                if(data.content.length === 0) {
-                    listEl.innerHTML = '<li>최근 등록한 의뢰가 없습니다.</li>';
-                    return;
-                }
-                data.content.forEach(req => {
-                    listEl.innerHTML += `<li>[${req.status}] ${req.title}</li>`;
-                });
+                listEl.innerHTML = data.content.length ? '' : '<li>최근 등록한 의뢰가 없습니다.</li>';
+                data.content.forEach(req => listEl.innerHTML += `<li>[${req.status}] ${req.title}</li>`);
             });
 
-        // ⭐ 2. [추가됨] 나의 리뷰 가져오기
-        fetch('/api/mypage/reviews?size=3')
-            .then(res => res.json())
-            .then(data => {
+            fetch('/api/mypage/reviews?size=3').then(res => res.json()).then(data => {
                 const listEl = document.getElementById('my-reviews-list');
-                listEl.innerHTML = '';
-                if(data.content.length === 0) {
-                    listEl.innerHTML = '<li>작성한 리뷰가 없습니다.</li>';
-                    return;
-                }
-                data.content.forEach(review => {
-                    // 별점과 리뷰 내용을 보여줍니다.
-                    listEl.innerHTML += `<li>${review.hunterName} 헌터님께 - ⭐${review.rating}점 : ${review.content}</li>`;
-                });
+                listEl.innerHTML = data.content.length ? '' : '<li>작성한 리뷰가 없습니다.</li>';
+                data.content.forEach(review => listEl.innerHTML += `<li>${review.hunterName} 헌터님께 - ⭐${review.rating}점 : ${review.content}</li>`);
             });
 
-        // 3. 찜한 헌터 가져오기
-        fetch('/api/mypage/bookmarks/hunters?size=3')
-            .then(res => res.json())
-            .then(data => {
+            fetch('/api/mypage/bookmarks/hunters?size=3').then(res => res.json()).then(data => {
                 const listEl = document.getElementById('my-bookmarks-list');
-                listEl.innerHTML = '';
-                if(data.content.length === 0) {
-                    listEl.innerHTML = '<li>찜한 헌터가 없습니다.</li>';
-                    return;
-                }
-                data.content.forEach(hunter => {
-                    listEl.innerHTML += `<li>${hunter.name} 헌터 (평점: ${hunter.rating}점)</li>`;
-                });
+                listEl.innerHTML = data.content.length ? '' : '<li>찜한 헌터가 없습니다.</li>';
+                data.content.forEach(hunter => listEl.innerHTML += `<li>${hunter.name} 헌터 (평점: ${hunter.rating}점)</li>`);
             });
 
-        // 4. 헌터 수행 내역 가져오기
-        const hunterTaskListEl = document.getElementById('hunter-tasks-list');
-        if (hunterTaskListEl) {
+        } else if (userRole === 'HUNTER') {
+            // [헌터 전용 로직]
+
+            // 1. 헌터 통계 정보 가져오기
+            fetch('/api/mypage/hunter/profile')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('hunter-grade').innerText = data.grade;
+                    document.getElementById('hunter-completion-cnt').innerText = `총 ${data.completionCount}건 완료`;
+                    document.getElementById('hunter-rating').innerText = `⭐ ${data.averageRating}`;
+                    document.getElementById('hunter-req-count').innerText = `${data.requestCount}회`;
+                    document.getElementById('hunter-res-count').innerText = `${data.responseCount}회`;
+                });
+
+            // 2. 최근 수행한 의뢰 가져오기
             fetch('/api/mypage/hunter/tasks?size=3')
                 .then(res => res.json())
                 .then(data => {
-                    hunterTaskListEl.innerHTML = '';
+                    const taskList = document.getElementById('hunter-tasks-list');
+                    taskList.innerHTML = '';
                     if(data.content.length === 0) {
-                        hunterTaskListEl.innerHTML = '<li>최근 수행한 의뢰가 없습니다.</li>';
+                        taskList.innerHTML = '<li>수행한 내역이 없습니다.</li>';
                         return;
                     }
                     data.content.forEach(task => {
-                        hunterTaskListEl.innerHTML += `<li>[완료] ${task.requestTitle}</li>`;
+                        taskList.innerHTML += `
+                            <li style="display: flex; justify-content: space-between;">
+                                <span>✔️ [${task.status}] ${task.title}</span>
+                            </li>`;
+                    });
+                });
+
+            // 3. 찜한 의뢰(게시글) 목록 가져오기
+            fetch('/api/mypage/hunter/bookmarks/requests?size=3')
+                .then(res => res.json())
+                .then(data => {
+                    const savedList = document.getElementById('hunter-saved-requests-list');
+                    savedList.innerHTML = '';
+                    if(data.content.length === 0) {
+                        savedList.innerHTML = '<li>찜한 의뢰가 없습니다.</li>';
+                        return;
+                    }
+                    data.content.forEach(saved => {
+                        // HunterSavedRequestDto 구조에 맞춰 렌더링 (title, approxLocation)
+                        savedList.innerHTML += `
+                            <li style="display: flex; flex-direction: column;">
+                                <strong>📌 ${saved.title}</strong>
+                                <span style="color: #999; font-size: 13px;">📍 ${saved.approxLocation}</span>
+                            </li>`;
                     });
                 });
         }
