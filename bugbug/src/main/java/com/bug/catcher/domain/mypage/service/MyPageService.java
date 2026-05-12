@@ -41,13 +41,11 @@ public class MyPageService {
         return new MyInfoResponseDto(user);
     }
     //이슈2
-    //  나의 의뢰 목록 보기
+    // 나의 의뢰 목록 조회 (페이징 적용)
     @Transactional(readOnly = true)
-    public List<MyRequestResponseDto> getMyRequests(Long userId) {
-        return requestRepository.findByUserIdOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(MyRequestResponseDto::new)
-                .toList();
+    public Page<MyRequestResponseDto> getMyRequests(Long userId, Pageable pageable) {
+        return requestRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
+                .map(MyRequestResponseDto::new);
     }
 
     // 찜한 헌터 목록 보기

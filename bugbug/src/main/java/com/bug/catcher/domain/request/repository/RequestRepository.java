@@ -1,6 +1,8 @@
 package com.bug.catcher.domain.request.repository;
 
 import com.bug.catcher.domain.entity.Request;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -38,5 +40,5 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     @Query("update Request r set r.videoUrl = :videoUrl where r.id = :requestId and r.user.id = :loginUserId")
     int updateVideoUrl(Long requestId, Long loginUserId, String videoUrl);
 
-    List<Request> findByUserIdOrderByCreatedAtDesc(Long userId);
+    Page<Request> findByUserIdOrderByCreatedAtDesc (Long userId, Pageable pageable);
 }

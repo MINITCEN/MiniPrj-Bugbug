@@ -43,11 +43,11 @@ public class MyPageController {
     // 이슈2
     // 나의 의뢰 목록 조회
     @GetMapping("/requests")
-    public ResponseEntity<List<MyRequestResponseDto>> getMyRequests(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+    public ResponseEntity<Page<MyRequestResponseDto>> getMyRequests(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        List<MyRequestResponseDto> response = myPageService.getMyRequests(loginUser.getId());
+        Page<MyRequestResponseDto> response = myPageService.getMyRequests(loginUser.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 

@@ -12,14 +12,14 @@ public class ReviewResponseDto {
     private String userName;      // 헌터 프로필에서 볼 때: 누가 썼는지
     private Float rating;
     private String content;
-    private LocalDateTime createdAt;
+
 
     public ReviewResponseDto(Review review) {
         this.reviewId = review.getId();
         this.hunterName = review.getHunter().getName();
-        this.userName = review.getRequest().getUser().getName();
+        this.userName = review.getRequest().getUser().getNickname();
         this.rating = review.getRating();
         this.content = review.getReviewContent();
-        this.createdAt = review.getCreatedAt();
+
     }
 }
