@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 | 버그버그</title>
+    <link rel="stylesheet" href="/css/common-layout.css">
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+<div th:replace="~{fragments/header :: siteHeader('none')}"></div>
+
+<main class="login-page">
+    <section class="login-shell">
+        <div class="login-hero">
+            <div class="login-hero__content">
+                <h1>버그버그</h1>
+                <h2>해충 걱정 끝, <span>5분 안에 해결!</span></h2>
+                <p>가입 후 우리 동네 모기지수와 방역 서비스를 바로 이용할 수 있습니다.</p>
+
+                <div class="login-hero__features">
+                    <div class="login-hero__feature">
+                        <span class="login-hero__feature-icon" aria-hidden="true">🛡️</span>
+                        <div>
+                            <strong>빠른 매칭</strong>
+                            <p>5분 안에 헌터 매칭 완료</p>
+                        </div>
+                    </div>
+                    <div class="login-hero__feature">
+                        <span class="login-hero__feature-icon" aria-hidden="true">📍</span>
+                        <div>
+                            <strong>우리 동네 헌터</strong>
+                            <p>내 주변 헌터를 쉽게 찾아요</p>
+                        </div>
+                    </div>
+                    <div class="login-hero__feature">
+                        <span class="login-hero__feature-icon" aria-hidden="true">⭐</span>
+                        <div>
+                            <strong>안심 후기 시스템</strong>
+                            <p>실제 이용자들의 리뷰로 안심할 수 있어요</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="auth-panel auth-panel--single" aria-label="회원가입">
+            <section class="auth-card" aria-labelledby="signup-form-title">
+                <div class="auth-card__head">
+                    <h2 id="signup-form-title">회원가입</h2>
+                </div>
+
+                <form class="signup-form" id="signup-form">
+                    <label class="login-form__field">
+                        <span class="login-form__icon" aria-hidden="true">👤</span>
+                        <input type="text" name="nickname" placeholder="닉네임" required>
+                    </label>
+
+                    <label class="login-form__field">
+                        <span class="login-form__icon" aria-hidden="true">✉️</span>
+                        <input type="email" name="email" placeholder="이메일" required>
+                    </label>
+
+                    <label class="login-form__field">
+                        <span class="login-form__icon" aria-hidden="true">🔒</span>
+                        <input type="password" name="password" placeholder="비밀번호" required>
+                        <span class="login-form__trailing-icon" aria-hidden="true">👁️</span>
+                    </label>
+
+                    <label class="login-form__field">
+                        <span class="login-form__icon" aria-hidden="true">📞</span>
+                        <input type="text" name="phoneNumber" placeholder="전화번호 (선택사항)">
+                    </label>
+
+                    <label class="login-form__field login-form__field--address">
+                        <span class="login-form__icon" aria-hidden="true">📍</span>
+                        <input type="text" name="address" placeholder="주소">
+                        <button type="button" class="login-form__search-button">주소 검색</button>
+                    </label>
+
+                    <label class="login-form__checkbox login-form__checkbox--agree">
+                        <input type="checkbox" id="privacy-agreement" name="isPrivacyAgreed" required>
+                        <span>개인정보 수집 및 이용에 동의합니다. (필수)</span>
+                    </label>
+
+                    <p id="signup-message" class="form-message" aria-live="polite"></p>
+                    <button type="submit" id="signup-submit" class="auth-button" disabled>회원가입</button>
+                </form>
+
+                <div class="auth-card__footer-link">
+                    <span>이미 계정이 있나요?</span>
+                    <a href="/login">로그인</a>
+                </div>
+            </section>
+        </section>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+<script src="/js/signup.js"></script>
+</body>
+</html>

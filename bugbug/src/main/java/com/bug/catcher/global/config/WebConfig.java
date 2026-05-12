@@ -22,10 +22,13 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/users/signup",
                         "/api/auth/login",
                         "/api/auth/logout",
+                        "/login",
+                        "/signup",
                         "/api/request/**",
                         "/mosquito-map",
                         "/css/**",
                         "/js/**",
+                        "/image/**",
                         "/map/**",
 
                         "/api/request/wholeList",

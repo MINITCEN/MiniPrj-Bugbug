@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 | 버그버그</title>
+    <link rel="stylesheet" href="/css/common-layout.css">
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+<div th:replace="~{fragments/header :: siteHeader('none')}"></div>
+
+<main class="login-page">
+    <section class="login-shell">
+        <div class="login-hero">
+            <div class="login-hero__content">
+                <h1>버그버그</h1>
+                <h2>해충 걱정 끝, <span>5분 안에 해결!</span></h2>
+                <p>우리 동네 헌터들이 빠르고 안전하게 도와드려요.</p>
+
+                <div class="login-hero__features">
+                    <div class="login-hero__feature">
+                        <span class="login-hero__feature-icon" aria-hidden="true">🛡️</span>
+                        <div>
+                            <strong>빠른 매칭</strong>
+                            <p>5분 안에 헌터 매칭 완료</p>
+                        </div>
+                    </div>
+                    <div class="login-hero__feature">
+                        <span class="login-hero__feature-icon" aria-hidden="true">📍</span>
+                        <div>
+                            <strong>우리 동네 헌터</strong>
+                            <p>내 주변 헌터를 쉽게 찾아요</p>
+                        </div>
+                    </div>
+                    <div class="login-hero__feature">
+                        <span class="login-hero__feature-icon" aria-hidden="true">⭐</span>
+                        <div>
+                            <strong>안심 후기 시스템</strong>
+                            <p>실제 이용자들의 리뷰로 안심할 수 있어요</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="auth-panel auth-panel--single" aria-label="로그인">
+            <section class="auth-card" aria-labelledby="login-form-title">
+                <div class="auth-card__head">
+                    <h2 id="login-form-title">로그인</h2>
+                </div>
+
+                <form class="login-form" method="post" action="/api/auth/login">
+                    <label class="login-form__field">
+                        <span class="login-form__icon" aria-hidden="true">✉️</span>
+                        <input type="email" name="email" placeholder="이메일" autocomplete="email">
+                    </label>
+
+                    <label class="login-form__field">
+                        <span class="login-form__icon" aria-hidden="true">🔒</span>
+                        <input type="password" name="password" placeholder="비밀번호" autocomplete="current-password">
+                        <span class="login-form__trailing-icon" aria-hidden="true">👁️</span>
+                    </label>
+
+                    <div class="login-form__row">
+                        <label class="login-form__checkbox">
+                            <input type="checkbox" name="rememberMe">
+                            <span>로그인 상태 유지</span>
+                        </label>
+                        <a href="/password/reset" class="login-form__link">비밀번호 찾기</a>
+                    </div>
+
+                    <button type="submit" class="auth-button">로그인</button>
+                </form>
+
+                <div class="auth-card__footer-link">
+                    <span>계정이 없나요?</span>
+                    <a href="/signup">회원가입</a>
+                </div>
+            </section>
+        </section>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+</body>
+</html>
