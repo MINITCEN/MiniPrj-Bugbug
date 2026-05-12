@@ -24,11 +24,17 @@
         </nav>
 
         <div class="site-header__actions">
-            <button type="button" class="site-header__icon-button" aria-label="알림">
-                <span aria-hidden="true">🔔</span>
-            </button>
-            <a href="/login" class="site-header__ghost-button">로그인</a>
-            <a href="/signup" class="site-header__solid-button">회원가입</a>
+            <a href="/mypage" class="site-header__icon-button" aria-label="마이페이지">
+                <span aria-hidden="true">👤</span>
+            </a>
+            <div th:if="${session.loginUser != null}" class="site-header__session">
+                <span class="site-header__welcome" th:text="|${session.loginUser.nickname}님|">사용자님</span>
+                <button type="button" class="site-header__ghost-button js-logout-button">로그아웃</button>
+            </div>
+            <div th:if="${session.loginUser == null}" class="site-header__session">
+                <a href="/login" class="site-header__ghost-button">로그인</a>
+                <a href="/signup" class="site-header__solid-button">회원가입</a>
+            </div>
         </div>
     </div>
 </header>
