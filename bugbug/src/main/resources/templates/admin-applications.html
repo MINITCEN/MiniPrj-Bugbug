@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>버그버그 관리자 - 헌터 승인 관리</title>
+    <!-- 기존 디자인 테마 완벽 복제 -->
+    <link rel="stylesheet" th:href="@{/css/common-layout.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <style>
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .admin-table th, .admin-table td {
+            border: 1px solid var(--shell-line);
+            padding: 12px;
+            text-align: left;
+            vertical-align: middle;
+        }
+        .admin-table th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            color: var(--shell-muted);
+        }
+        .approve-btn {
+            background-color: var(--shell-brand);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        .approve-btn:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body data-user-role="ADMIN">
+<div th:replace="~{fragments/header :: siteHeader('admin')}"></div>
+
+<main class="page">
+    <aside class="sidebar">
+        <h2 class="sidebar-title">관리자 대시보드</h2>
+
+        <!-- 좌측 카테고리 메뉴 (헌터 승인 액티브) -->
+        <a class="side-link" href="/admin/users"><span class="mark">👤</span>전체 회원 관리</a>
+        <a class="side-link active" href="/admin/applications"><span class="mark">🛡️</span>헌터 승인 관리</a>
+
+        <button class="side-link side-button" type="button" style="margin-top: 20px;" onclick="logout()">
+            <span class="mark">L</span>로그아웃
+        </button>
+    </aside>
+
+    <section>
+        <div class="content-header">
+            <div>
+                <h1>헌터 승인 관리</h1>
+                <p class="privacy-note">헌터를 희망하는 일반 유저의 신청서를 확인하고 승인합니다.</p>
+            </div>
+            <button class="outline-btn" type="button" onclick="loadApplications(0)">목록 새로고침</button>
+        </div>
+
+        <section class="section">
+            <div class="mini-panel" style="padding: 20px;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>신청서 번호</th>
+                            <th>이메일</th>
+                            <th>신청자 이름</th>
+                            <th>약관 동의</th>
+                            <th>신청일시</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="app-table-body">
+                        <tr><td colspan="6" style="text-align: center;">로딩 중입니다...</td></tr>
+                    </tbody>
+                </table>
+                <div id="pagination-area" style="margin-top: 15px; text-align: center;">
+                    <!-- 페이징 버튼 영역 -->
+                </div>
+            </div>
+        </section>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        loadApplications(0);
+    });
+
+    async function loadApplications(page = 0) {
+        const tbody = document.getElementById('app-table-body');
+        
+        try {
+            const response = await fetch(`/api/admin/applications/pending?page=${page}&size=10`, { credentials: 'include' });
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) throw new Error('권한이 없습니다.');
+                throw new Error('API 호출 실패');
+            }
+            
+            const data = await response.json();
+            
+            if (data.content.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">현재 승인 대기 중인 신청서가 없습니다.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.content.forEach(app => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${app.id}</td>
+                    <td>${app.email}</td>
+                    <td>${app.name}</td>
+                    <td>${app.pledgeAgreed ? '<span style="color:var(--shell-brand)">동의함</span>' : '<span style="color:red">미동의</span>'}</td>
+                    <td>${new Date(app.createdAt).toLocaleString()}</td>
+                    <td>
+                        <button class="approve-btn" onclick="approveHunter(${app.id})">승인하기</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            const pageArea = document.getElementById('pagination-area');
+            pageArea.innerHTML = '';
+            if (!data.first) {
+                pageArea.innerHTML += `<button class="outline-btn" style="padding: 5px 10px; margin-right: 5px;" onclick="loadApplications(${page - 1})">이전</button>`;
+            }
+            pageArea.innerHTML += `<span> ${data.number + 1} / ${data.totalPages} 페이지 </span>`;
+            if (!data.last) {
+                pageArea.innerHTML += `<button class="outline-btn" style="padding: 5px 10px; margin-left: 5px;" onclick="loadApplications(${page + 1})">다음</button>`;
+            }
+
+        } catch (error) {
+            console.error(error);
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: red;">데이터를 불러오는 데 실패했습니다. (${error.message})</td></tr>`;
+        }
+    }
+
+    async function approveHunter(applicationId) {
+        if (!confirm('이 유저의 신청을 승인하고 헌터 권한을 부여하시겠습니까?')) return;
+
+        try {
+            const response = await fetch(`/api/admin/applications/${applicationId}/approve`, {
+                method: 'POST',
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                alert('헌터 승인이 완료되었습니다!');
+                loadApplications(0); // 목록을 다시 그려서 승인된 사람을 목록에서 지움
+            } else {
+                alert('승인 처리 중 오류가 발생했습니다.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('네트워크 오류가 발생했습니다.');
+        }
+    }
+    
+    function logout() {
+        fetch('/api/auth/logout', {method: 'POST'}).then(() => window.location.href = '/login');
+    }
+</script>
+</body>
+</html>
