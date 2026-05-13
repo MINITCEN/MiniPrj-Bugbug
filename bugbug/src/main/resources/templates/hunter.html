@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>헌터 찾기</title>
+    <link rel="stylesheet" href="/css/common-layout.css">
+    <link rel="stylesheet" href="/css/hunter.css">
+</head>
+<body>
+<div th:replace="~{fragments/header :: siteHeader('hunter')}"></div>
+
+<main class="hunter-page">
+    <section class="hunter-hero">
+        <div>
+            <h1>헌터 찾기</h1>
+            <p>검증된 헌터의 등급과 활동 정보를 비교하고 필요한 헌터를 빠르게 찾아보세요.</p>
+        </div>
+        <div class="hunter-summary" aria-live="polite">
+            <span class="hunter-summary__label">등록 헌터</span>
+            <strong id="hunter-total-count">-</strong>
+        </div>
+    </section>
+
+    <section class="hunter-toolbar" aria-label="헌터 목록 도구">
+        <label class="hunter-search">
+            <span aria-hidden="true">⌕</span>
+            <input id="hunter-search-input" type="search" placeholder="헌터 이름 또는 등급 검색">
+        </label>
+        <label class="hunter-select">
+            <span>정렬</span>
+            <select id="hunter-sort-select">
+                <option value="id,desc">최근 등록순</option>
+                <option value="requestCount,desc">요청 많은순</option>
+                <option value="responseCount,desc">응답 많은순</option>
+                <option value="name,asc">이름순</option>
+            </select>
+        </label>
+    </section>
+
+    <section class="hunter-list-section" aria-label="헌터 목록">
+        <div id="hunter-state" class="hunter-state">헌터 목록을 불러오는 중입니다.</div>
+        <div id="hunter-list" class="hunter-list"></div>
+    </section>
+
+    <nav class="hunter-pagination" aria-label="헌터 목록 페이지 이동">
+        <button id="hunter-prev-btn" type="button">이전</button>
+        <span id="hunter-page-info">1 / 1</span>
+        <button id="hunter-next-btn" type="button">다음</button>
+    </nav>
+</main>
+
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+
+<script src="/js/common-layout.js"></script>
+<script src="/js/hunter.js"></script>
+</body>
+</html>
