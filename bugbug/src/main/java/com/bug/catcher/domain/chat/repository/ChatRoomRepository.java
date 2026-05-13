@@ -10,7 +10,8 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
     List<ChatRoom> findByUserId(Long userId);
 
     // 2. 헌터가 자신이 참여한 채팅방 목록을 찾을 때 사용합니다.
-    List<ChatRoom> findByHunterId(Long hunterId);
+    // 프론트에서 넘어오는 값은 User의 ID이므로 Hunter 엔티티 안의 User 객체 ID로 검색해야 합니다.
+    List<ChatRoom> findByHunter_UserId(Long userId);
 
     // 3. 특정 의뢰에 대해 특정 헌터가 이미 만들어둔 방이 있는지 확인합니다. (중복 방 생성 방지용)
     boolean existsByRequestIdAndHunterId(Long requestId, Long hunterId);
