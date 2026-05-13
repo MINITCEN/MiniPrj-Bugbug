@@ -97,23 +97,32 @@ public class RegionWeatherForecastService {
       LocalDateTime nearestForecastAt = selectNearestForecastTime(forecastMap, LocalDateTime.now());
       ForecastAccumulator value = forecastMap.get(nearestForecastAt);
 
-      // 기존 지역 스냅샷이 있으면 지우고 최신 값으로 교체한다.
       regionWeatherForecastRepository.findByRegion(region)
-          .ifPresent(regionWeatherForecastRepository::delete);
-
-      regionWeatherForecastRepository.save(
-          RegionWeatherForecast.builder()
-              .region(region)
-              .baseDate(baseDate)
-              .baseTime(baseTime)
-              .temperature(value.temperature)
-              .humidity(value.humidity)
-              .precipitation(value.precipitation)
-              .precipitationType(value.precipitationType)
-              .skyStatus(value.skyStatus)
-              .windSpeed(value.windSpeed)
-              .build()
-      );
+          .ifPresentOrElse(
+              forecast -> forecast.updateForecast(
+                  baseDate,
+                  baseTime,
+                  value.temperature,
+                  value.humidity,
+                  value.precipitation,
+                  value.precipitationType,
+                  value.skyStatus,
+                  value.windSpeed
+              ),
+              () -> regionWeatherForecastRepository.save(
+                  RegionWeatherForecast.builder()
+                      .region(region)
+                      .baseDate(baseDate)
+                      .baseTime(baseTime)
+                      .temperature(value.temperature)
+                      .humidity(value.humidity)
+                      .precipitation(value.precipitation)
+                      .precipitationType(value.precipitationType)
+                      .skyStatus(value.skyStatus)
+                      .windSpeed(value.windSpeed)
+                      .build()
+              )
+          );
     }
     log.info("지역별 날씨 정보 저장 완료.");
   }

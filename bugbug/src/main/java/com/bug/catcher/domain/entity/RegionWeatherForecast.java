@@ -65,4 +65,24 @@ public class RegionWeatherForecast {
 
   @Column(name = "wind_speed")
   private Double windSpeed;
+
+  public void updateForecast(
+      LocalDate baseDate,
+      String baseTime,
+      Double temperature,
+      Integer humidity,
+      String precipitation,
+      String precipitationType,
+      String skyStatus,
+      Double windSpeed
+  ) {
+    this.baseDate = baseDate;
+    this.baseTime = baseTime;
+    this.temperature = temperature;
+    this.humidity = humidity;
+    this.precipitation = precipitation;
+    this.precipitationType = precipitationType;
+    this.skyStatus = skyStatus;
+    this.windSpeed = windSpeed;
+  }
 }
