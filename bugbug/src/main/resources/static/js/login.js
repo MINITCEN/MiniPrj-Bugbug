@@ -1,7 +1,7 @@
 (function () {
     const loginForm = document.getElementById('login-form');
     const loginMessage = document.getElementById('login-message');
-    const redirectUrl = '/mosquito-map';
+    const redirectUrl = '/';
 
     if (!loginForm || !loginMessage) {
         return;

@@ -3,7 +3,7 @@
     const signupMessage = document.getElementById('signup-message');
     const privacyAgreement = document.getElementById('privacy-agreement');
     const signupSubmit = document.getElementById('signup-submit');
-    const redirectUrl = '/mosquito-map';
+    const redirectUrl = '/';
 
     if (!signupForm || !signupMessage || !privacyAgreement || !signupSubmit) {
         return;

@@ -16,7 +16,7 @@
                     throw new Error(`Logout failed: ${response.status}`);
                 }
 
-                window.location.reload();
+                window.location.href = "/";
             } catch (error) {
                 console.error(error);
                 window.alert('로그아웃에 실패했습니다.');
