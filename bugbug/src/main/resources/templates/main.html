@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>버그버그 - 해충 문제 5분 안에 해결</title>
+    <link rel="stylesheet" href="/css/common-layout.css">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+<div th:replace="~{fragments/header :: siteHeader('home')}"></div>
+
+<main class="main-page">
+    <section class="hero">
+        <div class="leaf leaf-left"></div>
+        <div class="leaf leaf-right"></div>
+
+        <div class="hero-inner">
+            <section class="hero-copy">
+                <p class="eyebrow">해충 문제, 혼자 해결하지 마세요!</p>
+                <h1>버그버그,<br><span>5분 안에</span> 해결!</h1>
+                <p class="description">의뢰를 등록하면 전문 헌터가 수락하고 빠르고 안전하게 해결해 드립니다.</p>
+
+                <div class="hero-actions">
+                    <a class="primary-cta" href="/login"><span>✎</span>의뢰 등록하기</a>
+                    <a class="secondary-cta" href="/hunter"><span>⌕</span>헌터 찾기</a>
+                </div>
+
+                <div class="solved-pill">
+                    <span class="avatars" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <strong>지금까지 <em>12,543건</em>의 해충 의뢰가 해결되었어요!</strong>
+                </div>
+            </section>
+
+            <section class="mascot-zone" aria-label="버그버그 헌터 캐릭터">
+                <div class="bubble bubble-fast"><strong>5분 내</strong><span>실시간 의뢰 등록</span></div>
+                <div class="bubble bubble-hunter"><strong>전문 헌터</strong><span>신원 인증 완료</span></div>
+                <div class="bubble bubble-safe"><strong>안심 해결</strong><span>사후 관리까지</span></div>
+                <div class="mascot" aria-hidden="true">
+                    <div class="wing wing-left"></div>
+                    <div class="wing wing-right"></div>
+                    <div class="antenna antenna-left"></div>
+                    <div class="antenna antenna-right"></div>
+                    <div class="bug-body">
+                        <div class="eye eye-left"></div>
+                        <div class="eye eye-right"></div>
+                        <div class="mouth"></div>
+                        <div class="vest"></div>
+                    </div>
+                    <div class="arm arm-left"></div>
+                    <div class="arm arm-right"></div>
+                    <div class="leg leg-left"></div>
+                    <div class="leg leg-right"></div>
+                    <div class="net"></div>
+                </div>
+            </section>
+
+            <aside class="live-card">
+                <div class="card-head">
+                    <h2>실시간 의뢰글</h2>
+                    <a href="/mypage/requests">더보기 ›</a>
+                </div>
+                <ul class="request-list">
+                    <li>
+                        <span class="tag urgent">긴급</span>
+                        <div><strong>주방에 바퀴벌레가 나타났어요!</strong><small>서울 강남구 역삼동</small></div>
+                        <time>5분 전</time>
+                        <a href="/login">상세보기</a>
+                    </li>
+                    <li>
+                        <span class="tag hurry">급해요</span>
+                        <div><strong>화장실에 작은 벌레가 생겼어요</strong><small>서울 서초구 반포동</small></div>
+                        <time>12분 전</time>
+                        <a href="/login">상세보기</a>
+                    </li>
+                    <li>
+                        <span class="tag normal">일반</span>
+                        <div><strong>베란다에 날벌레가 자꾸 들어와요</strong><small>서울 송파구 잠실동</small></div>
+                        <time>20분 전</time>
+                        <a href="/login">상세보기</a>
+                    </li>
+                    <li>
+                        <span class="tag normal">일반</span>
+                        <div><strong>방 안에 개미가 보여요 ㅠㅠ</strong><small>서울 마포구 연남동</small></div>
+                        <time>32분 전</time>
+                        <a href="/login">상세보기</a>
+                    </li>
+                </ul>
+                <div class="live-notice">
+                    <span>⚡</span>
+                    <p>의뢰를 등록하면 헌터들이 확인하고 수락합니다.</p>
+                    <a href="/login">의뢰 등록하기</a>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <section class="feature-band" aria-label="서비스 핵심 기능">
+        <article><span>⚡</span><div><h2>빠른 의뢰 등록</h2><p>5분 내 간편하게 의뢰를 등록하고 헌터들의 수락을 기다려요.</p></div></article>
+        <article><span>◆</span><div><h2>전문 헌터</h2><p>신원 인증된 전문 헌터만 활동하여 안전하고 믿을 수 있어요.</p></div></article>
+        <article><span class="star">★</span><div><h2>투명한 진행</h2><p>헌터 수락부터 완료까지 실시간으로 진행 상황을 확인해요.</p></div></article>
+        <article><span>✓</span><div><h2>사후 관리</h2><p>해결 후에도 안심할 수 있도록 사후 관리까지 책임져요.</p></div></article>
+    </section>
+
+    <section class="dashboard-grid">
+        <article class="process-card">
+            <div class="card-head">
+                <h2>의뢰 진행 과정</h2>
+                <a href="/guide">자세히 보기 ›</a>
+            </div>
+            <ol class="process-list">
+                <li><span>01</span><strong>의뢰 등록</strong><p>해충 정보와 발생 위치, 상황을 등록해요.</p></li>
+                <li><span>02</span><strong>헌터 수락</strong><p>헌터가 의뢰를 확인하고 수락해요.</p></li>
+                <li><span>03</span><strong>상담 및 방문</strong><p>헌터와 상담 후 방문 일정을 조율해요.</p></li>
+                <li><span>04</span><strong>해결 진행</strong><p>전문 헌터가 방문하여 문제를 해결해요.</p></li>
+                <li><span>05</span><strong>완료 및 관리</strong><p>해결 완료 후 평가하고 사후 관리받아요.</p></li>
+            </ol>
+        </article>
+
+        <article class="trust-card">
+            <h2>버그버그의 신뢰 데이터</h2>
+            <div class="trust-grid">
+                <div><span>◆</span><strong>12,543건</strong><p>누적 해결 의뢰</p></div>
+                <div><span>◷</span><strong>4분 37초</strong><p>평균 매칭 시간</p></div>
+                <div><span>☆</span><strong>4.9 / 5.0</strong><p>고객 만족도</p></div>
+                <div><span>☺</span><strong>98.2%</strong><p>재이용 의사</p></div>
+            </div>
+        </article>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+<script src="/js/common-layout.js"></script>
+</body>
+</html>

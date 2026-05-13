@@ -4,7 +4,7 @@
 <header th:fragment="siteHeader(activePage)" class="site-header">
     <div class="site-header__inner">
         <a href="/" class="site-header__brand" aria-label="버그버그 홈">
-            <span class="site-header__brand-badge" aria-hidden="true">🛡️</span>
+            <span class="site-header__brand-badge" aria-hidden="true">◆</span>
             <span class="site-header__brand-text">버그버그</span>
         </a>
 
@@ -18,14 +18,14 @@
             <a href="/mosquito-map"
                class="site-header__nav-link"
                th:classappend="${activePage == 'mosquito-map'} ? ' is-active' : ''">모기지수 지도</a>
-            <a href="/guide"
+            <a href="/login"
                class="site-header__nav-link"
-               th:classappend="${activePage == 'guide'} ? ' is-active' : ''">이용 방법</a>
+               th:classappend="${activePage == 'request'} ? ' is-active' : ''">의뢰 등록하기</a>
         </nav>
 
         <div class="site-header__actions">
             <a href="/mypage" class="site-header__icon-button" aria-label="마이페이지">
-                <span aria-hidden="true">👤</span>
+                <span aria-hidden="true">♡</span>
             </a>
             <div th:if="${session.loginUser != null}" class="site-header__session">
                 <span class="site-header__welcome" th:text="|${session.loginUser.nickname}님|">사용자님</span>

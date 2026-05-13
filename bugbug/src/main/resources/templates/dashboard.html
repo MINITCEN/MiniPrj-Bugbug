@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>버그버그 - 마이페이지</title>
+    <link rel="stylesheet" th:href="@{/css/common-layout.css}">
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
 </head>
 <body>
+<div th:replace="~{fragments/header :: siteHeader('mypage')}"></div>
 <main class="page">
     <aside class="sidebar">
         <h2 class="sidebar-title">마이페이지</h2>
@@ -225,6 +227,8 @@
     </section>
 </div>
 
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+<script src="/js/common-layout.js"></script>
 <script th:inline="javascript">
     const userRole = /*[[${user.role}]]*/ "USER";
 

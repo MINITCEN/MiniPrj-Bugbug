@@ -11,6 +11,7 @@
 .site-footer {
     width: 100%;
     background: var(--shell-bg);
+    font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
 }
 
 .site-header {
