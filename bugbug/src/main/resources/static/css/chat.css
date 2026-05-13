@@ -1,0 +1,199 @@
+/* 전체 위젯 컨테이너 */
+#bugbug-chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    font-family: 'Malgun Gothic', sans-serif;
+}
+
+/* 둥근 버튼 */
+#bugbug-chat-button {
+    width: 60px;
+    height: 60px;
+    background-color: #FEE500;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    transition: transform 0.2s;
+}
+
+#bugbug-chat-button:hover {
+    transform: scale(1.1);
+}
+
+/* 팝업 창 공통 설정 */
+#bugbug-chat-window {
+    display: none;
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 350px;
+    height: 500px;
+    background-color: #B2C7D9; /* 배경색 */
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+/* 목록 화면 뷰 */
+#bugbug-chat-room-list-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #FFFFFF; /* 목록 화면은 하얀색 */
+}
+
+/* 헤더 공통 */
+#bugbug-chat-header {
+    background-color: #A9BDCE;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    position: relative;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    color: #333;
+}
+
+#bugbug-chat-close {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+#bugbug-chat-back {
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* 방 목록 영역 */
+#bugbug-room-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.room-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.room-item:hover {
+    background-color: #f9f9f9;
+}
+
+.room-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 40%;
+    background-color: #ddd;
+    margin-right: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.room-info {
+    flex: 1;
+}
+
+.room-title {
+    font-weight: bold;
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.room-other {
+    font-size: 13px;
+    color: #888;
+}
+
+/* 대화 화면 메시지 영역 */
+#bugbug-chat-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 말풍선 공통 */
+.chat-bubble {
+    max-width: 70%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.chat-mine {
+    align-self: flex-end;
+    background-color: #FEE500;
+    border-top-right-radius: 2px;
+}
+
+.chat-other {
+    align-self: flex-start;
+    background-color: #FFFFFF;
+    border-top-left-radius: 2px;
+}
+
+.chat-media {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 5px;
+}
+
+/* 하단 입력 영역 */
+#bugbug-chat-input-area {
+    background-color: #FFFFFF;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#bugbug-chat-input {
+    flex: 1;
+    border: none;
+    background-color: #F5F5F5;
+    padding: 10px;
+    border-radius: 20px;
+    outline: none;
+}
+
+#bugbug-chat-send {
+    background-color: #FEE500;
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#bugbug-chat-attach {
+    cursor: pointer;
+    font-size: 20px;
+    color: #888;
+}
+
+#bugbug-file-input {
+    display: none;
+}

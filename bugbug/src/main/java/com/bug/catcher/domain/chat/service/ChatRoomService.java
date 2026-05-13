@@ -8,6 +8,7 @@ import com.bug.catcher.domain.entity.ChatRoom;
 import com.bug.catcher.domain.entity.Hunter;
 import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.request.repository.RequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,7 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
-    // 실제로는 RequestRepository, UserRepository, HunterRepository 도 필요합니다.
+    private final RequestRepository requestRepository;
 
     /**
      * 헌터가 의뢰에 지원하여 채팅방을 생성합니다.
@@ -33,10 +34,12 @@ public class ChatRoomService {
             throw new IllegalArgumentException("이미 해당 의뢰에 지원하여 채팅방이 존재합니다.");
         }
 
-        // 2. (임시) 원래는 DB에서 조회해야 함
-        Request request = Request.builder().id(requestDto.getRequestId()).build();
+        // 2. DB에서 실제 의뢰글을 찾아와서 의뢰인(작업 요청자) 정보를 꺼냅니다.
+        Request request = requestRepository.findById(requestDto.getRequestId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 의뢰입니다."));
+                
         Hunter hunter = Hunter.builder().id(requestDto.getHunterId()).build();
-        User user = User.builder().id(1L).build(); // 의뢰 올린 유저는 Request에서 가져와야 함
+        User user = request.getUser(); // 임시 1번 유저 땜빵 삭제! 의뢰글 주인이 진짜 방 주인이 됨
 
         // 3. 채팅방 생성 및 저장
         ChatRoom chatRoom = ChatRoom.builder()
@@ -57,18 +60,25 @@ public class ChatRoomService {
         
         // 역할에 따라 가져오는 방법이 다름
         if ("HUNTER".equals(role)) {
-            rooms = chatRoomRepository.findByHunterId(userId);
+            // 프론트에서 넘어온 userId를 기준으로, 그 유저와 연결된 헌터의 채팅방을 찾습니다.
+            rooms = chatRoomRepository.findByHunter_UserId(userId);
         } else {
             rooms = chatRoomRepository.findByUserId(userId);
         }
 
         // 가져온 방 목록을 DTO 형태로 변환
-        return rooms.stream().map(room -> ChatRoomDto.ListResponse.builder()
-                .roomId(room.getId())
-                .title("임시 의뢰 제목") // 실제로는 room.getRequest().getTitle()
-                .otherNickname("상대방 이름") 
-                .createdAt(room.getCreatedAt())
-                .build()).collect(Collectors.toList());
+        return rooms.stream().map(room -> {
+            // 진짜 의뢰 제목과 상대방 닉네임을 꺼내옵니다 (땜빵 코드 삭제)
+            String title = room.getRequest().getTitle();
+            String otherNickname = "HUNTER".equals(role) ? room.getUser().getNickname() : room.getHunter().getName();
+            
+            return ChatRoomDto.ListResponse.builder()
+                    .roomId(room.getId())
+                    .title(title)
+                    .otherNickname(otherNickname)
+                    .createdAt(room.getCreatedAt())
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     /**

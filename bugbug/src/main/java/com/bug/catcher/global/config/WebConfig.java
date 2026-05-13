@@ -25,16 +25,12 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/request/wholeList",
                         "/h2-console/**",
                         "/error",
-                        "/uploads/**",// 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.
-                        "/swagger-ui/**",// 스웨거 화면 접근 허용
-
-                        "/v3/api-docs/**",   // 스웨거 데이터 접근 허용
-                        "/swagger-resources/**",
-                        "/api/v1/mosquito/**",
-                        "/uploads/**",    // 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.
+                        "/uploads/**",   // 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.
                         "/swagger-ui/**",    // 스웨거 화면 접근 허용
                         "/v3/api-docs/**",   // 스웨거 데이터 접근 허용
                         "/swagger-resources/**",
+                        "/css/**",           // CSS 파일 접근 허용
+                        "/js/**",            // JS 파일 접근 허용
                         "/api/v1/mosquito/**"
                 );
     }

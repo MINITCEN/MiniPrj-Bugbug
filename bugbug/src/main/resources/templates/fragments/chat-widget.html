@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="chat" id="bugbug-chat-widget">
+    
+    <link rel="stylesheet" th:href="@{/css/chat.css}">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    
+    <!-- 팝업창 메인 컨테이너 -->
+    <div id="bugbug-chat-window">
+        
+        <!-- 1. 채팅방 목록 화면 -->
+        <div id="bugbug-chat-room-list-view">
+            <div id="bugbug-chat-header">
+                채팅 목록
+                <span id="bugbug-chat-close" onclick="toggleChatWindow()">✕</span>
+            </div>
+            <div id="bugbug-room-list">
+                <!-- JS에서 동적으로 방 목록이 추가됨 -->
+            </div>
+        </div>
+
+        <!-- 2. 개별 채팅방 대화 화면 (기본 숨김) -->
+        <div id="bugbug-chat-room-detail-view" style="display: none; flex-direction: column; height: 100%;">
+            <div id="bugbug-chat-header">
+                <span id="bugbug-chat-back" onclick="goBackToList()">⬅️</span>
+                <span id="bugbug-chat-title">대화방</span>
+                <span id="bugbug-chat-close" onclick="toggleChatWindow()">✕</span>
+            </div>
+            
+            <div id="bugbug-chat-messages">
+                <!-- 메시지가 동적 생성됨 -->
+            </div>
+            
+            <div id="bugbug-chat-input-area">
+                <span id="bugbug-chat-attach" onclick="triggerFileInput()">📎</span>
+                <input type="file" id="bugbug-file-input" onchange="uploadChatFile()">
+                <input type="text" id="bugbug-chat-input" placeholder="메시지 입력" onkeypress="handleEnterKey(event)">
+                <button id="bugbug-chat-send" onclick="sendChatMessage()">➤</button>
+            </div>
+        </div>
+        
+    </div>
+
+    <!-- 플로팅 버튼 -->
+    <div id="bugbug-chat-button" onclick="toggleChatWindow()">
+        💬
+    </div>
+
+    <script th:src="@{/js/chat.js}"></script>
+</div>
+</html>
