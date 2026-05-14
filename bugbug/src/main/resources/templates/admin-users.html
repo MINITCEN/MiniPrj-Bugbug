@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>버그버그 관리자 - 회원 관리</title>
+    <link rel="stylesheet" th:href="@{/css/common-layout.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <style>
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .admin-table th, .admin-table td {
+            border: 1px solid var(--shell-line);
+            padding: 12px;
+            text-align: left;
+        }
+        .admin-table th {
+            background-color: #f9f9f9;
+            font-weight: 600;
+            color: var(--shell-muted);
+        }
+        .filter-area {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .filter-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--shell-line);
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body data-user-role="ADMIN">
+<!-- 헤더의 경우, 마이페이지 헤더 형식을 빌려옵니다 -->
+<div th:replace="~{fragments/header :: siteHeader('admin')}"></div>
+
+<main class="page">
+    <aside class="sidebar">
+        <h2 class="sidebar-title">관리자 대시보드</h2>
+
+        <!-- 좌측 카테고리 메뉴 (회원 관리 액티브) -->
+        <a class="side-link active" href="/admin/users"><span class="mark">👤</span>전체 회원 관리</a>
+        <a class="side-link" href="/admin/applications"><span class="mark">🛡️</span>헌터 승인 관리</a>
+
+        <button class="side-link side-button js-logout-button" type="button" style="margin-top: 20px;">
+            <span class="mark">L</span>로그아웃
+        </button>
+    </aside>
+
+    <section>
+        <div class="content-header">
+            <div>
+                <h1>전체 회원 관리</h1>
+                <p class="privacy-note">서비스에 가입된 모든 일반 유저와 헌터를 조회합니다.</p>
+            </div>
+        </div>
+
+        <section class="section">
+            <div class="filter-area">
+                <select id="role-filter" class="filter-select">
+                    <option value="">모든 역할</option>
+                    <option value="USER">일반 유저 (USER)</option>
+                    <option value="HUNTER">헌터 (HUNTER)</option>
+                    <option value="ADMIN">관리자 (ADMIN)</option>
+                </select>
+                <button class="primary-btn" type="button" onclick="loadUsers()">조회</button>
+            </div>
+
+            <div class="mini-panel" style="padding: 20px;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>회원 번호</th>
+                            <th>이메일</th>
+                            <th>닉네임</th>
+                            <th>연락처</th>
+                            <th>역할</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-table-body">
+                        <tr><td colspan="5" style="text-align: center;">로딩 중입니다...</td></tr>
+                    </tbody>
+                </table>
+                <div id="pagination-area" style="margin-top: 15px; text-align: center;">
+                    <!-- 페이징 버튼 영역 -->
+                </div>
+            </div>
+        </section>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        loadUsers(0);
+    });
+
+    async function loadUsers(page = 0) {
+        const role = document.getElementById('role-filter').value;
+        const tbody = document.getElementById('user-table-body');
+        
+        try {
+            const url = role ? `/api/admin/users?page=${page}&size=10&role=${role}` : `/api/admin/users?page=${page}&size=10`;
+            const response = await fetch(url, { credentials: 'include' });
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    throw new Error('권한이 없습니다.');
+                }
+                throw new Error('API 호출 실패');
+            }
+            
+            const data = await response.json();
+            
+            if (data.content.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">조회된 회원 데이터가 없습니다.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.content.forEach(user => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.email}</td>
+                    <td>${user.nickname}</td>
+                    <td>${user.phoneNumber || '-'}</td>
+                    <td><span style="font-weight:bold; color: ${user.role === 'HUNTER' ? 'var(--shell-brand)' : '#333'}">${user.role}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            const pageArea = document.getElementById('pagination-area');
+            pageArea.innerHTML = '';
+            if (!data.first) {
+                pageArea.innerHTML += `<button class="outline-btn" style="padding: 5px 10px; margin-right: 5px;" onclick="loadUsers(${page - 1})">이전</button>`;
+            }
+            pageArea.innerHTML += `<span> ${data.number + 1} / ${data.totalPages} 페이지 </span>`;
+            if (!data.last) {
+                pageArea.innerHTML += `<button class="outline-btn" style="padding: 5px 10px; margin-left: 5px;" onclick="loadUsers(${page + 1})">다음</button>`;
+            }
+
+        } catch (error) {
+            console.error(error);
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">데이터를 불러오는 데 실패했습니다. (${error.message})</td></tr>`;
+        }
+    }
+</script>
+<script src="/js/common-layout.js"></script>
+</body>
+</html>

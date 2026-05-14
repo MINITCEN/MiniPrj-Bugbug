@@ -37,6 +37,12 @@ public class AdminService {
         return users.map(AdminUserResponseDto::from);
     }
 
+    // [추가] 승인 대기 중인 헌터 신청서 목록 조회
+    public Page<com.bug.catcher.domain.admin.dto.AdminApplicationResponseDto> getPendingApplications(Pageable pageable) {
+        return hunterApplicationRepository.findByStatus(ApplicationStatus.PENDING, pageable)
+                .map(com.bug.catcher.domain.admin.dto.AdminApplicationResponseDto::from);
+    }
+
     @Transactional
     public void approveHunterApplication(Long applicationId) {
         HunterApplication application = hunterApplicationRepository.findById(applicationId)
