@@ -49,7 +49,7 @@
         <a class="side-link active" href="/admin/users"><span class="mark">👤</span>전체 회원 관리</a>
         <a class="side-link" href="/admin/applications"><span class="mark">🛡️</span>헌터 승인 관리</a>
 
-        <button class="side-link side-button" type="button" style="margin-top: 20px;" onclick="logout()">
+        <button class="side-link side-button js-logout-button" type="button" style="margin-top: 20px;">
             <span class="mark">L</span>로그아웃
         </button>
     </aside>
@@ -152,10 +152,7 @@
             tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">데이터를 불러오는 데 실패했습니다. (${error.message})</td></tr>`;
         }
     }
-    
-    function logout() {
-        fetch('/api/auth/logout', {method: 'POST'}).then(() => window.location.href = '/login');
-    }
 </script>
+<script src="/js/common-layout.js"></script>
 </body>
 </html>
