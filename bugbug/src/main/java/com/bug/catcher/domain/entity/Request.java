@@ -39,10 +39,10 @@ public class Request {
     private String approxLocation;
     private String exactLocation;
     private String title;
-    private String status;
     private String content;
     private String videoUrl;
     private Integer viewCount;
+    private String status;
     private LocalDateTime occurrenceTime;
 
     // --- 댓글 연관관계 추가 ---

@@ -22,49 +22,24 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RequestController {
     private final RequestService requestService;
-
-//    @Value("${kakao.api.key}")
-//    private String kakaoMapApiKey;
-
-    //뷰 추가되면 구현하기
-    //페이징 포함 게시판
-//    @GetMapping("/request")
-//    public String requestMain(@RequestParam(defaultValue = "0") int page, Model model) {
-//        Page<Request> requestPage = requestService.findRequestPage(page);
+//    //로그인 된 사용자 꺼내오기
+//    private Long getLoginUserId(HttpSession session) {
+//        Object loginUserId = session.getAttribute("loginUserId");
 //
-//        model.addAttribute("requestList", requestPage.getContent());
-//        model.addAttribute("currentPage", page);
-//        model.addAttribute("totalPages", requestPage.getTotalPages());
-//
-//        return "requestList";
+//        if (loginUserId == null) {
+//            throw new IllegalStateException("로그인이 필요합니다.");
+//        }
+//        if (loginUserId instanceof Long) {
+//            return (Long) loginUserId;
+//        }
+//        if (loginUserId instanceof Integer) {
+//            return ((Integer) loginUserId).longValue();
+//        }
+//        if (loginUserId instanceof String) {
+//            return Long.valueOf((String) loginUserId);
+//        }
+//        throw new IllegalStateException("현재 아이디의 사용자가 없습니다!");
 //    }
-
-    // 뷰 추가되면 구현하기
-    // 헌터 의뢰글 작성 폼 연결
-//    @GetMapping("/request/new")
-//    public String requestForm(Model model) {
-//       //
-//        model.addAttribute("kakaoMapKey", kakaoMapApiKey);
-//        return "requestForm";
-//    }
-    //로그인 된 사용자 꺼내오기
-    private Long getLoginUserId(HttpSession session) {
-        Object loginUserId = session.getAttribute("loginUserId");
-
-        if (loginUserId == null) {
-            throw new IllegalStateException("로그인이 필요합니다.");
-        }
-        if (loginUserId instanceof Long) {
-            return (Long) loginUserId;
-        }
-        if (loginUserId instanceof Integer) {
-            return ((Integer) loginUserId).longValue();
-        }
-        if (loginUserId instanceof String) {
-            return Long.valueOf((String) loginUserId);
-        }
-        throw new IllegalStateException("현재 아이디의 사용자가 없습니다!");
-    }
 
 
     //create request

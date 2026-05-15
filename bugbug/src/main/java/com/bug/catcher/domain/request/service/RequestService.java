@@ -45,7 +45,7 @@ public class RequestService {
         String videoUrl = fileStore.storeVideo(form.getVideoFile());
         Request request = Request.builder()
                 .user(loginUser)
-                .status("WAITING")
+                .status(form.getStatus())
                 .approxLocation(form.getLocation())
                 .exactLocation(form.getDetailLocation())
                 .title(form.getTitle())
@@ -73,6 +73,7 @@ public class RequestService {
         return requests.stream().map(request -> {
             Map<String, Object> result = new LinkedHashMap<>();
             result.put("requestId", request.getId());
+            result.put("status", request.getStatus());
             result.put("title", request.getTitle());
             result.put("content", request.getContent());
             result.put("approxLocation", request.getApproxLocation());

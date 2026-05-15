@@ -20,6 +20,7 @@ public class RequestFormDto {
     // 서비스에서 Request.approxLocation, Request.exactLocation으로 매핑
     private String location;
     private String detailLocation;
+    private String status;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime occurrenceTime;
