@@ -1,14 +1,12 @@
 (function () {
     const config = window.mosquitoMapConfig || {};
-    const currentApiUrl = config.currentApiUrl || '/api/v1/mosquito/current';
-    const detailApiBase = config.detailApiBase || '/api/v1/mosquito/detail';
-    const trendApiBase = config.trendApiBase || '/api/v1/mosquito/trend';
     const geoJsonUrl = config.geoJsonUrl || '/map/seoul-districts.geojson';
+    const summaryApiBase = config.summaryApiBase || '/api/v1/mosquito/summary';
 
     const state = {
-        items: [],
+        items: Array.isArray(config.regions) ? config.regions : [],
         geoJson: null,
-        selectedRegionId: null,
+        selectedRegionId: config.selectedRegionId ?? null,
         map: null,
         districtLayer: null,
         selectedOutlineLayer: null
@@ -49,18 +47,6 @@
         try {
             state.geoJson = await fetchJson(geoJsonUrl);
 
-            try {
-                const items = await fetchJson(currentApiUrl);
-                state.items = Array.isArray(items) ? items : [];
-            } catch (error) {
-                console.error('current api failed', error);
-                state.items = (state.geoJson?.features || []).map(feature => ({
-                    regionId: null,
-                    location: feature?.properties?.SIG_KOR_NM,
-                    index: null
-                }));
-            }
-
             renderMap();
             renderRegionList(filterItems());
             updateLastUpdated();
@@ -68,7 +54,11 @@
             const selectableItems = state.items.filter(item => item.regionId != null);
             if (selectableItems.length > 0) {
                 const preferred = selectableItems.find(item => item.regionId === state.selectedRegionId) || selectableItems[0];
-                await selectRegion(preferred.regionId);
+                state.selectedRegionId = preferred.regionId;
+                drawSelectedOutline();
+                renderRegionList(filterItems());
+                renderDetail(config.initialDetail);
+                renderTrendChart(Array.isArray(config.initialTrend) ? config.initialTrend : []);
             } else {
                 renderDetailFallback();
                 renderTrendChart([]);
@@ -248,12 +238,9 @@
         }
 
         try {
-            const [detail, trend] = await Promise.all([
-                fetchJson(`${detailApiBase}/${regionId}`),
-                fetchJson(`${trendApiBase}/${regionId}`)
-            ]);
-            renderDetail(detail);
-            renderTrendChart(Array.isArray(trend) ? trend : []);
+            const summary = await fetchJson(`${summaryApiBase}/${regionId}`);
+            renderDetail(summary?.detail);
+            renderTrendChart(Array.isArray(summary?.trend) ? summary.trend : []);
         } catch (error) {
             console.error(error);
             const selected = state.items.find(item => item.regionId === regionId);

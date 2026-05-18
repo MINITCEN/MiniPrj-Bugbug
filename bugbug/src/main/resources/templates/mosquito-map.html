@@ -143,12 +143,14 @@
 </div>
 <div th:replace="~{fragments/footer :: siteFooter()}"></div>
 
-<script>
+<script th:inline="javascript">
     window.mosquitoMapConfig = {
-        currentApiUrl: '/api/v1/mosquito/current',
-        detailApiBase: '/api/v1/mosquito/detail',
-        trendApiBase: '/api/v1/mosquito/trend',
-        geoJsonUrl: '/map/seoul-districts.geojson'
+        geoJsonUrl: /*[[${pageData.geoJsonUrl}]]*/ '/map/seoul-districts.geojson',
+        summaryApiBase: '/api/v1/mosquito/summary',
+        selectedRegionId: /*[[${pageData.selectedRegionId}]]*/ null,
+        regions: /*[[${pageData.regions}]]*/ [],
+        initialDetail: /*[[${pageData.initialDetail}]]*/ null,
+        initialTrend: /*[[${pageData.initialTrend}]]*/ []
     };
 </script>
 <script src="/js/common-layout.js"></script>
