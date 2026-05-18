@@ -1,12 +1,8 @@
 package com.bug.catcher.domain.map.controller;
 
 import com.bug.catcher.domain.map.dto.MosquitoRegionSummaryResponse;
-import com.bug.catcher.domain.map.dto.MosquitoResponse;
-import com.bug.catcher.domain.map.dto.MosquitoTrendResponse;
-import com.bug.catcher.domain.map.dto.RegionDetailResponse;
 import com.bug.catcher.domain.map.service.MosquitoMapQueryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,25 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MosquitoIndexController {
 
   private final MosquitoMapQueryService mosquitoMapQueryService;
-
-  @GetMapping("/current")
-  public ResponseEntity<List<MosquitoResponse>> getAllCurrentStatus() {
-    List<MosquitoResponse> response = mosquitoMapQueryService.getCurrentStatuses();
-    if (response.isEmpty()) {
-      return ResponseEntity.noContent().build();
-    }
-    return ResponseEntity.ok(response);
-  }
-
-  @GetMapping("/detail/{regionId}")
-  public ResponseEntity<RegionDetailResponse> getRegionDetail(@PathVariable Long regionId) {
-    return ResponseEntity.ok(mosquitoMapQueryService.getRegionSummary(regionId).detail());
-  }
-
-  @GetMapping("/trend/{regionId}")
-  public ResponseEntity<List<MosquitoTrendResponse>> getRegionTrend(@PathVariable Long regionId) {
-    return ResponseEntity.ok(mosquitoMapQueryService.getRegionSummary(regionId).trend());
-  }
 
   @GetMapping("/summary/{regionId}")
   public ResponseEntity<MosquitoRegionSummaryResponse> getRegionSummary(@PathVariable Long regionId) {
