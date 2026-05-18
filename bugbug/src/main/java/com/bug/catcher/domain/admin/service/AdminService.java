@@ -66,4 +66,13 @@ public class AdminService {
                 .build();
         hunterRepository.save(hunter);
     }
+
+    @Transactional
+    public void rejectHunterApplication(Long applicationId) {
+        HunterApplication application = hunterApplicationRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("신청서를 찾을 수 없습니다."));
+
+        // 상태를 거절(REJECTED)로 변경 (권한 상승이나 헌터 프로필 생성은 하지 않음)
+        application.updateStatus(ApplicationStatus.REJECTED);
+    }
 }

@@ -46,4 +46,11 @@ public class AdminController {
         adminService.approveHunterApplication(applicationId);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "헌터 신청 거절 처리", description = "헌터 신청을 거절하여 상태를 REJECTED로 변경합니다.")
+    @PostMapping("/applications/{applicationId}/reject")
+    public ResponseEntity<Void> rejectHunter(@PathVariable("applicationId") Long applicationId) {
+        adminService.rejectHunterApplication(applicationId);
+        return ResponseEntity.ok().build();
+    }
 }
