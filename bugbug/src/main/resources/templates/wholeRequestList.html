@@ -50,20 +50,15 @@
             <tr th:each="request : ${requestList}">
                 <td th:text="${request.status}"></td>
                 <td class="title-cell">
-                    <a th:href="@{/request/detail/{id}(id=${request.requestId})}">
+                    <a th:href="@{/api/requestView/detail/{id}(id=${request.requestId})}">
                         <strong th:text="${request.title}">
-                            주방에 바퀴벌레가 나타났어요!
                         </strong>
-                        <p th:text="${request.description}">
-                            갑자기 싱크대 근처에 큰 바퀴벌레가 보여요 ㅠㅠ
-                        </p>
+                        <p th:text="${request.description}"></p>
                     </a>
                 </td>
-                <td th:text="${request.approxLocation}">서울 강남구 역삼동</td>
-                <td th:text="${#temporals.format(request.createdAt, 'yyyy-MM-dd HH:mm')}">
-                    2026-05-12 12:06
-                </td>
-                <td th:text="${request.viewCount}">0</td>
+                <td th:text="${request.approxLocation}"></td>
+                <td th:text="${#temporals.format(request.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="${request.viewCount}"></td>
             </tr>
 
             <tr th:if="${requestList == null or #lists.isEmpty(requestList)}">

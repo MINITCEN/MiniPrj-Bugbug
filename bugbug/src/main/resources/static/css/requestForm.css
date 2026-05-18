@@ -441,3 +441,23 @@ textarea:focus {
 .remove-file-btn:hover {
     background-color: #c92a2a;
 }
+
+.insert-media-btn{
+    margin-top: 12px;
+}
+
+/* 상세 내용 에디터 영역만 라벨 아래에 입력 칸이 오도록 배치 */
+.form-group.full > .detail-row.full {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.form-group.full > .detail-row.full > label {
+    width: 100%;
+}
+
+.form-group.full > .detail-row.full > .content-editor-box {
+    width: 100%;
+}

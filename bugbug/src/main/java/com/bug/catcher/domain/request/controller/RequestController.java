@@ -22,25 +22,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RequestController {
     private final RequestService requestService;
-//    //로그인 된 사용자 꺼내오기
-//    private Long getLoginUserId(HttpSession session) {
-//        Object loginUserId = session.getAttribute("loginUserId");
-//
-//        if (loginUserId == null) {
-//            throw new IllegalStateException("로그인이 필요합니다.");
-//        }
-//        if (loginUserId instanceof Long) {
-//            return (Long) loginUserId;
-//        }
-//        if (loginUserId instanceof Integer) {
-//            return ((Integer) loginUserId).longValue();
-//        }
-//        if (loginUserId instanceof String) {
-//            return Long.valueOf((String) loginUserId);
-//        }
-//        throw new IllegalStateException("현재 아이디의 사용자가 없습니다!");
-//    }
-
 
     //create request
     @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
