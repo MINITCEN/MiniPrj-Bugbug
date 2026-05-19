@@ -4,6 +4,7 @@ import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.RequestImage;
 import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.request.dto.RequestDetailResponseDto;
+import com.bug.catcher.domain.request.dto.RequestEditFormDto;
 import com.bug.catcher.domain.request.dto.RequestFormDto;
 import com.bug.catcher.domain.request.dto.RequestMediaFileUrlDto;
 import com.bug.catcher.domain.request.repository.RequestImageRepository;
@@ -37,13 +38,14 @@ public class RequestService {
         List<String> imageUrls = fileStore.storeImages(form.getImageFiles());
         String videoUrl = fileStore.storeVideo(form.getVideoFile());
 
+        String replacedContent = replaceMediaSrc(form.getContent(), imageUrls, videoUrl);
         Request request = Request.builder()
                 .user(loginUser)
                 .status(form.getStatus())
                 .approxLocation(form.getLocation())
                 .exactLocation(form.getDetailLocation())
                 .title(form.getTitle())
-                .content(form.getContent())
+                .content(replacedContent)
                 .occurrenceTime(form.getOccurrenceTime())
                 .description(buildDescription(form))
                 .videoUrl(videoUrl)
@@ -247,6 +249,74 @@ public class RequestService {
                 nullToBlank(form.getAdditionalDescription())
         );
     }
+
+    // content 경로 교체 메소드
+    private String replaceMediaSrc(String content, List<String> imageUrls, String videoUrl) {
+        if (content == null || content.isBlank()) {
+            return content;
+        }
+
+        String replaced = content;
+
+        if (imageUrls != null) {
+            for (String imageUrl : imageUrls) {
+                replaced = replaced.replaceFirst(
+                        "<img([^>]*)src=\"[^\"]*\"([^>]*)>",
+                        "<img$1src=\"" + imageUrl + "\"$2>"
+                );
+            }
+        }
+
+        if (videoUrl != null && !videoUrl.isBlank()) {
+            replaced = replaced.replaceFirst(
+                    "<video([^>]*)src=\"[^\"]*\"([^>]*)>",
+                    "<video$1src=\"" + videoUrl + "\"$2>"
+            );
+        }
+
+        return replaced;
+    }
+
+
+    @Transactional(readOnly = true)
+    public RequestEditFormDto getEditForm(Long requestId, Long loginUserId) {
+        Request request = requestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("의뢰글을 찾을 수 없습니다."));
+
+        if (!request.getUser().getId().equals(loginUserId)) {
+            throw new IllegalStateException("수정 권한이 없습니다.");
+        }
+
+        RequestFormDto form = new RequestFormDto();
+
+        form.setTitle(request.getTitle());
+        form.setContent(request.getContent());
+        form.setStatus(request.getStatus());
+        form.setLocation(request.getApproxLocation());
+        form.setDetailLocation(request.getExactLocation());
+        form.setOccurrenceTime(request.getOccurrenceTime());
+        form.setAdditionalDescription(request.getDescription());
+
+        RequestMediaFileUrlDto mediaUrl = new RequestMediaFileUrlDto();
+//        form.setLatitude(request.getLatitude());
+//        form.setLongitude(request.getLongitude());  나중에 추가할지도..?
+
+        mediaUrl.setVideoUrl(request.getVideoUrl());
+
+        List<String> imageUrls = request.getRequestImages()
+                .stream()
+                .map(requestImage -> requestImage.getImageUrl())
+                .toList();
+
+        mediaUrl.setImageUrls(imageUrls);
+
+        RequestEditFormDto editForm = new RequestEditFormDto();
+        editForm.setForm(form);
+        editForm.setMediaUrl(mediaUrl);
+
+        return editForm;
+    }
+
     private String nullToBlank(String value) {
         return value == null ? "" : value;
     }

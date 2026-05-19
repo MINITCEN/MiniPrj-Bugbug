@@ -45,7 +45,7 @@
                     <div class="writer-avatar">🐛</div>
 
                     <div class="writer-info">
-                        <strong>의뢰인</strong>
+                        <strong th:text="${request.nickname}">의뢰인</strong>
 
                         <p>
                             발생 시간
@@ -79,33 +79,9 @@
 
                 <!-- 현재는 content에 URL이 없으므로 텍스트 기준 출력 -->
                 <div class="detail-content"
-                     th:text="${request.content}">
+                     th:utext="${request.content}">
                     상세 내용이 들어갑니다.
                 </div>
-            </section>
-
-            <!-- 첨부 이미지 -->
-            <section class="media-section"
-                     th:if="${request.imageUrls != null and !#lists.isEmpty(request.imageUrls)}">
-                <h2>첨부 이미지</h2>
-
-                <div class="image-list">
-                    <img th:each="imageUrl : ${request.imageUrls}"
-                         th:src="@{${imageUrl}}"
-                         class="detail-image"
-                         alt="첨부 이미지">
-                </div>
-            </section>
-
-            <!-- 첨부 동영상 -->
-            <section class="media-section"
-                     th:if="${request.videoUrl != null and !#strings.isEmpty(request.videoUrl)}">
-                <h2>첨부 동영상</h2>
-
-                <video th:src="@{${request.videoUrl}}"
-                       controls
-                       class="detail-video">
-                </video>
             </section>
 
             <!-- 상세 정보 표 -->
@@ -122,8 +98,8 @@
                 <div class="info-row">
                     <div class="info-label">상세 위치</div>
                     <div class="info-value"
-                         th:text="${request.exactLocation != null and !#strings.isEmpty(request.exactLocation) ? request.exactLocation : '미입력'}">
-                        미입력
+                         th:text="${request.exactLocation != null and !#strings.isEmpty(request.exactLocation) ? request.exactLocation : '헌터와 논의 필요'}">
+                        헌터와 논의 필요
                     </div>
                 </div>
 

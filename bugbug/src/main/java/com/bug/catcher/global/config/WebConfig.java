@@ -1,6 +1,7 @@
 package com.bug.catcher.global.config;
 
 import com.bug.catcher.global.auth.LoginCheckInterceptor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -16,6 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
     // 1. 인터셉터 설정 (로그인 체크)
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+
+
         registry.addInterceptor(new LoginCheckInterceptor())
                 .addPathPatterns("/**") // 모든 경로 검사
                 .excludePathPatterns(   // 예외 경로 (프리패스)

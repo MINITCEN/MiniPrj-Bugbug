@@ -417,6 +417,17 @@ function initMap() {
             contentEditor.focus();
             return;
         }
-        contentHidden.value = contentEditor.innerHTML;
+        contentHidden.value = contentEditor.innerHTML.trim();
+    });
+
+    // 수정화면에서 기존 이미지 보이고 사용자가 X를 누루지 않을 시 url이 서버로 전송, X를 누르면 hidden input 제거
+    document.addEventListener("click", function (event) {
+        if (!event.target.classList.contains("existing-remove-btn")) {
+            return;
+        }
+        const previewBox = event.target.closest(".preview-box");
+        if (previewBox) {
+            previewBox.remove();
+        }
     });
 }

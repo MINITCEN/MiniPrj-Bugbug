@@ -13,6 +13,7 @@ import java.util.List;
 public class RequestDetailResponseDto {
     private Long requestId;
     private Long userId;
+    private String nickname;
     private String userRole;
     private String title;
     private String description;
@@ -33,6 +34,7 @@ public class RequestDetailResponseDto {
                 .title(request.getTitle())
                 .content(request.getContent())
                 .status(request.getStatus())
+                .nickname(request.getUser().getNickname())
                 .description(request.getDescription())
                 .approxLocation(request.getApproxLocation())
                 .exactLocation(request.getExactLocation())

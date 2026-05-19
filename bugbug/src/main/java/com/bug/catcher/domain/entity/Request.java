@@ -39,12 +39,15 @@ public class Request {
     private String approxLocation;
     private String exactLocation;
     private String title;
-    private String content;
+
     private String videoUrl;
     private Integer viewCount;
     private String status;
     private LocalDateTime occurrenceTime;
 
+    // 본문 내용에 태그가 포함되어 들어가도록 구성
+    @Column(columnDefinition = "LONGTEXT")
+    private String content;
     // --- 댓글 연관관계 추가 ---
     @OneToMany(mappedBy = "request", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

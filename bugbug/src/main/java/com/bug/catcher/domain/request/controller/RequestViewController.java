@@ -3,6 +3,7 @@ package com.bug.catcher.domain.request.controller;
 import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.request.dto.RequestDetailResponseDto;
+import com.bug.catcher.domain.request.dto.RequestEditFormDto;
 import com.bug.catcher.domain.request.dto.RequestFormDto;
 import com.bug.catcher.domain.request.service.RequestService;
 import com.bug.catcher.global.auth.SessionConst;
@@ -40,14 +41,16 @@ public class RequestViewController {
         return "wholeRequestList";
     }
 
-    // 카카오 지도 받아오기
+    // 의뢰 등록 화면
     @GetMapping("/new")
     public String requestForm(Model model) {
+        model.addAttribute("mode", "create");
+        model.addAttribute("form", new RequestFormDto());
         model.addAttribute("kakaoMapKey", kakaoMapApiKey);
         return "requestForm";
     }
 
-    // 의뢰인 이미지 동영상 본문에 등록 화면
+    // 의뢰 등록 처리
     @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String createRequest(@ModelAttribute RequestFormDto form, HttpSession session) {
         User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
@@ -82,46 +85,47 @@ public class RequestViewController {
 
         return "requestDetail";
     }
-//
-//    // 의뢰 수정 화면
-//    @GetMapping("/edit/{requestId}")
-//    public String editForm(@PathVariable Long requestId, HttpSession session, Model model) {
-//        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-//
-//        if (loginUser == null) {
-//            return "redirect:/login";
-//        }
-//
-//        RequestFormDto form = requestService.getEditForm(requestId, loginUser.getId());
-//
-//        model.addAttribute("form", form);
-//        model.addAttribute("mode", "edit");
-//        model.addAttribute("requestId", requestId);
-//        model.addAttribute("kakaoMapKey", kakaoMapApiKey);
-//
-//        return "requestForm";
-//    }
-//
-//    // 의뢰 수정 처리
-//    @PostMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public String updateRequest(@PathVariable Long requestId, @ModelAttribute RequestFormDto form, HttpSession session) {
-//        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-//        if (loginUser == null) {
-//            return "redirect:/login";
-//        }
-//
-//        requestService.updateRequest(requestId, loginUser.getId(), form);
-//        return "redirect:/api/requestView/detail/" + requestId;
-//    }
-//
-//    // 의뢰 삭제 처리
-//    @PostMapping("/remove/{requestId}")
-//    public String deleteRequest(@PathVariable Long requestId, HttpSession session) {
-//        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-//        if (loginUser == null) {
-//            return "redirect:/login";
-//        }
-//        requestService.deleteRequest(requestId, loginUser.getId());
-//        return "redirect:/api/requestView/list";
-//    }
+
+    // 의뢰 수정 화면
+    @GetMapping("/edit/{requestId}")
+    public String editForm(@PathVariable Long requestId, HttpSession session, Model model) {
+        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        RequestEditFormDto editForm = requestService.getEditForm(requestId, loginUser.getId());
+
+        model.addAttribute("mode", "edit");
+        model.addAttribute("requestId", requestId);
+        model.addAttribute("form", editForm.getForm());
+        model.addAttribute("mediaUrl", editForm.getMediaUrl());
+        model.addAttribute("kakaoMapKey", kakaoMapApiKey);
+
+        return "requestForm";
+    }
+
+    // 의뢰 수정 처리
+    @PostMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public String updateRequest(@PathVariable Long requestId, @ModelAttribute RequestFormDto form, HttpSession session) {
+        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        requestService.updateRequest(requestId, loginUser.getId(), form);
+        return "redirect:/api/requestView/detail/" + requestId;
+    }
+
+    // 의뢰 삭제 처리
+    @PostMapping("/remove/{requestId}")
+    public String deleteRequest(@PathVariable Long requestId, HttpSession session) {
+        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+        requestService.deleteRequest(requestId, loginUser.getId());
+        return "redirect:/api/requestView/list";
+    }
 }
