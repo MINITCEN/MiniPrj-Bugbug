@@ -13,6 +13,7 @@ public class AdminUserResponseDto {
     private String phoneNumber;
     private String address;
     private String role;
+    private String accountStatus; // 계정 정지 여부 확인용
 
     // User 엔티티를 DTO로 변환하는 편의 메서드
     public static AdminUserResponseDto from(User user) {
@@ -23,6 +24,7 @@ public class AdminUserResponseDto {
                 .phoneNumber(user.getPhoneNumber())
                 .address(user.getAddress())
                 .role(user.getRole())
+                .accountStatus(user.getAccountStatus() != null ? user.getAccountStatus().name() : "ACTIVE")
                 .build();
     }
 }
