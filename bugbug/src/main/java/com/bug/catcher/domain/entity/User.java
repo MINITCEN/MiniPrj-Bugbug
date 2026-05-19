@@ -35,6 +35,27 @@ public class User {
     @Column(nullable = false)
     private Boolean isPrivacyAgreed;
 
+    // 계정 상태 관리
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private AccountStatus accountStatus = AccountStatus.ACTIVE;
+
+    // 정지 해제 일시
+    private java.time.LocalDateTime banEndDate;
+
+    // 계정 정지 메서드
+    public void suspend(java.time.LocalDateTime banEndDate) {
+        this.accountStatus = AccountStatus.SUSPENDED;
+        this.banEndDate = banEndDate;
+    }
+
+    // 계정 복구(활성화) 메서드
+    public void activate() {
+        this.accountStatus = AccountStatus.ACTIVE;
+        this.banEndDate = null;
+    }
+
     // 권한 변경 메서드 (일반 유저 -> 헌터)
     public void updateRole(String role) {
         this.role = role;
