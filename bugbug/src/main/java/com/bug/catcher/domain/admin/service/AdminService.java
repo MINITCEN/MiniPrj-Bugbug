@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +36,19 @@ public class AdminService {
         
         // 엔티티를 DTO로 변환하여 반환
         return users.map(AdminUserResponseDto::from);
+    }
+
+    @Transactional
+    public void suspendUser(Long userId, int suspendDays) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+
+        // 영구 정지의 경우 100년 후로 설정
+        LocalDateTime banEndDate = (suspendDays == -1) 
+                ? LocalDateTime.now().plusYears(100) 
+                : LocalDateTime.now().plusDays(suspendDays);
+
+        user.suspend(banEndDate);
     }
 
     // [추가] 승인 대기 중인 헌터 신청서 목록 조회
@@ -65,5 +79,14 @@ public class AdminService {
                 .responseCount(0)
                 .build();
         hunterRepository.save(hunter);
+    }
+
+    @Transactional
+    public void rejectHunterApplication(Long applicationId) {
+        HunterApplication application = hunterApplicationRepository.findById(applicationId)
+                .orElseThrow(() -> new IllegalArgumentException("신청서를 찾을 수 없습니다."));
+
+        // 상태를 거절(REJECTED)로 변경 (권한 상승이나 헌터 프로필 생성은 하지 않음)
+        application.updateStatus(ApplicationStatus.REJECTED);
     }
 }

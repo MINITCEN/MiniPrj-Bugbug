@@ -14,11 +14,11 @@ import java.nio.file.Paths;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    // 1. 인터셉터 설정 (로그인 체크)
+    // 1. 인터셉터 설정 (로그인 체크 및 관리자 체크)
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
-
+        // 첫 번째 검문소: 로그인 여부 확인
         registry.addInterceptor(new LoginCheckInterceptor())
                 .addPathPatterns("/**") // 모든 경로 검사
                 .excludePathPatterns(   // 예외 경로 (프리패스)
@@ -34,17 +34,20 @@ public class WebConfig implements WebMvcConfigurer {
                         "/js/**",
                         "/image/**",
                         "/map/**",
-
+                        "/api/request/wholeList",
                         "/h2-console/**",
                         "/error",
                         "/uploads/**",   // 파일 접근은 로그인 체크에서 제외해야 이미지가 보입니다.
                         "/swagger-ui/**",    // 스웨거 화면 접근 허용
                         "/v3/api-docs/**",   // 스웨거 데이터 접근 허용
                         "/swagger-resources/**",
-                        "/css/**",           // CSS 파일 접근 허용
-                        "/js/**",            // JS 파일 접근 허용
                         "/api/v1/mosquito/**"
                 );
+
+        // 두 번째 검문소: 관리자 권한 확인
+        // LoginCheckInterceptor를 통과한 요청 중, 주소가 /admin/ 이나 /api/admin/ 으로 시작하는 경우에만 작동합니다.
+        registry.addInterceptor(new com.bug.catcher.global.auth.AdminCheckInterceptor())
+                .addPathPatterns("/admin/**", "/api/admin/**");
     }
 
     // 2. 리소스 핸들러 설정 (업로드된 파일 서빙)

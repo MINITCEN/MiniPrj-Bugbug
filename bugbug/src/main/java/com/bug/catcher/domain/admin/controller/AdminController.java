@@ -30,6 +30,16 @@ public class AdminController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "회원 정지 처리 (소프트 삭제)", description = "유저의 계정을 특정 기간 또는 영구 정지(SUSPENDED) 처리합니다.")
+    @PostMapping("/users/{userId}/suspend")
+    public ResponseEntity<Void> suspendUser(
+            @PathVariable("userId") Long userId,
+            @RequestParam("days") int days) {
+        // days = 7 (7일 정지), days = -1 (영구 정지)
+        adminService.suspendUser(userId, days);
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "헌터 승인 대기 목록 조회", description = "승인 대기 중인 헌터 신청서 목록을 페이징하여 조회합니다.")
     @GetMapping("/applications/pending")
     public ResponseEntity<Page<com.bug.catcher.domain.admin.dto.AdminApplicationResponseDto>> getPendingApplications(
@@ -44,6 +54,13 @@ public class AdminController {
     public ResponseEntity<Void> approveHunter(@PathVariable("applicationId") Long applicationId) {
         // [수정됨] 서비스 메서드 이름과 일치시킴
         adminService.approveHunterApplication(applicationId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "헌터 신청 거절 처리", description = "헌터 신청을 거절하여 상태를 REJECTED로 변경합니다.")
+    @PostMapping("/applications/{applicationId}/reject")
+    public ResponseEntity<Void> rejectHunter(@PathVariable("applicationId") Long applicationId) {
+        adminService.rejectHunterApplication(applicationId);
         return ResponseEntity.ok().build();
     }
 }
