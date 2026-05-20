@@ -43,6 +43,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testAnnotationProcessor 'org.projectlombok:lombok'
 	implementation 'io.github.cdimascio:dotenv-java:3.0.0' // env 의존성
+	implementation 'org.jsoup:jsoup:1.17.2' //jsoup 의존성
 }
 
 tasks.named('test') {

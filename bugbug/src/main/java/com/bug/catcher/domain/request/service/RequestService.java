@@ -12,6 +12,10 @@ import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.domain.user.repository.UserRepository;
 import com.bug.catcher.global.file.FileStore;
 import lombok.RequiredArgsConstructor;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -176,7 +180,16 @@ public class RequestService {
         Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
                 .orElseThrow(() -> new IllegalStateException("게시글이 없거나 삭제 권한이 없습니다."));
 
+        List<String> imageUrls = request.getRequestImages()
+                .stream()
+                .map(RequestImage::getImageUrl)
+                .toList();
+        String videoUrl = request.getVideoUrl();
+
         requestRepository.delete(request);
+
+        imageUrls.forEach(fileStore::deleteImageByUrl);
+        fileStore.deleteVideoByUrl(videoUrl);
     }
 
     // delete media
@@ -290,26 +303,53 @@ public class RequestService {
         if (content == null || content.isBlank()) {
             return content;
         }
+        Document document = Jsoup.parseBodyFragment(content);
+        document.outputSettings().prettyPrint(false);
+        replaceImageSrc(document, imageUrls);
+        replaceVideoSrc(document, videoUrl);
+        return document.body().html();
+    }
 
-        String replaced = content;
+    private void replaceImageSrc(Document document, List<String> imageUrls) {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return;
+        }
+        Elements images = document.select("img");
+        int imageIndex = 0;
 
-        if (imageUrls != null) {
-            for (String imageUrl : imageUrls) {
-                replaced = replaced.replaceFirst(
-                        "<img([^>]*)src=\"[^\"]*\"([^>]*)>",
-                        "<img$1src=\"" + imageUrl + "\"$2>"
-                );
+        for (Element image : images) {
+            if (imageIndex >= imageUrls.size()) {
+                return;
+            }
+            String src = image.attr("src");
+
+            if (isTemporaryImageSrc(src)) {
+                image.attr("src", imageUrls.get(imageIndex));
+                imageIndex++;
             }
         }
+    }
 
-        if (videoUrl != null && !videoUrl.isBlank()) {
-            replaced = replaced.replaceFirst(
-                    "<video([^>]*)src=\"[^\"]*\"([^>]*)>",
-                    "<video$1src=\"" + videoUrl + "\"$2>"
-            );
+    private void replaceVideoSrc(Document document, String videoUrl) {
+        if (videoUrl == null || videoUrl.isBlank()) {
+            return;
         }
+        Element video = document.selectFirst("video");
+        if (video == null) {
+            return;
+        }
+        String src = video.attr("src");
+        if (isTemporaryVideoSrc(src)) {
+            video.attr("src", videoUrl);
+        }
+    }
 
-        return replaced;
+    private boolean isTemporaryImageSrc(String src) {
+        return src != null && (src.startsWith("data:image") || src.startsWith("blob:"));
+    }
+
+    private boolean isTemporaryVideoSrc(String src) {
+        return src != null && (src.startsWith("data:video") || src.startsWith("blob:"));
     }
 
 
