@@ -40,10 +40,14 @@ public class RequestService {
         List<String> imageUrls = fileStore.storeImages(form.getImageFiles());
         String videoUrl = fileStore.storeVideo(form.getVideoFile());
 
+        String status = form.getStatus() == null || form.getStatus().isBlank()
+                ? "대기 중"
+                : form.getStatus();
+
         String replacedContent = replaceMediaSrc(form.getContent(), imageUrls, videoUrl);
         Request request = Request.builder()
                 .user(loginUser)
-                .status(form.getStatus())
+                .status(status)
                 .approxLocation(form.getLocation())
                 .exactLocation(form.getDetailLocation())
                 .title(form.getTitle())
