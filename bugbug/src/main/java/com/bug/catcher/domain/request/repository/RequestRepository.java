@@ -19,16 +19,18 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     @Modifying
     @Query("update Request r " +
-            "set r.title = :title, r.content = :content, r.approxLocation = :location, r.exactLocation = :detailLocation, r.occurrenceTime = :occurrenceTime " +
+            "set r.title = :title, r.content = :content, r.approxLocation = :location, r.exactLocation = :detailLocation, r.occurrenceTime = :occurrenceTime, r.description = :description, r.status = :status " +
             "where r.id = :requestId and r.user.id = :loginUserId")
     int update(
-            Long requestId,
-            Long loginUserId,
             String title,
             String content,
             String location,
             String detailLocation,
-            LocalDateTime occurrenceTime
+            LocalDateTime occurrenceTime,
+            String description,
+            String status,
+            Long requestId,
+            Long loginUserId
     );
 
     Optional<Request> findByIdAndUser_Id(Long requestId, Long userId);

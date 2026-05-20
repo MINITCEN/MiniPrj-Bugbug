@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>버그버그 - 헌터 구인</title>
+    <link rel="stylesheet" href="/css/common-layout.css">
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" th:href="@{/css/wholeRequestList.css}">
+</head>
+<body>
+<div th:replace="~{fragments/header :: siteHeader('none')}"></div>
+<main class="container">
+
+    <section class="board-area">
+        <div class="title-box">
+            <h1>헌터 구인</h1>
+            <p>도움이 필요한 의뢰들을 확인하고 헌터로 활동해보세요!</p>
+        </div>
+
+        <div class="top-line">
+            <div class="tabs">
+                <a class="active" href="#">전체</a>
+                <a href="#">예약 중</a>
+                <a href="#">완료</a>
+            </div>
+
+            <div class="board-actions">
+                <select name="align">
+                    <option>조회 수</option>
+                    <option>관심</option>
+                    <option>최신</option>
+                    <option>의뢰날짜</option>
+                </select>
+                <a href="/api/requestView/new" class="write-btn">+ 의뢰 등록하기</a>
+            </div>
+        </div>
+
+        <table class="request-table">
+            <thead>
+            <tr>
+                <th>상태</th>
+                <th>제목</th>
+                <th>위치</th>
+                <th>등록 시간</th>
+                <th>조회 수</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="request : ${requestList}">
+                <td th:text="${request.status}"></td>
+                <td class="title-cell">
+                    <a th:href="@{/api/requestView/detail/{id}(id=${request.requestId})}">
+                        <strong th:text="${request.title}">
+                        </strong>
+                        <p th:text="${request.description}"></p>
+                    </a>
+                </td>
+                <td th:text="${request.approxLocation}"></td>
+                <td th:text="${#temporals.format(request.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="${request.viewCount}"></td>
+            </tr>
+
+            <tr th:if="${requestList == null or #lists.isEmpty(requestList)}">
+                <td colspan="5" class="empty">
+                    등록된 의뢰가 없습니다.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination" th:if="${requestPage.totalPages > 0}">
+            <a th:if="${requestPage.hasPrevious()}"
+               th:href="@{/api/requestView/list(page=${requestPage.number - 1}, size=${requestPage.size})}">
+                ＜
+            </a>
+            <a th:each="pageNum : ${#numbers.sequence(0, requestPage.totalPages - 1)}"
+               th:href="@{/api/requestView/list(page=${pageNum}, size=${requestPage.size})}"
+               th:text="${pageNum + 1}"
+               th:classappend="${pageNum == requestPage.number} ? 'active'">
+                1
+            </a>
+            <a th:if="${requestPage.hasNext()}"
+               th:href="@{/api/requestView/list(page=${requestPage.number + 1}, size=${requestPage.size})}">
+                ＞
+            </a>
+        </div>
+    </section>
+
+    <aside class="side-area">
+
+        <section class="side-card" th:if="${role != null}">
+            <div class="side-title">
+                <h3>헌터 등급</h3>
+                <a href="#">내역 보기 ></a>
+            </div>
+
+            <div class="point-main">
+                <p>현재 등급</p>
+                <strong style="color:silver">Silver</strong>
+            </div>
+        </section>
+
+        <section class="side-card mosquito">
+            <div class="side-title">
+                <h3>오늘의 모기지수</h3>
+                <a href="#">자세히 보기 ></a>
+            </div>
+
+            <div class="mosquito-body">
+                <div class="circle">
+                    <strong>보통</strong>
+                    <span>Lv.3</span>
+                </div>
+
+                <div>
+                    <strong>서울 강남구 기준</strong>
+                    <p>6월 2일 (월) 10:00 기준</p>
+                    <span class="index-box">지수 65</span>
+                </div>
+            </div>
+
+            <div class="level-row">
+                <span class="level green">낮음</span>
+                <span class="level yellow">보통</span>
+                <span class="level red">높음</span>
+            </div>
+        </section>
+    </aside>
+</main>
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+<script src="/js/common-layout.js"></script>
+<script src="/js/login.js"></script>
+</body>
+</html>

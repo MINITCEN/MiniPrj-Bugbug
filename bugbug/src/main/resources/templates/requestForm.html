@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>버그버그 - 의뢰 등록</title>
+    <link rel="stylesheet" href="/css/common-layout.css">
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" th:href="@{/css/requestForm.css}">
+</head>
+
+<body>
+<script th:src="@{https://dapi.kakao.com/v2/maps/sdk.js(appkey=${kakaoMapKey},libraries='services',autoload=false)}"></script>
+<div th:replace="~{fragments/header :: siteHeader('none')}"></div>
+<main class="container">
+    <div class="page-title">
+        <h1 th:text="${mode == 'edit'} ? '의뢰 수정하기' : '의뢰 등록하기'">의뢰 등록하기</h1>
+        <p th:text="${mode == 'edit'} ? '기존 의뢰 내용을 수정해주세요' : '헌터에게 요청할 벌레 퇴치 의뢰 내용을 자세히 작성해주세요.'">헌터에게 요청할 벌레 퇴치 의뢰 내용을 자세히 작성해주세요.</p>
+    </div>
+
+    <form class="form-card"
+          method="post"
+          th:action="${mode == 'edit'} ? @{/api/requestView/edit/{id}(id=${requestId})} : @{/api/requestView/new}"
+          enctype="multipart/form-data">
+
+        <h2 class="section-title">의뢰 정보 입력</h2>
+
+        <div class="form-grid">
+
+            <!-- 제목 -->
+            <div class="form-group full">
+                <label>
+                    제목 <span class="required">*</span>
+                </label>
+
+                <input type="text"
+                       name="title"
+                       th:value="${form != null ? form.title : ''}"
+                       placeholder="예: 주방에 바퀴벌레가 나타났어요!"
+                       required>
+            </div>
+
+            <!-- 진행 상태 / 난이도 -->
+            <div class="form-group" th:if="${mode == 'edit'}">
+                <label>
+                    진행 상태 <span class="required">*</span>
+                </label>
+
+                <select name="status">
+                    <option value="">상태를 선택하세요</option>
+                    <option value="예약 중" th:selected="${form.status == '예약 중'}">예약 중</option>
+                    <option value="완료" th:selected="${form.status == '완료'}">완료</option>
+                </select>
+
+                <span th:if="${role == 'hunter'}" class="hint">
+                    높은 난이도를 완수할수록 더 높은 헌터 등급에 도달할 수 있습니다.
+                </span>
+            </div>
+
+            <!-- 위치 -->
+            <div class="form-group full">
+                <label>
+                    대략적인 위치 <span class="required">*</span>
+                </label>
+
+                <div class="location-search-box">
+                    <input type="text"
+                           id="location"
+                           name="location"
+                           th:value="${form.location}"
+                           placeholder="예: 서울 강남구 역삼동"
+                           required>
+
+                    <button type="button" onclick="searchAddress()">
+                        위치 검색
+                    </button>
+                </div>
+
+                <div id="map" class="map-box"></div>
+
+                <p id="selectedLocation" class="hint">
+                    위치를 검색하면 지도에 표시됩니다.
+                </p>
+            </div>
+
+            <!-- 상세 내용 -->
+            <div class="form-group full">
+                <div class="detail-row full">
+                    <label>
+                        상세 내용 <span class="required">*</span>
+                    </label>
+
+                    <div class="content-editor-box">
+
+                        <!-- 업로드 버튼 영역 -->
+                        <div class="upload-toolbar">
+                            <label for="imageFiles" class="upload-file-btn">
+                                🖼 이미지
+                            </label>
+
+                            <label for="videoFile" class="upload-file-btn">
+                                🎥 동영상
+                            </label>
+                        </div>
+
+                        <!-- 본문 입력 영역 -->
+                        <article id="contentEditor"
+                                 class="content-editor"
+                                 contenteditable="true"
+                                 th:utext="${form.content}"
+                                 data-placeholder="해당 양식에 맞춰 자세히 작성해주세요.
+--------------------------------------------------------------------
+※ 작성 예시:
+1. 벌레 종류 : 바퀴벌레
+2. 벌레 크기 : 3~4cm
+3. 발생 위치 : 주방 싱크대 근처
+4. 벌레 개체 수 : 1마리"></article>
+
+                        <!-- 서버로 전송될 실제 본문 HTML -->
+                        <input type="hidden"
+                               id="contentHidden"
+                               name="content"
+                               th:value="${form.content}">
+
+                        <!-- 실제 파일 input -->
+                        <input type="file"
+                               id="imageFiles"
+                               name="imageFiles"
+                               accept="image/*"
+                               multiple
+                               hidden>
+
+                        <input type="file"
+                               id="videoFile"
+                               name="videoFile"
+                               accept="video/*"
+                               hidden>
+
+                        <!-- 선택한 파일 프리뷰 영역 -->
+                        <div id="previewContainer" class="preview-container"></div>
+
+                        <!-- 프리뷰를 본문에 삽입하는 확인 버튼 영역 -->
+                        <div id="previewConfirmArea"
+                             class="preview-confirm-area"
+                             style="display:none;">
+                            <button type="button"
+                                    id="insertMediaBtn"
+                                    class="btn submit-btn insert-media-btn">
+                                본문에 삽입
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 추가 요청 사항 -->
+                <div class="detail-input-box">
+                    <div class="detail-row full">
+                        <label>추가 요청 사항</label>
+                        <input name="description"
+                                  placeholder="도착하면 전화 주세요"
+                                  required
+                                  th:value="${form != null ? form.description : ''}">
+                    </div>
+                    <div class="detail-row">
+                        <label>발생 시간</label>
+                        <input type="datetime-local"
+                               name="occurrenceTime"
+                               th:value="${form.occurrenceTime}">
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 작성 안내 -->
+        <div class="notice-box">
+            <strong>작성 안내</strong><br>
+            허위 의뢰나 장난성 글은 관리자에 의해 삭제될 수 있습니다.<br>
+            작성자 정보는 로그인한 사용자 기준으로 자동 저장되며, 화면에서는 직접 입력하지 않습니다.<br>
+            등록 후 상태는 기본적으로 <strong>예약 중</strong> 또는 <strong>완료</strong> 상태로 저장하는 것이 좋습니다.
+        </div>
+
+        <!-- 버튼 영역 -->
+        <div class="button-area">
+            <button type="submit" class="btn submit-btn" th:text="${mode == 'edit'} ? '의뢰 수정' : '의뢰 등록'">
+                의뢰 등록
+            </button>
+
+            <button type="reset" class="btn reset-btn">
+                다시 작성
+            </button>
+
+            <a href="/api/requestView/list" class="btn cancel-btn">
+                목록으로
+            </a>
+        </div>
+
+    </form>
+</main>
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+<script src="/js/common-layout.js"></script>
+<script src="/js/login.js"></script>
+<script src="/js/requestform.js"></script>
+
+</body>
+</html>

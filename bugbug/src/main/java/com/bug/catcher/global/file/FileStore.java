@@ -13,10 +13,10 @@ import java.util.UUID;
 @Component
 public class FileStore {
 
-    @Value("${file.image-upload-dir:C:/bugbug/uploads/request-images/}")
+    @Value("${file.image-upload-dir:uploads/request-images/}")
     private String imageUploadDir;
 
-    @Value("${file.video-upload-dir:C:/bugbug/uploads/request-videos/}")
+    @Value("${file.video-upload-dir:uploads/request-videos/}")
     private String videoUploadDir;
 
     /**
@@ -68,7 +68,33 @@ public class FileStore {
         }
     }
 
-    /**
-     * 파일 삭제 로직 구현 시작
-     */
+    // 이미지 파일 url 삭제 메소드
+    public void deleteImageByUrl(String imageUrl) {
+        deleteFileByUrl(imageUrl, "/uploads/request-images/", imageUploadDir);
+    }
+
+    // 동영상 파일 url 삭제 메소드
+    public void deleteVideoByUrl(String videoUrl) {
+        deleteFileByUrl(videoUrl, "/uploads/request-videos/", videoUploadDir);
+    }
+
+    // 파일 공통 url 삭제 메소드
+    private void deleteFileByUrl(String fileUrl, String urlPrefix, String uploadDir) {
+        if (fileUrl == null || fileUrl.isBlank()) {
+            return;
+        }
+
+        if (!fileUrl.startsWith(urlPrefix)) {
+            return;
+        }
+
+        String filename = fileUrl.substring(urlPrefix.length());
+        Path filePath = Paths.get(uploadDir, filename);
+
+        try {
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("파일 삭제 실패: " + fileUrl, e);
+        }
+    }
 }

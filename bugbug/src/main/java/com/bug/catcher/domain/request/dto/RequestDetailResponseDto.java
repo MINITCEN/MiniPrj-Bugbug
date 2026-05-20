@@ -11,8 +11,12 @@ import java.util.List;
 @Getter
 @Builder
 public class RequestDetailResponseDto {
-    private long requestId;
+    private Long requestId;
+    private Long userId;
+    private String nickname;
+    private String userRole;
     private String title;
+    private String description;
     private String content;
     private String status;
     private String approxLocation;
@@ -25,9 +29,13 @@ public class RequestDetailResponseDto {
     public static RequestDetailResponseDto responseDto(Request request){
         return RequestDetailResponseDto.builder()
                 .requestId(request.getId())
+                .userId(request.getUser().getId())
+                .userRole(request.getUser().getRole())
                 .title(request.getTitle())
                 .content(request.getContent())
                 .status(request.getStatus())
+                .nickname(request.getUser().getNickname())
+                .description(request.getDescription())
                 .approxLocation(request.getApproxLocation())
                 .exactLocation(request.getExactLocation())
                 .occurrenceTime(request.getOccurrenceTime())

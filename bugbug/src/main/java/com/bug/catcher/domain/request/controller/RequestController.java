@@ -2,6 +2,7 @@ package com.bug.catcher.domain.request.controller;
 
 import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.request.dto.RequestMediaFileUrlDto;
 import jakarta.servlet.http.HttpSession;
 import com.bug.catcher.global.auth.SessionConst;
 import org.springframework.http.MediaType;
@@ -22,50 +23,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RequestController {
     private final RequestService requestService;
-
-//    @Value("${kakao.api.key}")
-//    private String kakaoMapApiKey;
-
-    //뷰 추가되면 구현하기
-    //페이징 포함 게시판
-//    @GetMapping("/request")
-//    public String requestMain(@RequestParam(defaultValue = "0") int page, Model model) {
-//        Page<Request> requestPage = requestService.findRequestPage(page);
-//
-//        model.addAttribute("requestList", requestPage.getContent());
-//        model.addAttribute("currentPage", page);
-//        model.addAttribute("totalPages", requestPage.getTotalPages());
-//
-//        return "requestList";
-//    }
-
-    // 뷰 추가되면 구현하기
-    // 헌터 의뢰글 작성 폼 연결
-//    @GetMapping("/request/new")
-//    public String requestForm(Model model) {
-//       //
-//        model.addAttribute("kakaoMapKey", kakaoMapApiKey);
-//        return "requestForm";
-//    }
-    //로그인 된 사용자 꺼내오기
-    private Long getLoginUserId(HttpSession session) {
-        Object loginUserId = session.getAttribute("loginUserId");
-
-        if (loginUserId == null) {
-            throw new IllegalStateException("로그인이 필요합니다.");
-        }
-        if (loginUserId instanceof Long) {
-            return (Long) loginUserId;
-        }
-        if (loginUserId instanceof Integer) {
-            return ((Integer) loginUserId).longValue();
-        }
-        if (loginUserId instanceof String) {
-            return Long.valueOf((String) loginUserId);
-        }
-        throw new IllegalStateException("현재 아이디의 사용자가 없습니다!");
-    }
-
 
     //create request
     @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -97,9 +54,9 @@ public class RequestController {
 
     // update request
     @PatchMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public RequestDetailResponseDto updateRequest(@PathVariable Long requestId, @ModelAttribute RequestFormDto form, HttpSession session) {
+    public RequestDetailResponseDto updateRequest(@PathVariable Long requestId, @ModelAttribute RequestFormDto form, @ModelAttribute RequestMediaFileUrlDto mediaUrlDto, HttpSession session) {
         User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-        requestService.updateRequest(requestId, loginUser.getId(), form);
+        requestService.updateRequest(requestId, loginUser.getId(), form, mediaUrlDto);
         System.out.println("수정 성공");
         return requestService.readRequestDetail(requestId);
     }
