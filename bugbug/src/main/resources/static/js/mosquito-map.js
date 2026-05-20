@@ -1,17 +1,16 @@
 (function () {
     const config = window.mosquitoMapConfig || {};
-    const currentApiUrl = config.currentApiUrl || '/api/v1/mosquito/current';
-    const detailApiBase = config.detailApiBase || '/api/v1/mosquito/detail';
-    const trendApiBase = config.trendApiBase || '/api/v1/mosquito/trend';
     const geoJsonUrl = config.geoJsonUrl || '/map/seoul-districts.geojson';
+    const summaryApiBase = config.summaryApiBase || '/api/v1/mosquito/summary';
 
     const state = {
-        items: [],
+        items: normalizeItems(config.regions),
         geoJson: null,
-        selectedRegionId: null,
+        selectedRegionId: config.selectedRegionId ?? null,
         map: null,
         districtLayer: null,
-        selectedOutlineLayer: null
+        selectedOutlineLayer: null,
+        requestSequence: 0
     };
 
     const dom = {
@@ -34,48 +33,49 @@
         detailRainType: document.getElementById('detail-rain-type'),
         detailSky: document.getElementById('detail-sky'),
         detailWind: document.getElementById('detail-wind'),
+        detailMessage: document.getElementById('detail-message'),
         trendChart: document.getElementById('trend-chart')
     };
 
     document.addEventListener('DOMContentLoaded', init);
+
     if (dom.refreshButton) {
         dom.refreshButton.addEventListener('click', init);
     }
-    dom.searchInput.addEventListener('input', () => renderRegionList(filterItems()));
+
+    if (dom.searchInput) {
+        dom.searchInput.addEventListener('input', renderRegionList);
+    }
 
     async function init() {
         setLoading(true);
 
         try {
             state.geoJson = await fetchJson(geoJsonUrl);
-
-            try {
-                const items = await fetchJson(currentApiUrl);
-                state.items = Array.isArray(items) ? items : [];
-            } catch (error) {
-                console.error('current api failed', error);
-                state.items = (state.geoJson?.features || []).map(feature => ({
-                    regionId: null,
-                    location: feature?.properties?.SIG_KOR_NM,
-                    index: null
-                }));
-            }
-
             renderMap();
-            renderRegionList(filterItems());
             updateLastUpdated();
+            renderRegionList();
 
-            const selectableItems = state.items.filter(item => item.regionId != null);
-            if (selectableItems.length > 0) {
-                const preferred = selectableItems.find(item => item.regionId === state.selectedRegionId) || selectableItems[0];
-                await selectRegion(preferred.regionId);
-            } else {
+            const selectableItems = getSelectableItems();
+            if (!selectableItems.length) {
                 renderDetailFallback();
                 renderTrendChart([]);
+                return;
+            }
+
+            const selectedItem = findSelectedOrFirstItem(selectableItems);
+            applySelection(selectedItem.regionId, { fitBounds: false });
+
+            if (hasInitialSummaryFor(selectedItem.regionId)) {
+                renderSummary(config.initialDetail, config.initialTrend, selectedItem.message);
+            } else {
+                await fetchAndRenderSummary(selectedItem.regionId);
             }
         } catch (error) {
             console.error(error);
             renderEmptyMap('지도를 불러오지 못했습니다.');
+            renderDetailFallback();
+            renderTrendChart([]);
         } finally {
             setLoading(false);
         }
@@ -97,15 +97,17 @@
             doubleClickZoom: false
         });
 
-        const itemByName = new Map(state.items.map(item => [item.location, item]));
+        const itemByName = new Map(
+            state.items.map(item => [normalizeName(item.location), item])
+        );
 
         state.districtLayer = L.geoJSON(state.geoJson, {
             style: feature => {
-                const item = itemByName.get(feature?.properties?.SIG_KOR_NM);
+                const item = itemByName.get(normalizeName(feature?.properties?.SIG_KOR_NM));
                 return buildDistrictStyle(item?.index);
             },
             onEachFeature: (feature, layer) => {
-                const item = itemByName.get(feature?.properties?.SIG_KOR_NM);
+                const item = itemByName.get(normalizeName(feature?.properties?.SIG_KOR_NM));
                 const labelText = item
                     ? `${item.location} ${formatIndex(item.index)}`
                     : (feature?.properties?.SIG_KOR_NM || '');
@@ -189,26 +191,31 @@
         }
 
         return (state.geoJson?.features || []).find(
-            feature => feature?.properties?.SIG_KOR_NM === selectedItem.location
+            feature => normalizeName(feature?.properties?.SIG_KOR_NM) === normalizeName(selectedItem.location)
         ) || null;
     }
 
-    function filterItems() {
-        const keyword = dom.searchInput.value.trim();
-        if (!keyword) {
-            return [];
-        }
-        return state.items.filter(item => item.location.includes(keyword));
+    function getSelectableItems() {
+        return state.items.filter(item => item.regionId != null);
     }
 
-    function renderRegionList(items) {
-        dom.regionList.innerHTML = '';
-        const hasKeyword = dom.searchInput.value.trim().length > 0;
-        dom.regionList.classList.toggle('hidden', !hasKeyword);
+    function getFilteredItems() {
+        const keyword = dom.searchInput?.value.trim() || '';
+        if (!keyword) {
+            return getSelectableItems();
+        }
 
-        if (!hasKeyword) {
+        return getSelectableItems().filter(item => item.location.includes(keyword));
+    }
+
+    function renderRegionList() {
+        if (!dom.regionList) {
             return;
         }
+
+        const items = getFilteredItems();
+        dom.regionList.innerHTML = '';
+        dom.regionList.classList.remove('hidden');
 
         if (!items.length) {
             const empty = document.createElement('div');
@@ -223,21 +230,24 @@
             button.type = 'button';
             button.className = item.regionId === state.selectedRegionId ? 'active' : '';
             button.innerHTML = `<span>${item.location}</span><strong>${formatIndex(item.index)}</strong>`;
-
-            if (item.regionId != null) {
-                button.addEventListener('click', () => selectRegion(item.regionId));
-            } else {
-                button.disabled = true;
-            }
-
+            button.addEventListener('click', () => selectRegion(item.regionId));
             dom.regionList.appendChild(button);
         });
     }
 
     async function selectRegion(regionId) {
+        applySelection(regionId, { fitBounds: true });
+        await fetchAndRenderSummary(regionId);
+    }
+
+    function applySelection(regionId, options) {
         state.selectedRegionId = regionId;
         drawSelectedOutline();
-        renderRegionList(filterItems());
+        renderRegionList();
+
+        if (options?.fitBounds === false) {
+            return;
+        }
 
         const feature = findFeatureByRegionId(regionId);
         if (feature && state.map) {
@@ -246,31 +256,47 @@
                 maxZoom: 12
             });
         }
+    }
+
+    async function fetchAndRenderSummary(regionId) {
+        const requestId = ++state.requestSequence;
 
         try {
-            const [detail, trend] = await Promise.all([
-                fetchJson(`${detailApiBase}/${regionId}`),
-                fetchJson(`${trendApiBase}/${regionId}`)
-            ]);
-            renderDetail(detail);
-            renderTrendChart(Array.isArray(trend) ? trend : []);
+            const summary = await fetchJson(`${summaryApiBase}/${regionId}`);
+            if (requestId !== state.requestSequence) {
+                return;
+            }
+
+            const selectedItem = state.items.find(item => item.regionId === regionId);
+            renderSummary(summary?.detail, summary?.trend, selectedItem?.message);
         } catch (error) {
+            if (requestId !== state.requestSequence) {
+                return;
+            }
+
             console.error(error);
             const selected = state.items.find(item => item.regionId === regionId);
-            renderDetailFallback(selected?.location);
+            renderDetailFallback(selected?.location, selected?.message);
             renderTrendChart([]);
         }
     }
 
-    function renderDetail(detail) {
+    function renderSummary(detail, trend, message) {
+        renderDetail(detail, message);
+        renderTrendChart(Array.isArray(trend) ? trend : []);
+    }
+
+    function renderDetail(detail, message) {
         dom.detailRegion.textContent = detail?.regionName || '지역 선택';
         dom.detailScore.textContent = detail?.mosquitoIndex != null ? formatIndex(detail.mosquitoIndex) : '--';
         dom.detailStatus.textContent = detail?.mosquitoStatus || '데이터 없음';
+
         const detailColor = getColorByIndex(detail?.mosquitoIndex);
         dom.detailStatus.style.background = detailColor;
         dom.detailEmoji.textContent = '🦟';
         dom.detailEmoji.style.color = detailColor;
         dom.detailRing.style.background = buildProgressRing(detail?.mosquitoIndex, detailColor);
+
         dom.detailDate.textContent = detail?.mosquitoIndexDate || '-';
         dom.weatherDate.textContent = detail?.weatherBaseDate
             ? `${detail.weatherBaseDate} ${detail.weatherBaseTime || ''}`.trim()
@@ -281,13 +307,17 @@
         dom.detailRainType.textContent = detail?.precipitationType || '-';
         dom.detailSky.textContent = detail?.skyStatus || '-';
         dom.detailWind.textContent = detail?.windSpeed != null ? `${detail.windSpeed}m/s` : '-';
+
+        if (dom.detailMessage) {
+            dom.detailMessage.textContent = message || '날씨 정보는 예보 발표 시각 기준으로 표시됩니다.';
+        }
     }
 
-    function renderDetailFallback(regionName) {
+    function renderDetailFallback(regionName, message) {
         renderDetail({
             regionName: regionName || '지역 선택',
             mosquitoStatus: '데이터 없음'
-        });
+        }, message);
     }
 
     function renderTrendChart(items) {
@@ -363,12 +393,20 @@
 
     function renderEmptyMap(message) {
         destroyMap();
-        dom.mapRoot.innerHTML = '';
-        dom.mapLoading.textContent = message;
-        dom.mapLoading.style.display = 'grid';
+        if (dom.mapRoot) {
+            dom.mapRoot.innerHTML = '';
+        }
+        if (dom.mapLoading) {
+            dom.mapLoading.textContent = message;
+            dom.mapLoading.style.display = 'grid';
+        }
     }
 
     function setLoading(loading) {
+        if (!dom.mapLoading) {
+            return;
+        }
+
         dom.mapLoading.style.display = loading ? 'grid' : 'none';
         if (loading) {
             dom.mapLoading.textContent = '모기 지도를 불러오는 중';
@@ -379,8 +417,37 @@
         if (!dom.lastUpdated) {
             return;
         }
+
         const now = new Date();
         dom.lastUpdated.textContent = `최종 업데이트 ${now.toLocaleString('ko-KR')}`;
+    }
+
+    function hasInitialSummaryFor(regionId) {
+        return Boolean(config.initialDetail) && regionId != null && regionId === config.selectedRegionId;
+    }
+
+    function findSelectedOrFirstItem(items) {
+        return items.find(item => item.regionId === state.selectedRegionId) || items[0];
+    }
+
+    function normalizeItems(items) {
+        if (!Array.isArray(items)) {
+            return [];
+        }
+
+        return items
+            .map(item => ({
+                regionId: item?.regionId ?? null,
+                location: item?.location ?? '',
+                index: item?.index ?? null,
+                status: item?.status ?? '',
+                message: item?.message ?? ''
+            }))
+            .sort((left, right) => left.location.localeCompare(right.location, 'ko-KR'));
+    }
+
+    function normalizeName(value) {
+        return String(value || '').trim();
     }
 
     function formatIndex(value) {
