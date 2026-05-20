@@ -2,6 +2,7 @@ package com.bug.catcher.domain.request.controller;
 
 import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.request.dto.RequestMediaFileUrlDto;
 import jakarta.servlet.http.HttpSession;
 import com.bug.catcher.global.auth.SessionConst;
 import org.springframework.http.MediaType;
@@ -53,9 +54,9 @@ public class RequestController {
 
     // update request
     @PatchMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public RequestDetailResponseDto updateRequest(@PathVariable Long requestId, @ModelAttribute RequestFormDto form, HttpSession session) {
+    public RequestDetailResponseDto updateRequest(@PathVariable Long requestId, @ModelAttribute RequestFormDto form, @ModelAttribute RequestMediaFileUrlDto mediaUrlDto, HttpSession session) {
         User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-        requestService.updateRequest(requestId, loginUser.getId(), form);
+        requestService.updateRequest(requestId, loginUser.getId(), form, mediaUrlDto);
         System.out.println("수정 성공");
         return requestService.readRequestDetail(requestId);
     }

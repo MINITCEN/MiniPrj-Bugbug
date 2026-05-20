@@ -1,15 +1,19 @@
 package com.bug.catcher.domain.request.controller;
 
-import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.request.dto.RequestDetailResponseDto;
 import com.bug.catcher.domain.request.dto.RequestEditFormDto;
 import com.bug.catcher.domain.request.dto.RequestFormDto;
+import com.bug.catcher.domain.request.dto.RequestMediaFileUrlDto;
 import com.bug.catcher.domain.request.service.RequestService;
 import com.bug.catcher.global.auth.SessionConst;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,13 +35,15 @@ public class RequestViewController {
 
     // 전체 게시판 조회하기
     @GetMapping("/list")
-    public String requestList(HttpSession session, Model model) {
-        List<Map<String, Object>> requestList = requestService.readRequestList();
+    public String requestList(@PageableDefault(size=10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, HttpSession session, Model model) {
+        Page<Map<String, Object>> requestPage = requestService.readRequestPage(pageable);
         User user = (User) session.getAttribute("user");
         if (user != null) {
             model.addAttribute("role", user.getRole());
         }
-        model.addAttribute("requestList", requestList);
+
+        model.addAttribute("requestPage", requestPage);
+        model.addAttribute("requestList", requestPage.getContent());
         return "wholeRequestList";
     }
 
@@ -108,13 +114,13 @@ public class RequestViewController {
 
     // 의뢰 수정 처리
     @PostMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String updateRequest(@PathVariable Long requestId, @ModelAttribute RequestFormDto form, HttpSession session) {
+    public String updateRequest(@PathVariable Long requestId, @ModelAttribute RequestFormDto form, @ModelAttribute RequestMediaFileUrlDto mediaUrlDto, HttpSession session) {
         User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
         if (loginUser == null) {
             return "redirect:/login";
         }
 
-        requestService.updateRequest(requestId, loginUser.getId(), form);
+        requestService.updateRequest(requestId, loginUser.getId(), form, mediaUrlDto);
         return "redirect:/api/requestView/detail/" + requestId;
     }
 

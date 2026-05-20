@@ -69,16 +69,21 @@
             </tbody>
         </table>
 
-        <div class="pagination">
-            <a href="#">＜</a>
-            <a class="active" href="#">1</a>
-            <a href="#">2</a>
-            <a href="#">3</a>
-            <a href="#">4</a>
-            <a href="#">5</a>
-            <span>...</span>
-            <a href="#">10</a>
-            <a href="#">＞</a>
+        <div class="pagination" th:if="${requestPage.totalPages > 0}">
+            <a th:if="${requestPage.hasPrevious()}"
+               th:href="@{/api/requestView/list(page=${requestPage.number - 1}, size=${requestPage.size})}">
+                ＜
+            </a>
+            <a th:each="pageNum : ${#numbers.sequence(0, requestPage.totalPages - 1)}"
+               th:href="@{/api/requestView/list(page=${pageNum}, size=${requestPage.size})}"
+               th:text="${pageNum + 1}"
+               th:classappend="${pageNum == requestPage.number} ? 'active'">
+                1
+            </a>
+            <a th:if="${requestPage.hasNext()}"
+               th:href="@{/api/requestView/list(page=${requestPage.number + 1}, size=${requestPage.size})}">
+                ＞
+            </a>
         </div>
     </section>
 

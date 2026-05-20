@@ -25,8 +25,7 @@ public class RequestFormDto {
     private LocalDateTime occurrenceTime;
     private Double latitude;
     private Double longitude;
-    private String occurrencePlace;
-    private String additionalDescription;
+    private String description;
 
     // 이미지 여러 장 업로드
     private List<MultipartFile> imageFiles = new ArrayList<>();

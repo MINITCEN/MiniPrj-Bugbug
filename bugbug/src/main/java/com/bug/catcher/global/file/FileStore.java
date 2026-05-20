@@ -13,10 +13,10 @@ import java.util.UUID;
 @Component
 public class FileStore {
 
-    @Value("${file.image-upload-dir:C:/bugbug/uploads/request-images/}")
+    @Value("${file.image-upload-dir:uploads/request-images/}")
     private String imageUploadDir;
 
-    @Value("${file.video-upload-dir:C:/bugbug/uploads/request-videos/}")
+    @Value("${file.video-upload-dir:uploads/request-videos/}")
     private String videoUploadDir;
 
     /**

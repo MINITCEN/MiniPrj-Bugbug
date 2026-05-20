@@ -12,6 +12,8 @@ import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.domain.user.repository.UserRepository;
 import com.bug.catcher.global.file.FileStore;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -47,7 +49,7 @@ public class RequestService {
                 .title(form.getTitle())
                 .content(replacedContent)
                 .occurrenceTime(form.getOccurrenceTime())
-                .description(buildDescription(form))
+                .description(form.getDescription())
                 .videoUrl(videoUrl)
                 .viewCount(0)
                 .build();
@@ -61,10 +63,8 @@ public class RequestService {
     @Transactional(readOnly = true)
     public List<Map<String, Object>> readRequestList() {
         List<Request> requests = requestRepository.findAll();
-
         return requests.stream().map(request -> {
             Map<String, Object> result = new LinkedHashMap<>();
-
             result.put("requestId", request.getId());
             result.put("status", request.getStatus());
             result.put("title", request.getTitle());
@@ -78,6 +78,26 @@ public class RequestService {
 
             return result;
         }).toList();
+    }
+
+    // read list for paging
+    @Transactional(readOnly = true)
+    public Page<Map<String, Object>> readRequestPage(Pageable pageable) {
+        return requestRepository.findAll(pageable)
+                .map(request -> {
+                    Map<String, Object> result = new LinkedHashMap<>();
+                    result.put("requestId", request.getId());
+                    result.put("status", request.getStatus());
+                    result.put("title", request.getTitle());
+                    result.put("content", request.getContent());
+                    result.put("approxLocation", request.getApproxLocation());
+                    result.put("exactLocation", request.getExactLocation());
+                    result.put("occurrenceTime", request.getOccurrenceTime());
+                    result.put("createdAt", request.getCreatedAt());
+                    result.put("description", request.getDescription());
+                    result.put("viewCount", request.getViewCount());
+                    return result;
+                });
     }
 
     // detail
@@ -97,32 +117,53 @@ public class RequestService {
 
     // update
     @Transactional
-    public void updateRequest(Long requestId, Long loginUserId, RequestFormDto form) {
+    public void updateRequest(Long requestId, Long loginUserId, RequestFormDto form, RequestMediaFileUrlDto mediaUrlDto) {
+        Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
+                .orElseThrow(() -> new IllegalStateException("게시글이 없거나 수정 권한이 없습니다."));
+        // 1. 사용자가 삭제한 기존 미디어 먼저 제거
+        deleteMedia(requestId, loginUserId, mediaUrlDto);
 
-        // 1. 게시글 기본 정보 수정 + 권한 검증
+        // 2. 새 파일 저장
+        List<String> newImageUrls = fileStore.storeImages(form.getImageFiles());
+
+        String newVideoUrl = null;
+        if (form.getVideoFile() != null && !form.getVideoFile().isEmpty()) {
+            String dbVideoUrl = requestRepository.findVideoUrlByRequestIdAndUserId(requestId, loginUserId);
+
+            if (dbVideoUrl != null && !dbVideoUrl.isBlank()) {
+                throw new IllegalStateException("기존 영상을 삭제한 후 새 영상을 등록해 주세요.");
+            }
+
+            newVideoUrl = fileStore.storeVideo(form.getVideoFile());
+        }
+
+        // 3. 본문 안의 base64/blob URL을 실제 업로드 URL로 치환
+        String replacedContent = replaceMediaSrc(form.getContent(), newImageUrls, newVideoUrl);
+
+        // 4. 게시글 기본 정보 수정
         int updatedCount = requestRepository.update(
-                requestId,
-                loginUserId,
                 form.getTitle(),
-                form.getContent(),
+                replacedContent,
                 form.getLocation(),
                 form.getDetailLocation(),
-                form.getOccurrenceTime()
+                form.getOccurrenceTime(),
+                form.getDescription(),
+                form.getStatus(),
+                requestId,
+                loginUserId
         );
 
         if (updatedCount == 0) {
             throw new IllegalStateException("게시글이 없거나 수정 권한이 없습니다.");
         }
 
-        // 2. 새 이미지 / 새 동영상 추가를 위해 게시글 조회
-        Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
-                .orElseThrow(() -> new IllegalStateException("게시글이 없거나 수정 권한이 없습니다."));
+        // 5. 새 이미지 URL DB 저장
+        saveImages(request, newImageUrls);
 
-        // 3. 새 이미지가 있으면 추가
-        addNewImages(request, form);
-
-        // 4. 새 동영상이 있으면 추가
-        addNewVideo(requestId, loginUserId, form);
+        // 6. 새 동영상 URL DB 저장
+        if (newVideoUrl != null && !newVideoUrl.isBlank()) {
+            requestRepository.updateVideoUrl(requestId, loginUserId, newVideoUrl);
+        }
     }
 
     // delete request
@@ -240,16 +281,6 @@ public class RequestService {
         fileStore.deleteVideoByUrl(videoUrl);
     }
 
-    private String buildDescription(RequestFormDto form) {
-        return """
-                발생 위치: %s
-                추가 설명: %s
-                """.formatted(
-                nullToBlank(form.getOccurrencePlace()),
-                nullToBlank(form.getAdditionalDescription())
-        );
-    }
-
     // content 경로 교체 메소드
     private String replaceMediaSrc(String content, List<String> imageUrls, String videoUrl) {
         if (content == null || content.isBlank()) {
@@ -295,7 +326,7 @@ public class RequestService {
         form.setLocation(request.getApproxLocation());
         form.setDetailLocation(request.getExactLocation());
         form.setOccurrenceTime(request.getOccurrenceTime());
-        form.setAdditionalDescription(request.getDescription());
+        form.setDescription(request.getDescription());
 
         RequestMediaFileUrlDto mediaUrl = new RequestMediaFileUrlDto();
 //        form.setLatitude(request.getLatitude());

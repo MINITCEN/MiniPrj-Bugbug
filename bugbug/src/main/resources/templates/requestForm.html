@@ -40,7 +40,7 @@
             </div>
 
             <!-- 진행 상태 / 난이도 -->
-            <div class="form-group">
+            <div class="form-group" th:if="${mode == 'edit'}">
                 <label>
                     진행 상태 <span class="required">*</span>
                 </label>
@@ -50,17 +50,6 @@
                     <option value="예약 중" th:selected="${form.status == '예약 중'}">예약 중</option>
                     <option value="완료" th:selected="${form.status == '완료'}">완료</option>
                 </select>
-
-<!--                <label>-->
-<!--                    난이도 <span class="required">*</span>-->
-<!--                </label>-->
-
-<!--                <select name="difficulty" id="difficulty" required>-->
-<!--                    <option value="">난이도를 선택하세요</option>-->
-<!--                    <option value="EASY">쉬움</option>-->
-<!--                    <option value="NORMAL">보통</option>-->
-<!--                    <option value="HARD">어려움</option>-->
-<!--                </select>-->
 
                 <span th:if="${role == 'hunter'}" class="hint">
                     높은 난이도를 완수할수록 더 높은 헌터 등급에 도달할 수 있습니다.
@@ -93,7 +82,7 @@
                 </p>
             </div>
 
-            <!-- 상세 내용 / 파일 첨부 / 프리뷰 -->
+            <!-- 상세 내용 -->
             <div class="form-group full">
                 <div class="detail-row full">
                     <label>
@@ -118,9 +107,13 @@
                                  class="content-editor"
                                  contenteditable="true"
                                  th:utext="${form.content}"
-                                 data-placeholder="벌레가 나온 위치, 크기, 개체 수, 현재 상황 등을 자세히 작성해주세요.
+                                 data-placeholder="해당 양식에 맞춰 자세히 작성해주세요.
 --------------------------------------------------------------------
-※ 작성 예시: 바퀴벌레가 나타났어요!!! 크기는 대략 5cm이고 1마리에요. 10분 전쯤 발견했어요!!!"></article>
+※ 작성 예시:
+1. 벌레 종류 : 바퀴벌레
+2. 벌레 크기 : 3~4cm
+3. 발생 위치 : 주방 싱크대 근처
+4. 벌레 개체 수 : 1마리"></article>
 
                         <!-- 서버로 전송될 실제 본문 HTML -->
                         <input type="hidden"
@@ -158,52 +151,20 @@
                     </div>
                 </div>
 
-                <!-- 상세 입력 정보 -->
+                <!-- 추가 요청 사항 -->
                 <div class="detail-input-box">
-
-                    <div class="detail-row">
-                        <label>발생 위치</label>
-
-                        <input type="text"
-                               name="occurrencePlace"
-                               placeholder="예: 주방 싱크대 근처"
-                               th:value="${form.occurrencePlace}"
-                               required>
+                    <div class="detail-row full">
+                        <label>추가 요청 사항</label>
+                        <input name="description"
+                                  placeholder="도착하면 전화 주세요"
+                                  required
+                                  th:value="${form != null ? form.description : ''}">
                     </div>
-
-<!--                    <div class="detail-row">-->
-<!--                        <label>-->
-<!--                            벌레 종류 <span class="small-text">(추정)</span>-->
-<!--                        </label>-->
-
-<!--                        <input type="text"-->
-<!--                               name="bugType"-->
-<!--                               placeholder="예: 바퀴벌레, 거미"-->
-<!--                               th:value="${form.bugType}"-->
-<!--                               required>-->
-<!--                    </div>-->
-
-<!--                    <div class="detail-row">-->
-<!--                        <label>크기</label>-->
-
-<!--                        <input type="text"-->
-<!--                               name="bugSize"-->
-<!--                               placeholder="예: 3~4cm 정도"-->
-<!--                               th:value="${form.bugSize}">-->
-<!--                    </div>-->
-
                     <div class="detail-row">
                         <label>발생 시간</label>
                         <input type="datetime-local"
                                name="occurrenceTime"
                                th:value="${form.occurrenceTime}">
-                    </div>
-                    <div class="detail-row full">
-                        <label>추가 설명</label>
-                        <textarea name="additionalDescription"
-                                  placeholder="예: 한 마리만 봤고, 더 있는지는 모르겠어요. 잡아주신 후 청소나 처리가 부탁드려요."
-                                  required
-                                  th:text="${form != null ? form.additionalDescription : ''}"></textarea>
                     </div>
 
                 </div>
