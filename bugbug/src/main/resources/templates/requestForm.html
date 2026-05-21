@@ -22,6 +22,11 @@
           th:action="${mode == 'edit'} ? @{/api/requestView/edit/{id}(id=${requestId})} : @{/api/requestView/new}"
           enctype="multipart/form-data">
 
+        <input type="hidden"
+               name="status"
+               value="대기 중"
+               th:if="${mode == 'create'}">
+
         <h2 class="section-title">의뢰 정보 입력</h2>
 
         <div class="form-grid">
@@ -47,6 +52,7 @@
 
                 <select name="status">
                     <option value="">상태를 선택하세요</option>
+                    <option value="대기 중" th:selected="${form.status == '대기 중'}">대기 중</option>
                     <option value="예약 중" th:selected="${form.status == '예약 중'}">예약 중</option>
                     <option value="완료" th:selected="${form.status == '완료'}">완료</option>
                 </select>
@@ -90,38 +96,42 @@
                     </label>
 
                     <div class="content-editor-box">
-
-                        <!-- 업로드 버튼 영역 -->
-                        <div class="upload-toolbar">
-                            <label for="imageFiles" class="upload-file-btn">
-                                🖼 이미지
-                            </label>
-
-                            <label for="videoFile" class="upload-file-btn">
-                                🎥 동영상
-                            </label>
-                        </div>
-
                         <!-- 본문 입력 영역 -->
                         <article id="contentEditor"
                                  class="content-editor"
                                  contenteditable="true"
-                                 th:utext="${form.content}"
-                                 data-placeholder="해당 양식에 맞춰 자세히 작성해주세요.
---------------------------------------------------------------------
-※ 작성 예시:
-1. 벌레 종류 : 바퀴벌레
-2. 벌레 크기 : 3~4cm
-3. 발생 위치 : 주방 싱크대 근처
-4. 벌레 개체 수 : 1마리"></article>
+                                 th:text="${mode == 'create'} ?
+                                 '1. 벌레 종류 :
+2. 벌레 크기 :
+3. 발생 위치 :
+4. 벌레 개체 수 :'
+                                 : form.content"></article>
 
                         <!-- 서버로 전송될 실제 본문 HTML -->
                         <input type="hidden"
                                id="contentHidden"
                                name="content"
                                th:value="${form.content}">
+                    </div>
+                </div>
 
-                        <!-- 실제 파일 input -->
+                <!-- 첨부 파일 -->
+                <div class="detail-row full">
+                    <label>첨부 파일</label>
+
+                    <div class="media-upload-section">
+                        <div class="upload-toolbar">
+                            <label for="imageFiles" class="upload-file-btn">
+                                이미지 첨부
+                            </label>
+
+                            <button type="button"
+                                    id="videoUploadButton"
+                                    class="upload-file-btn">
+                                동영상 첨부
+                            </button>
+                        </div>
+
                         <input type="file"
                                id="imageFiles"
                                name="imageFiles"
@@ -135,19 +145,43 @@
                                accept="video/*"
                                hidden>
 
-                        <!-- 선택한 파일 프리뷰 영역 -->
-                        <div id="previewContainer" class="preview-container"></div>
+                        <div class="existing-media-grid"
+                             th:if="${mode == 'edit' and mediaUrl != null and ((mediaUrl.imageUrls != null and !#lists.isEmpty(mediaUrl.imageUrls)) or (mediaUrl.videoUrl != null and !#strings.isEmpty(mediaUrl.videoUrl)))}">
+                            <div class="preview-box existing-preview"
+                                 th:each="imageUrl : ${mediaUrl.imageUrls}">
+                                <img class="preview-img"
+                                     th:src="@{${imageUrl}}"
+                                     alt="기존 첨부 이미지">
+                                <button type="button"
+                                        class="remove-file-btn existing-remove-btn"
+                                        data-media-type="image"
+                                        th:data-url="${imageUrl}"
+                                        aria-label="기존 이미지 삭제">
+                                    x
+                                </button>
+                            </div>
 
-                        <!-- 프리뷰를 본문에 삽입하는 확인 버튼 영역 -->
-                        <div id="previewConfirmArea"
-                             class="preview-confirm-area"
-                             style="display:none;">
-                            <button type="button"
-                                    id="insertMediaBtn"
-                                    class="btn submit-btn insert-media-btn">
-                                본문에 삽입
-                            </button>
+                            <div class="preview-box existing-preview video-preview-box"
+                                 th:if="${mediaUrl.videoUrl != null and !#strings.isEmpty(mediaUrl.videoUrl)}">
+                                <video class="preview-video"
+                                       th:src="@{${mediaUrl.videoUrl}}"
+                                       controls>
+                                </video>
+                                <button type="button"
+                                        class="remove-file-btn existing-remove-btn"
+                                        data-media-type="video"
+                                        th:data-url="${mediaUrl.videoUrl}"
+                                        aria-label="기존 동영상 삭제">
+                                    x
+                                </button>
+                            </div>
                         </div>
+
+                        <div id="previewContainer" class="media-preview-grid"></div>
+
+                        <p class="media-empty" id="mediaEmptyText">
+                            첨부한 이미지와 동영상이 여기에 표시됩니다.
+                        </p>
                     </div>
                 </div>
 
@@ -177,7 +211,7 @@
             <strong>작성 안내</strong><br>
             허위 의뢰나 장난성 글은 관리자에 의해 삭제될 수 있습니다.<br>
             작성자 정보는 로그인한 사용자 기준으로 자동 저장되며, 화면에서는 직접 입력하지 않습니다.<br>
-            등록 후 상태는 기본적으로 <strong>예약 중</strong> 또는 <strong>완료</strong> 상태로 저장하는 것이 좋습니다.
+            등록 후 상태는 기본적으로 <strong>대기 중</strong> 상태로 저장됩니다.
         </div>
 
         <!-- 버튼 영역 -->

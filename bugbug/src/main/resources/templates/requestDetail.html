@@ -75,10 +75,33 @@
 
             <!-- 본문 -->
             <section class="content-section">
-                <!-- 현재는 content에 URL이 없으므로 텍스트 기준 출력 -->
+                <h2>상세 내용</h2>
                 <div class="detail-content"
-                     th:utext="${request.content}">
+                     th:text="${request.content}">
                     상세 내용이 들어갑니다.
+                </div>
+            </section>
+
+            <!-- 첨부 파일 -->
+            <section class="media-section"
+                     th:if="${(request.imageUrls != null and !#lists.isEmpty(request.imageUrls)) or (request.videoUrl != null and !#strings.isEmpty(request.videoUrl))}">
+                <h2>첨부 파일</h2>
+
+                <div class="media-grid">
+                    <div class="media-item"
+                         th:each="imageUrl : ${request.imageUrls}">
+                        <img class="detail-image"
+                             th:src="@{${imageUrl}}"
+                             alt="첨부 이미지">
+                    </div>
+
+                    <div class="media-item video-item"
+                         th:if="${request.videoUrl != null and !#strings.isEmpty(request.videoUrl)}">
+                        <video class="detail-video"
+                               th:src="@{${request.videoUrl}}"
+                               controls>
+                        </video>
+                    </div>
                 </div>
             </section>
 

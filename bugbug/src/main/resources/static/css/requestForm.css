@@ -337,20 +337,19 @@ textarea:focus {
     box-shadow: 0 0 0 3px rgba(6, 75, 43, 0.08);
 }
 
-.upload-toolbar {
-    height: 0;
-    opacity: 0;
-    overflow: hidden;
-    display: flex;
-    gap: 8px;
-    margin-bottom: 0;
-    transition: all 0.25s ease;
+.media-upload-section {
+    width: 100%;
+    min-height: 180px;
+    border: 1px dashed #cfd8d2;
+    border-radius: 10px;
+    background-color: #fbfcfb;
+    padding: 16px;
 }
 
-.content-editor-box:hover .upload-toolbar,
-.content-editor-box:focus-within .upload-toolbar {
-    height: 40px;
-    opacity: 1;
+.upload-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-bottom: 8px;
 }
 
@@ -391,29 +390,39 @@ textarea:focus {
     white-space: pre-wrap;
 }
 
-.preview-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 12px;
-    padding-top: 12px;
+.existing-media-grid,
+.media-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+    padding-top: 14px;
     border-top: 1px dashed #dcdcdc;
 }
 
-.preview-container:empty {
+.media-preview-grid:empty {
     display: none;
+}
+
+.existing-preview {
+    opacity: 0.9;
 }
 
 .preview-box {
     position: relative;
-    width: 120px;
-    height: 120px;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+}
+
+.video-preview-box {
+    grid-column: 1 / -1;
+    aspect-ratio: 16 / 9;
 }
 
 .preview-img,
 .preview-video {
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     border-radius: 8px;
     border: 1px solid #ddd;
@@ -423,7 +432,7 @@ textarea:focus {
 .remove-file-btn {
     position: absolute;
     right: 6px;
-    bottom: 6px;
+    top: 6px;
     width: 24px;
     height: 24px;
     border: none;
@@ -442,8 +451,10 @@ textarea:focus {
     background-color: #c92a2a;
 }
 
-.insert-media-btn{
-    margin-top: 12px;
+.media-empty {
+    margin: 12px 0 0;
+    color: #777;
+    font-size: 13px;
 }
 
 /* 상세 내용 에디터 영역만 라벨 아래에 입력 칸이 오도록 배치 */
