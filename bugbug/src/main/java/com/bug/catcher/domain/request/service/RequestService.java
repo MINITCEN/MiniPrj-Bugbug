@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -40,14 +39,17 @@ public class RequestService {
         List<String> imageUrls = fileStore.storeImages(form.getImageFiles());
         String videoUrl = fileStore.storeVideo(form.getVideoFile());
 
-        String replacedContent = replaceMediaSrc(form.getContent(), imageUrls, videoUrl);
+        String status = form.getStatus() == null || form.getStatus().isBlank()
+                ? "대기 중"
+                : form.getStatus();
+
         Request request = Request.builder()
                 .user(loginUser)
-                .status(form.getStatus())
+                .status(status)
                 .approxLocation(form.getLocation())
                 .exactLocation(form.getDetailLocation())
                 .title(form.getTitle())
-                .content(replacedContent)
+                .content(form.getContent())
                 .occurrenceTime(form.getOccurrenceTime())
                 .description(form.getDescription())
                 .videoUrl(videoUrl)
@@ -137,13 +139,9 @@ public class RequestService {
             newVideoUrl = fileStore.storeVideo(form.getVideoFile());
         }
 
-        // 3. 본문 안의 base64/blob URL을 실제 업로드 URL로 치환
-        String replacedContent = replaceMediaSrc(form.getContent(), newImageUrls, newVideoUrl);
-
-        // 4. 게시글 기본 정보 수정
         int updatedCount = requestRepository.update(
                 form.getTitle(),
-                replacedContent,
+                form.getContent(),
                 form.getLocation(),
                 form.getDetailLocation(),
                 form.getOccurrenceTime(),
@@ -172,12 +170,25 @@ public class RequestService {
         Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
                 .orElseThrow(() -> new IllegalStateException("게시글이 없거나 삭제 권한이 없습니다."));
 
+        List<String> imageUrls = request.getRequestImages()
+                .stream()
+                .map(RequestImage::getImageUrl)
+                .toList();
+        String videoUrl = request.getVideoUrl();
+
         requestRepository.delete(request);
+
+        imageUrls.forEach(fileStore::deleteImageByUrl);
+        fileStore.deleteVideoByUrl(videoUrl);
     }
 
     // delete media
     @Transactional
     public void deleteMedia(Long requestId, Long loginUserId, RequestMediaFileUrlDto dto) {
+        if (dto == null) {
+            return;
+        }
+
         Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
                 .orElseThrow(() -> new IllegalStateException("게시글이 없거나 삭제 권한이 없습니다."));
 
@@ -198,46 +209,6 @@ public class RequestService {
                     .build();
 
             requestImageRepository.save(requestImage);
-        }
-    }
-
-    private void addNewImages(Request request, RequestFormDto form) {
-        if (form.getImageFiles() == null || form.getImageFiles().isEmpty()) {
-            return;
-        }
-
-        List<MultipartFile> validImageFiles = form.getImageFiles().stream()
-                .filter(file -> file != null && !file.isEmpty())
-                .toList();
-
-        if (validImageFiles.isEmpty()) {
-            return;
-        }
-
-        List<String> newImageUrls = fileStore.storeImages(validImageFiles);
-
-        saveImages(request, newImageUrls);
-    }
-
-    private void addNewVideo(Long requestId, Long loginUserId, RequestFormDto form) {
-        MultipartFile videoFile = form.getVideoFile();
-
-        if (videoFile == null || videoFile.isEmpty()) {
-            return;
-        }
-
-        String dbVideoUrl = requestRepository.findVideoUrlByRequestIdAndUserId(requestId, loginUserId);
-
-        if (dbVideoUrl != null && !dbVideoUrl.isBlank()) {
-            throw new IllegalStateException("기존 영상을 삭제한 후 새 영상을 등록해 주세요.");
-        }
-
-        String newVideoUrl = fileStore.storeVideo(videoFile);
-
-        int updatedCount = requestRepository.updateVideoUrl(requestId, loginUserId, newVideoUrl);
-
-        if (updatedCount == 0) {
-            throw new IllegalStateException("게시글이 없거나 수정 권한이 없습니다.");
         }
     }
 
@@ -281,34 +252,6 @@ public class RequestService {
         fileStore.deleteVideoByUrl(videoUrl);
     }
 
-    // content 경로 교체 메소드
-    private String replaceMediaSrc(String content, List<String> imageUrls, String videoUrl) {
-        if (content == null || content.isBlank()) {
-            return content;
-        }
-
-        String replaced = content;
-
-        if (imageUrls != null) {
-            for (String imageUrl : imageUrls) {
-                replaced = replaced.replaceFirst(
-                        "<img([^>]*)src=\"[^\"]*\"([^>]*)>",
-                        "<img$1src=\"" + imageUrl + "\"$2>"
-                );
-            }
-        }
-
-        if (videoUrl != null && !videoUrl.isBlank()) {
-            replaced = replaced.replaceFirst(
-                    "<video([^>]*)src=\"[^\"]*\"([^>]*)>",
-                    "<video$1src=\"" + videoUrl + "\"$2>"
-            );
-        }
-
-        return replaced;
-    }
-
-
     @Transactional(readOnly = true)
     public RequestEditFormDto getEditForm(Long requestId, Long loginUserId) {
         Request request = requestRepository.findById(requestId)
@@ -348,7 +291,4 @@ public class RequestService {
         return editForm;
     }
 
-    private String nullToBlank(String value) {
-        return value == null ? "" : value;
-    }
 }
