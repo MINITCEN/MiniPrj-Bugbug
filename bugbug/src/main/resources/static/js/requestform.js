@@ -9,6 +9,7 @@ const contentHidden = document.getElementById("contentHidden");
 const imageInput = document.getElementById("imageFiles");
 const videoInput = document.getElementById("videoFile");
 const videoUploadButton = document.getElementById("videoUploadButton");
+const statusSelect = document.getElementById("statusSelect");
 
 const previewContainer = document.getElementById("previewContainer");
 const existingMediaGrid = document.querySelector(".existing-media-grid");
@@ -399,7 +400,34 @@ toggleEmptyText();
 
 
 /* =========================================================
-7. 폼 제출 전 본문 내용 hidden input에 저장
+7. 진행 상태 색상 동기화
+========================================================= */
+if (statusSelect) {
+    statusSelect.addEventListener("change", syncStatusColor);
+    syncStatusColor();
+}
+
+function syncStatusColor() {
+    statusSelect.classList.remove("is-waiting", "is-reserved", "is-done");
+
+    if (statusSelect.value === "대기 중") {
+        statusSelect.classList.add("is-waiting");
+        return;
+    }
+
+    if (statusSelect.value === "예약 중") {
+        statusSelect.classList.add("is-reserved");
+        return;
+    }
+
+    if (statusSelect.value === "완료") {
+        statusSelect.classList.add("is-done");
+    }
+}
+
+
+/* =========================================================
+8. 폼 제출 전 본문 내용 hidden input에 저장
 ========================================================= */
 if (requestForm && contentEditor && contentHidden) {
     requestForm.addEventListener("submit", function (event) {
