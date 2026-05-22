@@ -16,8 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class MyPageService {
@@ -83,11 +81,9 @@ public class MyPageService {
 
     // 찜한 헌터 목록 보기
     @Transactional(readOnly = true)
-    public List<MySavedHunterResponseDto> getMySavedHunters(Long userId) {
-        return savedHunterRepository.findByUserId(userId)
-                .stream()
-                .map(MySavedHunterResponseDto::new)
-                .toList();
+    public Page<MySavedHunterResponseDto> getMySavedHunters(Long userId, Pageable pageable) {
+        return savedHunterRepository.findByUserId(userId, pageable)
+                .map(MySavedHunterResponseDto::new);
     }
 
     // 완료된 의뢰 리뷰 쓰기

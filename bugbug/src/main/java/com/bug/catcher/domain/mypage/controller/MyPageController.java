@@ -18,8 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/mypage")
 @RequiredArgsConstructor
@@ -71,11 +69,11 @@ public class MyPageController {
 
     // 찜한 헌터 목록 조회
     @GetMapping("/bookmarks/hunters")
-    public ResponseEntity<List<MySavedHunterResponseDto>> getMySavedHunters(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+    public ResponseEntity<Page<MySavedHunterResponseDto>> getMySavedHunters(
+            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        List<MySavedHunterResponseDto> response = myPageService.getMySavedHunters(loginUser.getId());
+        Page<MySavedHunterResponseDto> response = myPageService.getMySavedHunters(loginUser.getId(), pageable);
         return ResponseEntity.ok(response);
     }
 

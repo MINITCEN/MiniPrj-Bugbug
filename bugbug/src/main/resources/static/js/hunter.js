@@ -58,6 +58,10 @@
         });
     }
 
+    function isBookmarked(hunter) {
+        return Boolean(hunter.isBookmarked ?? hunter.bookmarked);
+    }
+
     function renderHunters(items) {
         const hunters = filteredHunters(items);
         list.innerHTML = "";
@@ -71,6 +75,7 @@
         const fragment = document.createDocumentFragment();
 
         hunters.forEach((hunter) => {
+            const bookmarked = isBookmarked(hunter);
             const card = document.createElement("article");
             card.className = "hunter-card";
             card.innerHTML = `
@@ -80,11 +85,11 @@
                         <span class="hunter-card__grade">${escapeHtml(hunter.grade || "일반 헌터")}</span>
                     </div>
                     <button
-                        class="hunter-bookmark ${hunter.isBookmarked ? "is-active" : ""}"
+                        class="hunter-bookmark ${bookmarked ? "is-active" : ""}"
                         type="button"
-                        aria-label="${hunter.isBookmarked ? "찜 취소" : "찜하기"}"
+                        aria-label="${bookmarked ? "찜 취소" : "찜하기"}"
                         data-hunter-id="${escapeHtml(hunter.hunterId)}"
-                    >${hunter.isBookmarked ? "♥" : "♡"}</button>
+                    >${bookmarked ? "♥" : "♡"}</button>
                 </div>
                 <div class="hunter-card__stats">
                     <div class="hunter-stat">
@@ -185,4 +190,9 @@
     });
 
     document.addEventListener("DOMContentLoaded", () => loadHunters(0));
+    window.addEventListener("pageshow", (event) => {
+        if (event.persisted) {
+            loadHunters(state.page);
+        }
+    });
 })();
