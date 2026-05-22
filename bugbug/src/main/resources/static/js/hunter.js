@@ -185,4 +185,9 @@
     });
 
     document.addEventListener("DOMContentLoaded", () => loadHunters(0));
+    window.addEventListener("pageshow", (event) => {
+        if (event.persisted) {
+            loadHunters(state.page);
+        }
+    });
 })();
