@@ -37,11 +37,11 @@ public class ChatRoomController {
     @Operation(summary = "채팅방 생성", description = "의뢰에 지원하며 새로운 채팅방을 생성합니다.")
     @PostMapping("/requests/{requestId}/apply")
     public ResponseEntity<Long> applyAndCreateRoom(
-            @PathVariable Long requestId,
-            @RequestBody ChatRoomDto.CreateRequest request) {
+            @PathVariable("requestId") Long requestId,
+            @SessionAttribute(com.bug.catcher.global.auth.SessionConst.LOGIN_USER) com.bug.catcher.domain.entity.User loginUser) {
         
-        // 프론트에서 넘어온 requestId를 DTO에 세팅해주거나 로직 조정 필요
-        Long roomId = chatRoomService.createChatRoom(request);
+        // 세션의 유저 ID를 이용해 백엔드에서 안전하게 헌터 정보를 찾고 방을 생성합니다.
+        Long roomId = chatRoomService.createChatRoom(requestId, loginUser.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(roomId);
     }
 

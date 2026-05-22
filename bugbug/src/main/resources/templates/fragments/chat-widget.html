@@ -6,6 +6,10 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     
+    <!-- 위젯 스스로 세션에서 내 정보를 빼옵니다 (컨트롤러 불필요) -->
+    <input type="hidden" id="widget-user-id" th:value="${session.loginUser?.id}">
+    <input type="hidden" id="widget-user-role" th:value="${session.loginUser?.role}">
+
     <!-- 팝업창 메인 컨테이너 -->
     <div id="bugbug-chat-window">
         
