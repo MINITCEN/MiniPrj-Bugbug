@@ -187,6 +187,30 @@
 
             </div>
 
+            <section class="comment-section">
+                <div class="comment-section-header">
+                    <h2 class="comment-section-title">댓글</h2>
+                    <span id="commentCount" class="comment-count">0</span>
+                </div>
+
+                <form id="commentForm" class="comment-form">
+                    <label for="commentContent" class="comment-form-label">댓글 작성</label>
+                    <textarea id="commentContent"
+                              class="comment-textarea"
+                              rows="4"
+                              maxlength="1000"
+                              placeholder="댓글을 입력하세요."
+                              required></textarea>
+                    <div class="comment-form-footer">
+                        <p class="comment-form-hint">최대 1000자까지 입력할 수 있습니다.</p>
+                        <button type="submit" class="btn-primary comment-submit-btn">댓글 등록</button>
+                    </div>
+                </form>
+
+                <div id="commentMessage" class="comment-message" hidden></div>
+                <div id="commentList" class="comment-list"></div>
+            </section>
+
         </section>
 
         <!-- 오른쪽 사이드 영역 -->
@@ -228,6 +252,12 @@
 <input type="hidden"
        id="detailLocation"
        th:value="${request.approxLocation}">
+<input type="hidden"
+       id="requestId"
+       th:value="${request.requestId}">
+<input type="hidden"
+       id="loginUserId"
+       th:value="${loginUserId}">
 
 <div th:replace="~{fragments/footer :: siteFooter()}"></div>
 
