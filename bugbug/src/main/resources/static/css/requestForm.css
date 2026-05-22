@@ -95,12 +95,60 @@ a {
     padding: 34px 38px;
 }
 
+.form-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #111;
+}
+
 .section-title {
     font-size: 19px;
     font-weight: bold;
-    margin: 0 0 20px;
-    padding-bottom: 14px;
-    border-bottom: 2px solid #111;
+    margin: 0;
+}
+
+.status-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.status-box label {
+    color: #555;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.status-select {
+    width: auto;
+    min-width: 122px;
+    padding: 8px 32px 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.status-select.is-waiting {
+    border-color: #d8b24c;
+    background-color: #fff8df;
+    color: #7a5700;
+}
+
+.status-select.is-reserved {
+    border-color: #579f75;
+    background-color: #ecf8f0;
+    color: #064b2b;
+}
+
+.status-select.is-done {
+    border-color: #8c99aa;
+    background-color: #f1f3f5;
+    color: #394150;
 }
 
 .form-grid {
