@@ -86,6 +86,8 @@ public class RequestViewController {
         model.addAttribute("request", request);
         model.addAttribute("role", role);
         model.addAttribute("editable", editable);
+        model.addAttribute("loginUserId", loginUser != null ? loginUser.getId() : null);
+        model.addAttribute("loginUserNickname", loginUser != null ? loginUser.getNickname() : null);
         model.addAttribute("liked", false); // 찜 기능 구현 전 임시값
         model.addAttribute("kakaoMapKey", kakaoMapApiKey);
 
