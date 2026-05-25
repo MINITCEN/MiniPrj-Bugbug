@@ -6,6 +6,7 @@ import com.bug.catcher.domain.chat.repository.ChatRoomRepository;
 import com.bug.catcher.domain.entity.ChatMessage;
 import com.bug.catcher.domain.entity.ChatRoom;
 import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ public class ChatMessageService {
 
     private final ChatMessageRepository chatMessageRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final UserRepository userRepository;
 
     /**
      * 프론트에서 넘어온 메시지를 DB에 저장하고 응답 형태로 반환합니다.
@@ -25,8 +27,9 @@ public class ChatMessageService {
         ChatRoom chatRoom = chatRoomRepository.findById(requestDto.getRoomId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
 
-        // 임시로 User를 세팅합니다. (실제로는 UserRepository에서 조회)
-        User sender = User.builder().id(requestDto.getSenderId()).nickname("임시 닉네임").build();
+        // DB에서 실제 유저 정보를 조회하여 진짜 닉네임을 가져옵니다.
+        User sender = userRepository.findById(requestDto.getSenderId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .chatRoom(chatRoom)
@@ -48,7 +51,9 @@ public class ChatMessageService {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
 
-        User sender = User.builder().id(senderId).nickname("임시 닉네임").build();
+        // 파일 전송 시에도 진짜 유저 정보를 가져옵니다.
+        User sender = userRepository.findById(senderId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         String content = "파일을 보냈습니다.";
         if (type == ChatMessage.MessageType.IMAGE) content = "(사진)";

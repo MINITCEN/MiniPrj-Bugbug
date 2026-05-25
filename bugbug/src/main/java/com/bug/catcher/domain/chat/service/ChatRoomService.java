@@ -8,6 +8,7 @@ import com.bug.catcher.domain.entity.ChatRoom;
 import com.bug.catcher.domain.entity.Hunter;
 import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.hunter.repository.HunterRepository;
 import com.bug.catcher.domain.request.repository.RequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,23 +24,32 @@ public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final RequestRepository requestRepository;
+    private final HunterRepository hunterRepository;
 
     /**
      * 헌터가 의뢰에 지원하여 채팅방을 생성합니다.
      */
     @Transactional
-    public Long createChatRoom(ChatRoomDto.CreateRequest requestDto) {
+    public Long createChatRoom(Long requestId, Long hunterUserId) {
+        // 헌터의 유저 ID로 헌터 정보를 찾습니다.
+        Hunter hunter = hunterRepository.findByUserId(hunterUserId)
+                .orElseThrow(() -> new IllegalArgumentException("헌터 정보가 존재하지 않습니다."));
+
         // 1. 이미 방이 있는지 확인 (중복 방지)
-        if (chatRoomRepository.existsByRequestIdAndHunterId(requestDto.getRequestId(), requestDto.getHunterId())) {
+        if (chatRoomRepository.existsByRequestIdAndHunterId(requestId, hunter.getId())) {
             throw new IllegalArgumentException("이미 해당 의뢰에 지원하여 채팅방이 존재합니다.");
         }
 
         // 2. DB에서 실제 의뢰글을 찾아와서 의뢰인(작업 요청자) 정보를 꺼냅니다.
-        Request request = requestRepository.findById(requestDto.getRequestId())
+        Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 의뢰입니다."));
                 
-        Hunter hunter = Hunter.builder().id(requestDto.getHunterId()).build();
-        User user = request.getUser(); // 임시 1번 유저 땜빵 삭제! 의뢰글 주인이 진짜 방 주인이 됨
+        User user = request.getUser(); // 의뢰글 주인이 진짜 방 주인이 됨
+
+        // 본인의 의뢰에 본인이 헌터로 지원하는 것 방지
+        if (user.getId().equals(hunterUserId)) {
+            throw new IllegalArgumentException("본인이 작성한 의뢰에는 지원할 수 없습니다.");
+        }
 
         // 3. 채팅방 생성 및 저장
         ChatRoom chatRoom = ChatRoom.builder()
@@ -61,9 +71,9 @@ public class ChatRoomService {
         // 역할에 따라 가져오는 방법이 다름
         if ("HUNTER".equals(role)) {
             // 프론트에서 넘어온 userId를 기준으로, 그 유저와 연결된 헌터의 채팅방을 찾습니다.
-            rooms = chatRoomRepository.findByHunter_UserId(userId);
+            rooms = chatRoomRepository.findByHunter_User_Id(userId);
         } else {
-            rooms = chatRoomRepository.findByUserId(userId);
+            rooms = chatRoomRepository.findByUser_Id(userId);
         }
 
         // 가져온 방 목록을 DTO 형태로 변환

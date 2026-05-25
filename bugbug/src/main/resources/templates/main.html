@@ -131,5 +131,7 @@
 
 <div th:replace="~{fragments/footer :: siteFooter()}"></div>
 <script src="/js/common-layout.js"></script>
+<!-- 로그인한 유저에게만 채팅 위젯을 띄워줍니다 -->
+<div th:if="${session.loginUser != null}" th:replace="~{fragments/chat-widget :: chat}"></div>
 </body>
 </html>

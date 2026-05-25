@@ -158,7 +158,8 @@
                     </button>
 
                     <button type="button"
-                            class="btn-primary apply-btn">
+                            class="btn-primary apply-btn"
+                            th:onclick="|applyForRequest(${request.requestId})|">
                         ⚡ 헌터 지원하기
                     </button>
 
@@ -267,5 +268,37 @@
 <!-- 상세 페이지 지도 -->
 <script th:src="@{https://dapi.kakao.com/v2/maps/sdk.js(appkey=${kakaoMapKey},libraries='services',autoload=false)}"></script>
 <script src="/js/requestdetail.js"></script>
+
+<script>
+    async function applyForRequest(requestId) {
+        if (!confirm('이 의뢰에 지원하시겠습니까? 지원 시 의뢰인과 채팅방이 개설됩니다.')) return;
+
+        try {
+            const response = await fetch(`/api/requests/${requestId}/apply`, {
+                method: 'POST',
+                credentials: 'include' // 세션 정보 포함
+            });
+
+            if (response.ok) {
+                const roomId = await response.json();
+                alert('지원 완료! 채팅방이 성공적으로 개설되었습니다.');
+                
+                // 이미 화면 우측 하단에 있는 채팅 위젯을 열고 방 목록을 보여줍니다.
+                if (typeof toggleChatWindow === 'function') {
+                    const chatWindow = document.getElementById('bugbug-chat-window');
+                    if (chatWindow && chatWindow.style.display !== 'block') {
+                        toggleChatWindow(); // 채팅 위젯 팝업 열기
+                    }
+                }
+            } else {
+                const errorText = await response.text();
+                alert('지원에 실패했습니다: ' + errorText);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('네트워크 오류가 발생했습니다.');
+        }
+    }
+</script>
 </body>
 </html>
