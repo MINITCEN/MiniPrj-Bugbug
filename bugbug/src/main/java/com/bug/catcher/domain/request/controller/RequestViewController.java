@@ -10,6 +10,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -34,16 +35,41 @@ public class RequestViewController {
     private String kakaoMapApiKey;
 
     @GetMapping("/list")
-    public String requestList(
-            @AuthenticationPrincipal CustomUserPrincipal loginUser,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            Model model) {
+public String requestList(
+        @AuthenticationPrincipal CustomUserPrincipal loginUser,
+        @RequestParam(required = false) String status,
+        @PageableDefault(size = 10, sort = "createdAt",
+                direction = Sort.Direction.DESC) Pageable pageable,
+        @RequestParam(defaultValue = "latest") String sortType,
+        Model model) {
 
-        Page<Map<String, Object>> requestPage = requestService.readRequestPage(pageable);
-        if (loginUser != null) {
-            model.addAttribute("role", loginUser.getRole());
+    Sort sort = "viewCount".equals(sortType)
+            ? Sort.by(Sort.Direction.DESC, "viewCount")
+            : Sort.by(Sort.Direction.DESC, "createdAt");
+
+    Pageable sortedPageable = PageRequest.of(
+            pageable.getPageNumber(),
+            pageable.getPageSize(),
+            sort
+    );
+
+    Page<Map<String, Object>> requestPage =
+            requestService.readRequestPage(status, sortedPageable);
+
+    if (loginUser != null) {
+        model.addAttribute("role", loginUser.getRole());
+    }
+
+    model.addAttribute("requestPage", requestPage);
+    model.addAttribute("sortType", sortType);
+    model.addAttribute("status", status);
+
+    return "request/list";
+}
         }
 
+        model.addAttribute("sortType", sortType);
+        model.addAttribute("status", status);
         model.addAttribute("requestPage", requestPage);
         model.addAttribute("requestList", requestPage.getContent());
         return "wholeRequestList";

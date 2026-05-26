@@ -84,8 +84,11 @@ public class RequestService {
 
     // read list for paging
     @Transactional(readOnly = true)
-    public Page<Map<String, Object>> readRequestPage(Pageable pageable) {
-        return requestRepository.findAll(pageable)
+    public Page<Map<String, Object>> readRequestPage(String status, Pageable pageable) {
+        Page<Request> requestPage = (status == null || status.isBlank())
+                ? requestRepository.findAll(pageable)
+                : requestRepository.findByStatus(status, pageable);
+        return requestPage
                 .map(request -> {
                     Map<String, Object> result = new LinkedHashMap<>();
                     result.put("requestId", request.getId());
@@ -272,8 +275,6 @@ public class RequestService {
         form.setDescription(request.getDescription());
 
         RequestMediaFileUrlDto mediaUrl = new RequestMediaFileUrlDto();
-//        form.setLatitude(request.getLatitude());
-//        form.setLongitude(request.getLongitude());  나중에 추가할지도..?
 
         mediaUrl.setVideoUrl(request.getVideoUrl());
 
