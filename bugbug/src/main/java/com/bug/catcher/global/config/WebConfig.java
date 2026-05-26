@@ -23,6 +23,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**") // 모든 경로 검사
                 .excludePathPatterns(   // 예외 경로 (프리패스)
                         "/",
+                        "/service-intro",
                         "/api/users/signup",
                         "/api/auth/login",
                         "/api/auth/logout",

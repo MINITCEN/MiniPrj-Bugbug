@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>서비스 소개 | 버그버그</title>
+    <link rel="stylesheet" href="/css/common-layout.css">
+    <link rel="stylesheet" href="/css/service-intro.css">
+</head>
+<body>
+<div th:replace="~{fragments/header :: siteHeader('service-intro')}"></div>
+
+<main class="service-page">
+    <section class="service-hero">
+        <div class="service-hero__inner">
+            <p class="eyebrow">BUGBUG SERVICE</p>
+            <h1>해충 문제를 빠르게 등록하고<br>검증된 헌터와 연결합니다.</h1>
+            <p class="hero-description">
+                버그버그는 생활 속 해충 문제를 의뢰자가 간편하게 요청하고,
+                헌터가 현장을 확인해 해결까지 돕는 매칭 서비스입니다.
+            </p>
+            <div class="hero-actions">
+                <a class="primary-link" href="/api/requestView/list">의뢰 등록하기</a>
+                <a class="secondary-link" href="/hunter">헌터 찾기</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="intro-section">
+        <div class="section-heading">
+            <span>01</span>
+            <h2>이런 상황에서 이용하세요</h2>
+            <p>반복되는 해충 문제를 혼자 해결하기 어렵다면, 사진과 위치를 남겨 헌터에게 요청할 수 있습니다.</p>
+        </div>
+        <div class="problem-grid">
+            <article>
+                <strong>주거 공간</strong>
+                <h3>집 안에 모기, 바퀴벌레, 개미가 계속 보여요.</h3>
+                <p>발생 위치와 상황을 등록하면 가까운 헌터가 확인합니다.</p>
+            </article>
+            <article>
+                <strong>영업장</strong>
+                <h3>매장 위생 문제를 빠르게 처리해야 해요.</h3>
+                <p>긴급도를 표시해 현장 대응이 필요한 의뢰를 전달할 수 있습니다.</p>
+            </article>
+            <article>
+                <strong>반복 발생</strong>
+                <h3>처리 후에도 같은 문제가 반복돼요.</h3>
+                <p>후속 관리와 리뷰를 통해 해결 품질을 확인할 수 있습니다.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="intro-section flow-section">
+        <div class="section-heading">
+            <span>02</span>
+            <h2>서비스 이용 흐름</h2>
+            <p>의뢰 등록부터 완료 리뷰까지 한 흐름 안에서 관리됩니다.</p>
+        </div>
+        <ol class="flow-list">
+            <li>
+                <span>1</span>
+                <strong>의뢰 등록</strong>
+                <p>사진, 위치, 상세 내용을 입력해 문제 상황을 등록합니다.</p>
+            </li>
+            <li>
+                <span>2</span>
+                <strong>헌터 확인</strong>
+                <p>헌터가 의뢰 내용을 확인하고 수행 가능 여부를 결정합니다.</p>
+            </li>
+            <li>
+                <span>3</span>
+                <strong>상담 및 방문</strong>
+                <p>채팅으로 세부 내용을 조율하고 필요한 경우 현장을 방문합니다.</p>
+            </li>
+            <li>
+                <span>4</span>
+                <strong>해결 완료</strong>
+                <p>작업이 끝나면 완료 상태를 확인하고 리뷰를 남깁니다.</p>
+            </li>
+        </ol>
+    </section>
+
+    <section class="intro-section split-section">
+        <div class="section-heading">
+            <span>03</span>
+            <h2>의뢰자와 헌터를 위한 기능</h2>
+        </div>
+        <div class="target-grid">
+            <article>
+                <h3>의뢰자</h3>
+                <ul>
+                    <li>나의 의뢰 진행 상태 확인</li>
+                    <li>관심 있는 헌터 찜하기</li>
+                    <li>완료된 의뢰 리뷰 작성</li>
+                    <li>채팅을 통한 일정 조율</li>
+                </ul>
+            </article>
+            <article>
+                <h3>헌터</h3>
+                <ul>
+                    <li>수행 가능한 의뢰 확인</li>
+                    <li>관심 의뢰 저장</li>
+                    <li>활동 실적 기반 등급 성장</li>
+                    <li>프로필과 리뷰를 통한 신뢰 확보</li>
+                </ul>
+            </article>
+        </div>
+    </section>
+
+    <section class="intro-section trust-section">
+        <div>
+            <span class="trust-label">BUGBUG TRUST</span>
+            <h2>버그버그는 진행 상태와 활동 이력을 투명하게 보여줍니다.</h2>
+        </div>
+        <div class="trust-points">
+            <p><strong>상태 관리</strong> 등록, 수락, 진행, 완료 상태를 마이페이지에서 확인합니다.</p>
+            <p><strong>헌터 등급</strong> 완료 횟수와 평점 기반으로 헌터 활동 수준을 안내합니다.</p>
+            <p><strong>리뷰 기록</strong> 완료된 의뢰의 후기를 통해 다음 선택에 필요한 정보를 제공합니다.</p>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: siteFooter()}"></div>
+<script src="/js/common-layout.js"></script>
+<div th:if="${session.loginUser != null}" th:replace="~{fragments/chat-widget :: chat}"></div>
+</body>
+</html>
