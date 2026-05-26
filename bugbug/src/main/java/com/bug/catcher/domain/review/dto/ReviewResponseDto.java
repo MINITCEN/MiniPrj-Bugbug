@@ -8,18 +8,22 @@ import java.time.LocalDateTime;
 @Getter
 public class ReviewResponseDto {
     private Long reviewId;
-    private String hunterName;    // 유저가 볼 때: 어떤 헌터에게 썼는지
-    private String userName;      // 헌터 프로필에서 볼 때: 누가 썼는지
+    private Long requestId;
+    private String requestTitle;
+    private String hunterName;
+    private String userName;
     private Float rating;
     private String content;
-
+    private LocalDateTime createdAt;
 
     public ReviewResponseDto(Review review) {
         this.reviewId = review.getId();
+        this.requestId = review.getRequest().getId();
+        this.requestTitle = review.getRequest().getTitle();
         this.hunterName = review.getHunter().getName();
         this.userName = review.getRequest().getUser().getNickname();
         this.rating = review.getRating();
         this.content = review.getReviewContent();
-
+        this.createdAt = review.getCreatedAt();
     }
 }

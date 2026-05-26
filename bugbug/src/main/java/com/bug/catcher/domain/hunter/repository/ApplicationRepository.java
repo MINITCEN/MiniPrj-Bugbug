@@ -4,12 +4,17 @@ import com.bug.catcher.domain.entity.Application;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.List;
 
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
-    // List -> Page로 변경, Pageable 추가
+
+    // 헌터 마이페이지에서 헌터가 수행 중인 의뢰 목록을 페이징 조회한다.
     Page<Application> findByHunterId(Long hunterId, Pageable pageable);
-    
-    // 예약 중복 저장 방지용 중복 체크
+
+    // 같은 헌터가 같은 의뢰에 중복 지원하지 못하도록 확인한다.
     boolean existsByRequestIdAndHunterId(Long requestId, Long hunterId);
+
+    // 의뢰 완료 처리 화면에서 해당 의뢰에 지원한 헌터 후보를 보여주기 위해 사용한다.
+    List<Application> findByRequestId(Long requestId);
 }

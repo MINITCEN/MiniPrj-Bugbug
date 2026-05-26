@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>버그버그 - 의뢰 등록</title>
@@ -14,7 +14,9 @@
 <main class="container">
     <div class="page-title">
         <h1 th:text="${mode == 'edit'} ? '의뢰 수정하기' : '의뢰 등록하기'">의뢰 등록하기</h1>
-        <p th:text="${mode == 'edit'} ? '기존 의뢰 내용을 수정해주세요' : '헌터에게 요청할 벌레 퇴치 의뢰 내용을 자세히 작성해주세요.'">헌터에게 요청할 벌레 퇴치 의뢰 내용을 자세히 작성해주세요.</p>
+        <p th:text="${mode == 'edit'} ? '기존 의뢰 내용을 수정해주세요.' : '헌터에게 요청할 해충 퇴치 의뢰 내용을 자세히 작성해주세요.'">
+            헌터에게 요청할 해충 퇴치 의뢰 내용을 자세히 작성해주세요.
+        </p>
     </div>
 
     <form class="form-card"
@@ -36,20 +38,15 @@
                         name="status"
                         class="status-select">
                     <option value="대기 중" th:selected="${form.status == '대기 중'}">대기 중</option>
-                    <option value="예약 중" th:selected="${form.status == '예약 중'}">예약 중</option>
+                    <option value="예약 완료" th:selected="${form.status == '예약 완료'}">예약 완료</option>
                     <option value="완료" th:selected="${form.status == '완료'}">완료</option>
                 </select>
             </div>
         </div>
 
         <div class="form-grid">
-
-            <!-- 제목 -->
             <div class="form-group full">
-                <label>
-                    제목 <span class="required">*</span>
-                </label>
-
+                <label>제목 <span class="required">*</span></label>
                 <input type="text"
                        name="title"
                        th:value="${form != null ? form.title : ''}"
@@ -57,11 +54,8 @@
                        required>
             </div>
 
-            <!-- 위치 -->
             <div class="form-group full">
-                <label>
-                    대략적인 위치 <span class="required">*</span>
-                </label>
+                <label>대략적인 위치 <span class="required">*</span></label>
 
                 <div class="location-search-box">
                     <input type="text"
@@ -71,9 +65,7 @@
                            placeholder="예: 서울 강남구 역삼동"
                            required>
 
-                    <button type="button" onclick="searchAddress()">
-                        위치 검색
-                    </button>
+                    <button type="button" onclick="searchAddress()">위치 검색</button>
                 </div>
 
                 <div id="map" class="map-box"></div>
@@ -83,15 +75,11 @@
                 </p>
             </div>
 
-            <!-- 상세 내용 -->
             <div class="form-group full">
                 <div class="detail-row full">
-                    <label>
-                        상세 내용 <span class="required">*</span>
-                    </label>
+                    <label>상세 내용 <span class="required">*</span></label>
 
                     <div class="content-editor-box">
-                        <!-- 본문 입력 영역 -->
                         <article id="contentEditor"
                                  class="content-editor"
                                  contenteditable="true"
@@ -100,9 +88,9 @@
 2. 벌레 크기 :
 3. 발생 위치 :
 4. 벌레 개체 수 :'
-                                 : ${form.content}"></article>
+                                 : ${form.content}">
+                        </article>
 
-                        <!-- 서버로 전송될 실제 본문 HTML -->
                         <input type="hidden"
                                id="contentHidden"
                                name="content"
@@ -110,15 +98,12 @@
                     </div>
                 </div>
 
-                <!-- 첨부 파일 -->
                 <div class="detail-row full">
                     <label>첨부 파일</label>
 
                     <div class="media-upload-section">
                         <div class="upload-toolbar">
-                            <label for="imageFiles" class="upload-file-btn">
-                                이미지 첨부
-                            </label>
+                            <label for="imageFiles" class="upload-file-btn">이미지 첨부</label>
 
                             <button type="button"
                                     id="videoUploadButton"
@@ -180,13 +165,12 @@
                     </div>
                 </div>
 
-                <!-- 추가 요청 사항 -->
                 <div class="detail-input-box">
                     <div class="detail-row full">
                         <label>추가 요청 사항</label>
                         <input name="description"
-                                  placeholder="도착하면 전화 주세요"
-                                  th:value="${form != null ? form.description : ''}">
+                               placeholder="필요하면 요청 사항을 입력하세요."
+                               th:value="${form != null ? form.description : ''}">
                     </div>
                     <div class="detail-row">
                         <label>발생 시간</label>
@@ -194,35 +178,26 @@
                                name="occurrenceTime"
                                th:value="${form.occurrenceTime}">
                     </div>
-
                 </div>
             </div>
-
         </div>
 
-        <!-- 작성 안내 -->
         <div class="notice-box">
             <strong>작성 안내</strong><br>
-            허위 의뢰나 장난성 글은 관리자에 의해 삭제될 수 있습니다.<br>
-            작성자 정보는 로그인한 사용자 기준으로 자동 저장되며, 화면에서는 직접 입력하지 않습니다.<br>
-            등록 후 상태는 기본적으로 <strong>대기 중</strong> 상태로 저장됩니다.
+            허위 의뢰나 악성 글은 관리자에 의해 삭제될 수 있습니다.<br>
+            작성자 정보는 로그인한 사용자 기준으로 자동 저장됩니다.<br>
+            등록 시 상태는 기본적으로 <strong>대기 중</strong> 상태로 저장됩니다.
         </div>
 
-        <!-- 버튼 영역 -->
         <div class="button-area">
             <button type="submit" class="btn submit-btn" th:text="${mode == 'edit'} ? '의뢰 수정' : '의뢰 등록'">
                 의뢰 등록
             </button>
 
-            <button type="reset" class="btn reset-btn">
-                다시 작성
-            </button>
+            <button type="reset" class="btn reset-btn">다시 작성</button>
 
-            <a href="/api/requestView/list" class="btn cancel-btn">
-                목록으로
-            </a>
+            <a href="/api/requestView/list" class="btn cancel-btn">목록으로</a>
         </div>
-
     </form>
 </main>
 <div th:replace="~{fragments/footer :: siteFooter()}"></div>

@@ -415,7 +415,7 @@ function syncStatusColor() {
         return;
     }
 
-    if (statusSelect.value === "예약 중") {
+    if (statusSelect.value === "예약 완료") {
         statusSelect.classList.add("is-reserved");
         return;
     }

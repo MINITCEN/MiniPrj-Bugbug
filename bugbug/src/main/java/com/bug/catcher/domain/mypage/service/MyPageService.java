@@ -76,7 +76,10 @@ public class MyPageService {
     @Transactional(readOnly = true)
     public Page<MyRequestResponseDto> getMyRequests(Long userId, Pageable pageable) {
         return requestRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable)
-                .map(MyRequestResponseDto::new);
+                .map(request -> new MyRequestResponseDto(
+                        request,
+                        reviewRepository.findByRequestId(request.getId()).orElse(null)
+                ));
     }
 
     // 찜한 헌터 목록 보기
@@ -92,24 +95,44 @@ public class MyPageService {
         Request request = requestRepository.findById(requestDto.getRequestId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 의뢰입니다."));
 
-        Hunter hunter = hunterRepository.findById(requestDto.getHunterId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 헌터입니다."));
+        validateReviewRating(requestDto.getRating());
 
-        // 유저 본인의 의뢰가 맞는지, 상태가 '완료'인지 검증하는 로직 추가 가능
+        // 의뢰 작성자 본인만 리뷰를 작성할 수 있다.
         if (!request.getUser().getId().equals(userId)) {
             throw new IllegalArgumentException("본인의 의뢰에만 리뷰를 작성할 수 있습니다.");
         }
 
+        // 리뷰는 완료 처리된 의뢰에만 작성할 수 있다.
+        if (!"완료".equals(request.getStatus())) {
+            throw new IllegalArgumentException("완료된 의뢰에만 리뷰를 작성할 수 있습니다.");
+        }
+
+        // 완료 헌터가 저장되어 있어야 리뷰 대상 헌터를 확정할 수 있다.
+        Hunter completedHunter = request.getCompletedHunter();
+        if (completedHunter == null) {
+            throw new IllegalArgumentException("완료한 헌터 정보가 없어 리뷰를 작성할 수 없습니다.");
+        }
+
+        // 클라이언트가 보낸 헌터 ID가 완료 헌터와 다르면 다른 헌터에게 리뷰가 달리는 것을 막는다.
+        if (requestDto.getHunterId() != null && !completedHunter.getId().equals(requestDto.getHunterId())) {
+            throw new IllegalArgumentException("해당 의뢰를 완료한 헌터에게만 리뷰를 작성할 수 있습니다.");
+        }
+
+        // 하나의 의뢰에는 하나의 리뷰만 허용한다.
+        if (reviewRepository.existsByRequestId(request.getId())) {
+            throw new IllegalArgumentException("이미 리뷰가 작성된 의뢰입니다.");
+        }
+
         Review review = Review.builder()
                 .request(request)
-                .hunter(hunter)
+                .hunter(completedHunter)
                 .rating(requestDto.getRating())
                 .reviewContent(requestDto.getReviewContent())
                 .build();
 
         reviewRepository.save(review);
         //리뷰가 생성되었으니 해당 헌터의 등급 갱신
-        hunterService.updateHunterLevel(requestDto.getHunterId());
+        hunterService.updateHunterLevel(completedHunter.getId());
     }
     // 리뷰 수정
     @Transactional
@@ -122,12 +145,10 @@ public class MyPageService {
             throw new IllegalArgumentException("본인이 작성한 리뷰만 수정할 수 있습니다.");
         }
 
-        //  엔티티 메서드 대신 레포지토리의 직접 업데이트 쿼리 실행
-        reviewRepository.updateReviewDirectly(
-                reviewId,
-                requestDto.getRating(),
-                requestDto.getReviewContent()
-        );
+        validateReviewRating(requestDto.getRating());
+
+        // 엔티티 변경 감지를 사용해 수정일(updatedAt)까지 함께 갱신한다.
+        review.update(requestDto.getRating(), requestDto.getReviewContent());
         // 평점이 바뀌었으니 헌터의 등급 갱신
         hunterService.updateHunterLevel(review.getHunter().getId());
     }
@@ -153,6 +174,15 @@ public class MyPageService {
     //유저가 쓴 리뷰 조회
     @Transactional(readOnly = true)
     public Page<ReviewResponseDto> getMyReviews(Long userId, Pageable pageable) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 헌터 마이페이지에서는 내가 작성한 리뷰가 아니라 내가 받은 리뷰를 보여준다.
+        if ("HUNTER".equals(user.getRole())) {
+            return reviewRepository.findByHunterUserId(userId, pageable)
+                    .map(ReviewResponseDto::new);
+        }
+
         return reviewRepository.findByUserId(userId, pageable)
                 .map(ReviewResponseDto::new);
     }
@@ -223,5 +253,17 @@ public class MyPageService {
         float averageRating = reviewRepository.getAverageRatingByHunterId(hunter.getId());
 
         return new HunterProfileResponseDto(hunter, completionCount, averageRating);
+    }
+
+    private void validateReviewRating(Float rating) {
+        // 별점은 0.5점 단위이며 최대 5점까지만 허용한다.
+        if (rating == null || rating < 0.5f || rating > 5.0f) {
+            throw new IllegalArgumentException("별점은 0.5점 이상 5점 이하로 입력해 주세요.");
+        }
+
+        float doubled = rating * 2;
+        if (Math.abs(doubled - Math.round(doubled)) > 0.0001f) {
+            throw new IllegalArgumentException("별점은 0.5점 단위로만 입력할 수 있습니다.");
+        }
     }
 }
