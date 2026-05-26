@@ -93,12 +93,8 @@
                 </div>
                 <div class="hunter-card__stats">
                     <div class="hunter-stat">
-                        <span>요청</span>
-                        <strong>${Number(hunter.requestCount || 0).toLocaleString("ko-KR")}회</strong>
-                    </div>
-                    <div class="hunter-stat">
-                        <span>응답</span>
-                        <strong>${Number(hunter.responseCount || 0).toLocaleString("ko-KR")}회</strong>
+                        <span>퇴치 완료</span>
+                        <strong>${Number(hunter.completionCount || 0).toLocaleString("ko-KR")}회</strong>
                     </div>
                 </div>
             `;

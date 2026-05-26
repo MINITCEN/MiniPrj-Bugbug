@@ -74,7 +74,7 @@ public class AdminService {
                 .user(user)
                 .name(application.getName())
                 .pledgeAgreed(application.getPledgeAgreed())
-                .grade("슬리퍼 전사") // 진화 시스템의 초기 등급 설정!
+                .grade("루키")
                 .requestCount(0)
                 .responseCount(0)
                 .build();

@@ -12,4 +12,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     
     // 예약 중복 저장 방지용 중복 체크
     boolean existsByRequestIdAndHunterId(Long requestId, Long hunterId);
+
+    List<Application> findByRequestId(Long requestId);
+
+    long countByHunterIdAndRequest_Status(Long hunterId, String status);
 }
