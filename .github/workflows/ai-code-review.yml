@@ -3,20 +3,20 @@ name: Antigravity AI Code Reviewer
 on:
   pull_request:
     types: [opened, synchronize]
-    branches: [ dev ] # dev 브랜치로 날아오는 PR만 감시
+    branches: [ dev ]
     paths:
-      - 'src/main/java/**/*.java' # 자바 소스 파일 변경 시에만 가동 (토큰 절약)
+      - 'bugbug/src/main/java/**/*.java' # 감시 경로 앞에 bugbug/ 추가
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
-  cancel-in-progress: true # 새 커밋이 올라오면 이전 AI 분석을 즉시 취소하여 계정 보호
+  cancel-in-progress: true
 
 jobs:
   review:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write # 깃허브 PR 창에 AI가 직접 댓글을 달아야 하므로 쓰기 권한 필수
+      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -26,8 +26,8 @@ jobs:
 
       - name: Get code diff
         run: |
-          # dev 브랜치 대비 이번에 수정/추가된 자바 코드 줄만 쏙 골라내기
-          git diff origin/${{ github.base_ref }} HEAD -- 'src/main/java/**/*.java' > diff.txt
+          # diff 추출 경로 앞에 bugbug/ 추가
+          git diff origin/${{ github.base_ref }} HEAD -- 'bugbug/src/main/java/**/*.java' > diff.txt
 
       - name: Install Antigravity CLI
         run: |
