@@ -25,6 +25,8 @@ public class RequestDetailResponseDto {
     private Integer viewCount;
     private String videoUrl;
     private List<String> imageUrls;
+    private Long completedHunterId;
+    private String completedHunterName;
 
     public static RequestDetailResponseDto responseDto(Request request){
         return RequestDetailResponseDto.builder()
@@ -42,6 +44,8 @@ public class RequestDetailResponseDto {
                 .viewCount(request.getViewCount())
                 .videoUrl(request.getVideoUrl())
                 .imageUrls(request.getRequestImages().stream().map(RequestImage :: getImageUrl).toList())
+                .completedHunterId(request.getCompletedHunter() != null ? request.getCompletedHunter().getId() : null)
+                .completedHunterName(request.getCompletedHunter() != null ? request.getCompletedHunter().getName() : null)
                 .build();
     }
 }

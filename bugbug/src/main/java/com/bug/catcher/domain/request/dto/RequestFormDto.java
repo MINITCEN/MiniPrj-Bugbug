@@ -20,6 +20,7 @@ public class RequestFormDto {
     private String location;
     private String detailLocation;
     private String status;
+    private Long completedHunterId;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime occurrenceTime;
