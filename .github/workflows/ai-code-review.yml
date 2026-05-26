@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize]
     branches: [ dev ]
     paths:
-      - 'bugbug/src/main/java/**/*.java' # 감시 경로 앞에 bugbug/ 추가
+      - 'bugbug/src/main/java/**/*.java'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
@@ -26,12 +26,12 @@ jobs:
 
       - name: Get code diff
         run: |
-          # diff 추출 경로 앞에 bugbug/ 추가
           git diff origin/${{ github.base_ref }} HEAD -- 'bugbug/src/main/java/**/*.java' > diff.txt
 
       - name: Install Antigravity CLI
         run: |
           curl -fsSL https://antigravity.google/cli/install.sh | bash
+          # 경로를 확실하게 인지하도록 이중 처리
           echo "$HOME/.antigravity/bin" >> $GITHUB_PATH
 
       - name: Run Antigravity Code Review
@@ -40,7 +40,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -s diff.txt ]; then
-            antigravity review \
+            # [수정 포인트] 명령어 앞에 설치된 절대 경로($HOME/.antigravity/bin/)를 직접 명시하여 127 에러 원천 차단
+            $HOME/.antigravity/bin/antigravity review \
               --diff ./diff.txt \
               --prompt "너는 Java 17, Spring Boot, Spring Data JPA, MySQL DB, Thymeleaf를 사용하는 프로젝트의 매우 깐깐한 시니어 백엔드 아키텍트야. 이번 PR로 변경된 자바 코드를 소나큐브 스타일로 정밀 검수하되, 반드시 다음 사항을 최우선으로 지적해줘:
               1. [Spring Data JPA / MySQL] 연관관계 매핑 시 FetchType.EAGER 오용 및 N+1 문제 유발 코드 감지, @Transactional 선언 누락으로 인한 영속성 컨텍스트(Dirty Checking) 작동 불가 오류 검사, MySQL 성능 저하를 일으킬 수 있는 비효율적인 분산 쿼리 로직 지적.
