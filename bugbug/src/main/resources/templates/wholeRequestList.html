@@ -93,7 +93,7 @@
                 1
             </a>
             <a th:if="${requestPage.hasNext()}"
-               th:href="@{/api/requestView/list(page=${requestPage.number + 1}, size=${requestPage.size}, , status=${status}, sortType=${sortType})}">
+               th:href="@{/api/requestView/list(page=${requestPage.number + 1}, size=${requestPage.size}, status=${status}, sortType=${sortType})}">
                 ＞
             </a>
         </div>

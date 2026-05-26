@@ -18,11 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/api/requestView")
@@ -35,43 +31,36 @@ public class RequestViewController {
     private String kakaoMapApiKey;
 
     @GetMapping("/list")
-public String requestList(
-        @AuthenticationPrincipal CustomUserPrincipal loginUser,
-        @RequestParam(required = false) String status,
-        @PageableDefault(size = 10, sort = "createdAt",
-                direction = Sort.Direction.DESC) Pageable pageable,
-        @RequestParam(defaultValue = "latest") String sortType,
-        Model model) {
+    public String requestList(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @RequestParam(required = false) String status,
+            @PageableDefault(size = 10, sort = "createdAt",
+                    direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(defaultValue = "latest") String sortType,
+            Model model) {
 
-    Sort sort = "viewCount".equals(sortType)
-            ? Sort.by(Sort.Direction.DESC, "viewCount")
-            : Sort.by(Sort.Direction.DESC, "createdAt");
+        Sort sort = "viewCount".equals(sortType)
+                ? Sort.by(Sort.Direction.DESC, "viewCount")
+                : Sort.by(Sort.Direction.DESC, "createdAt");
 
-    Pageable sortedPageable = PageRequest.of(
-            pageable.getPageNumber(),
-            pageable.getPageSize(),
-            sort
-    );
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort
+        );
 
-    Page<Map<String, Object>> requestPage =
-            requestService.readRequestPage(status, sortedPageable);
+        Page<Map<String, Object>> requestPage =
+                requestService.readRequestPage(status, sortedPageable);
 
-    if (loginUser != null) {
-        model.addAttribute("role", loginUser.getRole());
-    }
-
-    model.addAttribute("requestPage", requestPage);
-    model.addAttribute("sortType", sortType);
-    model.addAttribute("status", status);
-
-    return "request/list";
-}
+        if (loginUser != null) {
+            model.addAttribute("role", loginUser.getRole());
         }
 
         model.addAttribute("sortType", sortType);
         model.addAttribute("status", status);
         model.addAttribute("requestPage", requestPage);
         model.addAttribute("requestList", requestPage.getContent());
+
         return "wholeRequestList";
     }
 
