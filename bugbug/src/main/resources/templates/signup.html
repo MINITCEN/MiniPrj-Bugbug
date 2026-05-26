@@ -61,10 +61,12 @@
                         <input type="email" name="email" placeholder="이메일" required>
                     </label>
 
-                    <label class="login-form__field">
+                    <label class="login-form__field login-form__field--password">
                         <span class="login-form__icon" aria-hidden="true">🔒</span>
                         <input type="password" name="password" placeholder="비밀번호" required>
-                        <span class="login-form__trailing-icon" aria-hidden="true">👁️</span>
+                        <button class="password-toggle" type="button" aria-label="비밀번호 보기" data-password-toggle>
+                            <span class="password-toggle__eye" aria-hidden="true"></span>
+                        </button>
                     </label>
 
                     <label class="login-form__field">
@@ -98,6 +100,7 @@
 
 <div th:replace="~{fragments/footer :: siteFooter()}"></div>
 <script src="/js/common-layout.js"></script>
+<script src="/js/password-toggle.js"></script>
 <script src="/js/signup.js"></script>
 </body>
 </html>

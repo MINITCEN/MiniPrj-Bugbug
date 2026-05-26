@@ -185,6 +185,10 @@ body {
     outline: none;
 }
 
+.login-form__field--password input {
+    padding-right: 58px;
+}
+
 .login-form__icon,
 .login-form__trailing-icon {
     position: absolute;
@@ -199,6 +203,70 @@ body {
 
 .login-form__trailing-icon {
     right: 18px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    background: transparent;
+    cursor: pointer;
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid rgba(28, 125, 74, 0.45);
+    outline-offset: 2px;
+}
+
+.password-toggle__eye {
+    position: relative;
+    width: 22px;
+    height: 14px;
+    border: 2px solid #6f7d75;
+    border-radius: 70% 70% 70% 70% / 85% 85% 85% 85%;
+}
+
+.password-toggle__eye::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6f7d75;
+    transform: translate(-50%, -50%);
+}
+
+.password-toggle__eye::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 28px;
+    height: 2px;
+    border-radius: 999px;
+    background: #6f7d75;
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-35deg);
+}
+
+.password-toggle.is-visible .password-toggle__eye {
+    border-color: #1c7d4a;
+}
+
+.password-toggle.is-visible .password-toggle__eye::before {
+    background: #1c7d4a;
+}
+
+.password-toggle.is-visible .password-toggle__eye::after {
+    opacity: 1;
+    background: #1c7d4a;
 }
 
 .login-form__field--address input {
