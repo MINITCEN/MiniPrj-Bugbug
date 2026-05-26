@@ -1,13 +1,12 @@
 package com.bug.catcher.domain.request.controller;
 
-import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.request.dto.RequestDetailResponseDto;
 import com.bug.catcher.domain.request.dto.RequestEditFormDto;
 import com.bug.catcher.domain.request.dto.RequestFormDto;
 import com.bug.catcher.domain.request.dto.RequestMediaFileUrlDto;
 import com.bug.catcher.domain.request.service.RequestService;
-import com.bug.catcher.global.auth.SessionConst;
-import jakarta.servlet.http.HttpSession;
+import com.bug.catcher.global.auth.CustomUserPrincipal;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -15,12 +14,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/api/requestView")
@@ -32,14 +33,15 @@ public class RequestViewController {
     @Value("${kakao.api.key}")
     private String kakaoMapApiKey;
 
-
-    // 전체 게시판 조회하기
     @GetMapping("/list")
-    public String requestList(@PageableDefault(size=10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, HttpSession session, Model model) {
+    public String requestList(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            Model model) {
+
         Page<Map<String, Object>> requestPage = requestService.readRequestPage(pageable);
-        User user = (User) session.getAttribute("user");
-        if (user != null) {
-            model.addAttribute("role", user.getRole());
+        if (loginUser != null) {
+            model.addAttribute("role", loginUser.getRole());
         }
 
         model.addAttribute("requestPage", requestPage);
@@ -47,7 +49,6 @@ public class RequestViewController {
         return "wholeRequestList";
     }
 
-    // 의뢰 등록 화면
     @GetMapping("/new")
     public String requestForm(Model model) {
         model.addAttribute("mode", "create");
@@ -56,54 +57,45 @@ public class RequestViewController {
         return "requestForm";
     }
 
-    // 의뢰 등록 처리
     @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String createRequest(@ModelAttribute RequestFormDto form, HttpSession session) {
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+    public String createRequest(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @ModelAttribute RequestFormDto form) {
 
-        if (loginUser == null) {
-            return "login";
-        }
-
-        requestService.createRequest(loginUser.getId(), form);
+        requestService.createRequest(loginUser.getUserId(), form);
         return "redirect:/api/requestView/list";
     }
 
-    // 의뢰 상세 화면
     @GetMapping("/detail/{requestId}")
-    public String requestDetail(@PathVariable Long requestId, HttpSession session, Model model) {
+    public String requestDetail(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @PathVariable Long requestId,
+            Model model) {
+
         RequestDetailResponseDto request = requestService.readRequestDetail(requestId);
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-        String role = null;
-        boolean editable = false;
+        String role = loginUser != null ? loginUser.getRole() : null;
+        boolean editable = loginUser != null
+                && request.getUserId().equals(loginUser.getUserId())
+                && "USER".equals(loginUser.getRole());
 
-        if (loginUser != null) {
-            role = loginUser.getRole();
-
-            // 작성자인 의뢰인만 수정/삭제 가능
-            editable = request.getUserId().equals(loginUser.getId()) && "USER".equals(loginUser.getRole());
-        }
         model.addAttribute("request", request);
         model.addAttribute("role", role);
         model.addAttribute("editable", editable);
-        model.addAttribute("loginUserId", loginUser != null ? loginUser.getId() : null);
+        model.addAttribute("loginUserId", loginUser != null ? loginUser.getUserId() : null);
         model.addAttribute("loginUserNickname", loginUser != null ? loginUser.getNickname() : null);
-        model.addAttribute("liked", false); // 찜 기능 구현 전 임시값
+        model.addAttribute("liked", false);
         model.addAttribute("kakaoMapKey", kakaoMapApiKey);
 
         return "requestDetail";
     }
 
-    // 의뢰 수정 화면
     @GetMapping("/edit/{requestId}")
-    public String editForm(@PathVariable Long requestId, HttpSession session, Model model) {
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+    public String editForm(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @PathVariable Long requestId,
+            Model model) {
 
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
-
-        RequestEditFormDto editForm = requestService.getEditForm(requestId, loginUser.getId());
+        RequestEditFormDto editForm = requestService.getEditForm(requestId, loginUser.getUserId());
 
         model.addAttribute("mode", "edit");
         model.addAttribute("requestId", requestId);
@@ -114,26 +106,23 @@ public class RequestViewController {
         return "requestForm";
     }
 
-    // 의뢰 수정 처리
     @PostMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public String updateRequest(@PathVariable Long requestId, @ModelAttribute RequestFormDto form, @ModelAttribute RequestMediaFileUrlDto mediaUrlDto, HttpSession session) {
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
+    public String updateRequest(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @PathVariable Long requestId,
+            @ModelAttribute RequestFormDto form,
+            @ModelAttribute RequestMediaFileUrlDto mediaUrlDto) {
 
-        requestService.updateRequest(requestId, loginUser.getId(), form, mediaUrlDto);
+        requestService.updateRequest(requestId, loginUser.getUserId(), form, mediaUrlDto);
         return "redirect:/api/requestView/detail/" + requestId;
     }
 
-    // 의뢰 삭제 처리
     @PostMapping("/remove/{requestId}")
-    public String deleteRequest(@PathVariable Long requestId, HttpSession session) {
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
-        requestService.deleteRequest(requestId, loginUser.getId());
+    public String deleteRequest(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @PathVariable Long requestId) {
+
+        requestService.deleteRequest(requestId, loginUser.getUserId());
         return "redirect:/api/requestView/list";
     }
 }
