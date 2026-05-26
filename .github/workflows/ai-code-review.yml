@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write # PR에 댓글을 달기 위해 반드시 필요
+      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -55,16 +55,20 @@ jobs:
               -H "Content-Type: application/json" \
               -d "$(jq -n --arg msg "$PROMPT_TEXT" '{contents: [{parts: [{text: $msg}]}]}')")
 
+            # [디버깅용 로그 출력] 구글 서버가 보낸 원본 메시지를 깃액션 콘솔에 강제로 출력
+            echo "===== GEMINI RAW RESPONSE START ====="
+            echo "$RESPONSE"
+            echo "===== GEMINI RAW RESPONSE END ====="
+
             # 2. 결과 텍스트 추출 및 검증
-            AI_COMMENT=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text')
+            AI_COMMENT=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text' 2>/dev/null || echo "json_error")
           
-            if [ "$AI_COMMENT" = "null" ] || [ -z "$AI_COMMENT" ]; then
-              echo "AI 응답을 받지 못했습니다. API 키나 쿼리 한도를 확인하세요."
+            if [ "$AI_COMMENT" = "null" ] || [ -z "$AI_COMMENT" ] || [ "$AI_COMMENT" = "json_error" ]; then
+              echo "AI 응답 파싱 실패 또는 빈 응답 수신. 위의 RAW RESPONSE 에러 메시지를 확인하세요."
               exit 1
             fi
 
-            # 3. 깃허브 공식 API를 사용하여 PR에 리뷰 댓글 통째로 등록하기 (파싱 에러 원천 차단)
-            # 대화(Conversation) 탭에 종합 의견 형태로 이쁘게 박힘
+            # 3. 깃허브 API를 사용하여 PR에 리뷰 댓글 등록
             COMMENT_BODY="### 🤖 Antigravity AI Code Review Result
             $AI_COMMENT"
 
