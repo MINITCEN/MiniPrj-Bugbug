@@ -36,15 +36,15 @@ jobs:
       - name: Run Google Gemini Reviewer
         if: success()
         env:
-          # 레포지토리 Settings -> Secrets에 등록한 내 유료 계정 키
+          # [수정 포인트] 제미나이 엔진이 인식할 수 있도록 변수명을 다중 선언해서 바인딩
+          GEMINI_TOKEN: ${{ secrets.ANTIGRAVITY_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.ANTIGRAVITY_API_KEY }}
+          API_KEY: ${{ secrets.ANTIGRAVITY_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ -s diff.txt ]; then
-            # 1. npm 404 에러를 피하기 위해 리눅스용 reviewdog 바이너리를 직접 다운로드 및 설치
             curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b ./bin
           
-            # 2. 내장된 바이너리로 직접 실행 (npx 차단)
             ./bin/reviewdog \
               -name="Gemini-AI-Architect" \
               -f=diff \
