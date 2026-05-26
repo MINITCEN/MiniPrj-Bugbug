@@ -87,6 +87,7 @@ public class ChatRoomService {
                     .title(title)
                     .otherNickname(otherNickname)
                     .createdAt(room.getCreatedAt())
+                    .reservedAt(room.getReservedAt())
                     .build();
         }).collect(Collectors.toList());
     }
@@ -111,6 +112,12 @@ public class ChatRoomService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
         
         chatRoom.updateReservation(requestDto.getReservedAt());
+        
+        // 예약 완료 시, 연관된 의뢰의 상태를 "예약 완료"로 동시 업데이트
+        Request request = chatRoom.getRequest();
+        if (request != null) {
+            request.updateStatus("예약 완료");
+        }
         // 별도의 save 호출 없이 더티 체킹(Dirty Checking)으로 업데이트됩니다.
     }
 }

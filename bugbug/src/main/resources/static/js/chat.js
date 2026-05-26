@@ -2,6 +2,7 @@ let stompClient = null;
 let currentRoomId = null; 
 let currentUserId = null; 
 let currentUserRole = null; // 방 목록을 가져오려면 ROLE이 필요할 수 있습니다.
+let myChatRooms = [];       // 내가 속한 방 목록 리스트 전역 캐시
 
 // 1. 메인 버튼: 창 열기/닫기
 function toggleChatWindow() {
@@ -44,6 +45,7 @@ async function showRoomListView() {
         }
 
         const rooms = await response.json();
+        myChatRooms = rooms; // 전역 캐시에 저장
         listContainer.innerHTML = '';
         
         if (rooms.length === 0) {
@@ -83,6 +85,28 @@ function enterRoom(roomId, otherNickname) {
     
     // 상단 제목 변경
     document.getElementById('bugbug-chat-title').innerText = otherNickname;
+    
+    // 예약 현황 표시 및 버튼 노출 여부 처리
+    const roomInfo = myChatRooms.find(r => r.roomId === roomId);
+    const statusBar = document.getElementById('bugbug-chat-status-bar');
+    const statusText = document.getElementById('bugbug-reservation-status');
+    const reserveBtn = document.getElementById('bugbug-reserve-btn');
+    
+    if (statusBar && statusText && reserveBtn) {
+        statusBar.style.display = 'flex';
+        if (roomInfo && roomInfo.reservedAt) {
+            statusText.innerText = '📌 매칭 상태: 예약 완료';
+            reserveBtn.style.display = 'none';
+        } else {
+            statusText.innerText = '📌 매칭 상태: 대기 중';
+            // 의뢰인(USER)일 때만 예약 완료하기 버튼 표시
+            if (currentUserRole === 'USER') {
+                reserveBtn.style.display = 'block';
+            } else {
+                reserveBtn.style.display = 'none';
+            }
+        }
+    }
     
     // 채팅 연결 및 이전 메시지 불러오기
     connectChat();
@@ -218,5 +242,67 @@ async function uploadChatFile() {
         console.error('파일 업로드 오류:', error);
     } finally {
         fileInput.value = ''; 
+    }
+}
+
+// --- 예약 기능 관련 핸들러 함수 추가 ---
+
+async function confirmReservation() {
+    if (!confirm('이 의뢰를 예약 완료 상태로 변경하시겠습니까?')) {
+        return;
+    }
+    
+    // 현재 시각 기준의 ISO 문자열 (Spring Boot LocalDateTime 파싱용: YYYY-MM-DDTHH:mm:ss)
+    const localIsoString = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 19);
+    
+    try {
+        const response = await fetch(`/api/chats/${currentRoomId}/reservation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reservedAt: localIsoString }),
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            alert('예약이 성공적으로 완료되었습니다.');
+            
+            // 현황 바 UI 로컬 업데이트
+            const statusText = document.getElementById('bugbug-reservation-status');
+            if (statusText) {
+                statusText.innerText = '📌 매칭 상태: 예약 완료';
+            }
+            const reserveBtn = document.getElementById('bugbug-reserve-btn');
+            if (reserveBtn) {
+                reserveBtn.style.display = 'none';
+            }
+            
+            // 전역 캐시 업데이트
+            const roomInfo = myChatRooms.find(r => r.roomId === currentRoomId);
+            if (roomInfo) {
+                roomInfo.reservedAt = localIsoString;
+            }
+            
+            // 상세 정보 페이지의 상태 배지 동적 업데이트
+            const badge = document.querySelector('.status-badge');
+            if (badge) {
+                badge.innerText = '예약 완료';
+                badge.style.backgroundColor = '#4e73df';
+                badge.style.color = '#FFFFFF';
+            }
+            
+            // 확실한 페이지 반영을 위해 1초 후 새로고침
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+            
+        } else {
+            const errorText = await response.text();
+            alert('예약 처리에 실패했습니다: ' + errorText);
+        }
+    } catch (error) {
+        console.error('예약 에러:', error);
+        alert('예약 진행 중 오류가 발생했습니다.');
     }
 }
