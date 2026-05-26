@@ -22,9 +22,6 @@
             <a class="side-link" href="/mypage/requests"><span class="mark">R</span>나의 의뢰 보기</a>
             <a class="side-link" href="/mypage/reviews"><span class="mark">V</span>나의 리뷰 관리</a>
             <a class="side-link" href="/mypage/bookmarks/hunters"><span class="mark">H</span>찜한 헌터</a>
-            <button class="side-link side-button" type="button" onclick="applyHunter()">
-                <span class="mark">+</span>헌터 등록
-            </button>
         </div>
 
         <div th:if="${isHunter}">
@@ -34,10 +31,6 @@
                 <span class="mark">-</span>헌터 자격 해제
             </button>
         </div>
-
-        <button class="side-link side-button" type="button" onclick="logout()">
-            <span class="mark">L</span>로그아웃
-        </button>
 
         <div class="side-cta" th:if="${!isHunter}">
             <strong>헌터로 활동하고 싶으신가요?</strong>
