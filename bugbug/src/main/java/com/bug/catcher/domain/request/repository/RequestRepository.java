@@ -35,6 +35,9 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     Optional<Request> findByIdAndUser_Id(Long requestId, Long userId);
 
+    //상태별 페이지 조회
+    Page<Request> findByStatus(String status, Pageable pageable);
+
     @Query("select r.videoUrl from Request r where r.id = :requestId and r.user.id = :loginUserId")
     String findVideoUrlByRequestIdAndUserId(Long requestId, Long loginUserId);
 

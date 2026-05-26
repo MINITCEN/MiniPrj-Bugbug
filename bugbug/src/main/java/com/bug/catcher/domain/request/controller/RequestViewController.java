@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -35,13 +36,23 @@ public class RequestViewController {
 
     // 전체 게시판 조회하기
     @GetMapping("/list")
-    public String requestList(@PageableDefault(size=10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, HttpSession session, Model model) {
-        Page<Map<String, Object>> requestPage = requestService.readRequestPage(pageable);
+    public String requestList(@RequestParam(required = false) String status, @PageableDefault(size=10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,  @RequestParam(defaultValue = "latest") String sortType, HttpSession session, Model model) {
+        Sort sort = "viewCount".equals(sortType)
+                ? Sort.by(Sort.Direction.DESC, "viewCount")
+                : Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                sort
+        );
+        Page<Map<String, Object>> requestPage = requestService.readRequestPage(status, sortedPageable);
         User user = (User) session.getAttribute("user");
         if (user != null) {
             model.addAttribute("role", user.getRole());
         }
 
+        model.addAttribute("sortType", sortType);
+        model.addAttribute("status", status);
         model.addAttribute("requestPage", requestPage);
         model.addAttribute("requestList", requestPage.getContent());
         return "wholeRequestList";

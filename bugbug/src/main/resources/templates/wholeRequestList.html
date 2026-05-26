@@ -19,17 +19,27 @@
 
         <div class="top-line">
             <div class="tabs">
-                <a class="active" href="#">전체</a>
-                <a href="#">예약 중</a>
-                <a href="#">완료</a>
+                <a th:href="@{/api/requestView/list}"
+                   th:classappend="${status == null} ? 'active'">전체</a>
+                <a th:href="@{/api/requestView/list(status='대기 중')}"
+                   th:classappend="${status == '대기 중'} ? 'active'">대기 중</a>
+                <a th:href="@{/api/requestView/list(status='예약 중')}"
+                   th:classappend="${status == '예약 중'} ? 'active'">예약 중</a>
+                <a th:href="@{/api/requestView/list(status='완료')}"
+                   th:classappend="${status == '완료'} ? 'active'">완료</a>
             </div>
 
             <div class="board-actions">
-                <select name="align">
-                    <option>조회 수</option>
-                    <option>관심</option>
-                    <option>최신</option>
-                    <option>의뢰날짜</option>
+                <select name="sortType"
+                        onchange="location.href=this.value">
+                    <option th:value="@{/api/requestView/list(status=${status}, sortType='latest')}"
+                            th:selected="${sortType == null or sortType == 'latest'}">
+                        최신 순
+                    </option>
+                    <option th:value="@{/api/requestView/list(status=${status}, sortType='viewCount')}"
+                            th:selected="${sortType == 'viewCount'}">
+                        조회 수
+                    </option>
                 </select>
                 <a href="/api/requestView/new" class="write-btn">+ 의뢰 등록하기</a>
             </div>
@@ -71,62 +81,21 @@
 
         <div class="pagination" th:if="${requestPage.totalPages > 0}">
             <a th:if="${requestPage.hasPrevious()}"
-               th:href="@{/api/requestView/list(page=${requestPage.number - 1}, size=${requestPage.size})}">
+               th:href="@{/api/requestView/list(page=${requestPage.number - 1}, size=${requestPage.size}, status=${status}, sortType=${sortType})}">
                 ＜
             </a>
             <a th:each="pageNum : ${#numbers.sequence(0, requestPage.totalPages - 1)}"
-               th:href="@{/api/requestView/list(page=${pageNum}, size=${requestPage.size})}"
+               th:href="@{/api/requestView/list(page=${pageNum}, size=${requestPage.size}, status=${status}, sortType=${sortType})}"
                th:text="${pageNum + 1}"
                th:classappend="${pageNum == requestPage.number} ? 'active'">
                 1
             </a>
             <a th:if="${requestPage.hasNext()}"
-               th:href="@{/api/requestView/list(page=${requestPage.number + 1}, size=${requestPage.size})}">
+               th:href="@{/api/requestView/list(page=${requestPage.number + 1}, size=${requestPage.size}, , status=${status}, sortType=${sortType})}">
                 ＞
             </a>
         </div>
     </section>
-
-    <aside class="side-area">
-
-        <section class="side-card" th:if="${role != null}">
-            <div class="side-title">
-                <h3>헌터 등급</h3>
-                <a href="#">내역 보기 ></a>
-            </div>
-
-            <div class="point-main">
-                <p>현재 등급</p>
-                <strong style="color:silver">Silver</strong>
-            </div>
-        </section>
-
-        <section class="side-card mosquito">
-            <div class="side-title">
-                <h3>오늘의 모기지수</h3>
-                <a href="#">자세히 보기 ></a>
-            </div>
-
-            <div class="mosquito-body">
-                <div class="circle">
-                    <strong>보통</strong>
-                    <span>Lv.3</span>
-                </div>
-
-                <div>
-                    <strong>서울 강남구 기준</strong>
-                    <p>6월 2일 (월) 10:00 기준</p>
-                    <span class="index-box">지수 65</span>
-                </div>
-            </div>
-
-            <div class="level-row">
-                <span class="level green">낮음</span>
-                <span class="level yellow">보통</span>
-                <span class="level red">높음</span>
-            </div>
-        </section>
-    </aside>
 </main>
 <div th:replace="~{fragments/footer :: siteFooter()}"></div>
 <script src="/js/common-layout.js"></script>
