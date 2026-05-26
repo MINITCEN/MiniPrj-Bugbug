@@ -52,4 +52,8 @@ public class Request {
     @OneToMany(mappedBy = "request", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Comment> comments = new ArrayList<>();
+
+    public void updateStatus(String status) {
+        this.status = status;
+    }
 }

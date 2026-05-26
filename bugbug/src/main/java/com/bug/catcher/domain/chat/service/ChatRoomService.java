@@ -10,6 +10,9 @@ import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.hunter.repository.HunterRepository;
 import com.bug.catcher.domain.request.repository.RequestRepository;
+import com.bug.catcher.domain.hunter.repository.ApplicationRepository;
+import com.bug.catcher.domain.entity.Application;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +28,7 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
     private final RequestRepository requestRepository;
     private final HunterRepository hunterRepository;
+    private final ApplicationRepository applicationRepository;
 
     /**
      * 헌터가 의뢰에 지원하여 채팅방을 생성합니다.
@@ -87,6 +91,7 @@ public class ChatRoomService {
                     .title(title)
                     .otherNickname(otherNickname)
                     .createdAt(room.getCreatedAt())
+                    .reservedAt(room.getReservedAt())
                     .build();
         }).collect(Collectors.toList());
     }
@@ -107,10 +112,37 @@ public class ChatRoomService {
      */
     @Transactional
     public void updateReservation(Long roomId, ChatRoomDto.ReservationRequest requestDto) {
+        // 1. 채팅방 검증
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 채팅방입니다. ROOM_ID: " + roomId));
         
+        // 2. 예약 일자 업데이트 (더티 체킹 보장)
         chatRoom.updateReservation(requestDto.getReservedAt());
+        
+        // 3. [Early Return 적용] 연관 의뢰(Request) 검증 및 예외 처리
+        Request request = chatRoom.getRequest();
+        if (request == null) {
+            throw new EntityNotFoundException("채팅방에 매핑된 의뢰 정보가 존재하지 않습니다. ROOM_ID: " + roomId);
+        }
+        
+        // 4. 의뢰 상태 변경
+        request.updateStatus("예약 완료");
+        
+        // 5. [Early Return 적용] 연관 헌터(Hunter) 검증 및 예외 처리
+        Hunter hunter = chatRoom.getHunter();
+        if (hunter == null) {
+            throw new EntityNotFoundException("채팅방에 매핑된 헌터 정보가 존재하지 않습니다. ROOM_ID: " + roomId);
+        }
+        
+        // 6. 중복 확인 후 매칭 내역(Application) 추가
+        boolean isAlreadyApplied = applicationRepository.existsByRequestIdAndHunterId(request.getId(), hunter.getId());
+        if (!isAlreadyApplied) {
+            Application application = Application.builder()
+                    .request(request)
+                    .hunter(hunter)
+                    .build();
+            applicationRepository.save(application);
+        }
         // 별도의 save 호출 없이 더티 체킹(Dirty Checking)으로 업데이트됩니다.
     }
 }

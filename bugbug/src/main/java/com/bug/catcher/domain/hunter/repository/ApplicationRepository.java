@@ -9,4 +9,7 @@ import java.util.List;
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
     // List -> Page로 변경, Pageable 추가
     Page<Application> findByHunterId(Long hunterId, Pageable pageable);
+    
+    // 예약 중복 저장 방지용 중복 체크
+    boolean existsByRequestIdAndHunterId(Long requestId, Long hunterId);
 }
