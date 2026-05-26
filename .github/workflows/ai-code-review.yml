@@ -50,17 +50,15 @@ jobs:
             리뷰 대상 코드:
             $DIFF_CONTENT"
 
-            # 1. 제미나이 1.5 프로 모델 호출
-            RESPONSE=$(curl -s -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${GEMINI_API_KEY}" \
+            # [★수정 포인트] 엔드포인트 모델 명칭을 최신 antigravity-3.5-flash 로 변경
+            RESPONSE=$(curl -s -X POST "https://generativelanguage.googleapis.com/v1beta/models/antigravity-3.5-flash:generateContent?key=${GEMINI_API_KEY}" \
               -H "Content-Type: application/json" \
               -d "$(jq -n --arg msg "$PROMPT_TEXT" '{contents: [{parts: [{text: $msg}]}]}')")
 
-            # [디버깅용 로그 출력] 구글 서버가 보낸 원본 메시지를 깃액션 콘솔에 강제로 출력
             echo "===== GEMINI RAW RESPONSE START ====="
             echo "$RESPONSE"
             echo "===== GEMINI RAW RESPONSE END ====="
 
-            # 2. 결과 텍스트 추출 및 검증
             AI_COMMENT=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text' 2>/dev/null || echo "json_error")
           
             if [ "$AI_COMMENT" = "null" ] || [ -z "$AI_COMMENT" ] || [ "$AI_COMMENT" = "json_error" ]; then
@@ -68,8 +66,7 @@ jobs:
               exit 1
             fi
 
-            # 3. 깃허브 API를 사용하여 PR에 리뷰 댓글 등록
-            COMMENT_BODY="### 🤖 Antigravity AI Code Review Result
+            COMMENT_BODY="### 🤖 Antigravity AI Code Review Result (Antigravity 3.5 Flash)
             $AI_COMMENT"
 
             curl -s -X POST "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
