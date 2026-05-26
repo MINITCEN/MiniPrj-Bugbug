@@ -2,15 +2,13 @@ package com.bug.catcher.domain.mypage.controller;
 
 import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.user.repository.UserRepository;
-import com.bug.catcher.global.auth.SessionConst;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import com.bug.catcher.global.auth.CustomUserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.SessionAttribute;
 
 @Controller
 @RequestMapping("/mypage")
@@ -26,21 +24,11 @@ public class MyPageViewController {
 
     @GetMapping("/dashboard")
     public String dashboardView(
-            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser,
-            HttpServletRequest request,
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
             Model model) {
 
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
-
-        User currentUser = userRepository.findById(loginUser.getId())
-                .orElse(loginUser);
-
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.setAttribute(SessionConst.LOGIN_USER, currentUser);
-        }
+        User currentUser = userRepository.findById(loginUser.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
         model.addAttribute("user", currentUser);
         model.addAttribute("isHunter", "HUNTER".equals(currentUser.getRole()));
@@ -48,37 +36,27 @@ public class MyPageViewController {
     }
 
     @GetMapping("/requests")
-    public String requestListView(
-            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
-        if (loginUser == null) return "redirect:/login";
+    public String requestListView() {
         return "request-list";
     }
 
     @GetMapping("/reviews")
-    public String reviewListView(
-            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
-        if (loginUser == null) return "redirect:/login";
+    public String reviewListView() {
         return "review-list";
     }
 
     @GetMapping("/bookmarks/hunters")
-    public String bookmarkListView(
-            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
-        if (loginUser == null) return "redirect:/login";
+    public String bookmarkListView() {
         return "bookmark-list";
     }
 
     @GetMapping("/hunter/tasks")
-    public String hunterTaskListView(
-            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
-        if (loginUser == null) return "redirect:/login";
+    public String hunterTaskListView() {
         return "hunter-task-list";
     }
 
     @GetMapping("/hunter/bookmarks/requests")
-    public String hunterBookmarkListView(
-            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser) {
-        if (loginUser == null) return "redirect:/login";
+    public String hunterBookmarkListView() {
         return "hunter-bookmark-list";
     }
 }

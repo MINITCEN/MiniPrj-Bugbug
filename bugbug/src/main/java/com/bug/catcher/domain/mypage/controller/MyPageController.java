@@ -2,202 +2,168 @@ package com.bug.catcher.domain.mypage.controller;
 
 import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.hunter.dto.HunterProfileResponseDto;
-import com.bug.catcher.domain.hunter.service.HunterService;
-import com.bug.catcher.domain.mypage.dto.*;
+import com.bug.catcher.domain.mypage.dto.DashboardResponseDto;
+import com.bug.catcher.domain.mypage.dto.HunterApplyRequestDto;
+import com.bug.catcher.domain.mypage.dto.HunterSavedRequestDto;
+import com.bug.catcher.domain.mypage.dto.HunterTaskResponseDto;
+import com.bug.catcher.domain.mypage.dto.MyInfoResponseDto;
+import com.bug.catcher.domain.mypage.dto.MyInfoUpdateRequestDto;
+import com.bug.catcher.domain.mypage.dto.MyRequestResponseDto;
+import com.bug.catcher.domain.mypage.dto.MySavedHunterResponseDto;
+import com.bug.catcher.domain.mypage.dto.ReviewCreateRequestDto;
+import com.bug.catcher.domain.mypage.dto.ReviewUpdateRequestDto;
 import com.bug.catcher.domain.mypage.service.MyPageService;
 import com.bug.catcher.domain.review.dto.ReviewResponseDto;
 import com.bug.catcher.domain.user.repository.UserRepository;
-import com.bug.catcher.global.auth.SessionConst;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import com.bug.catcher.global.auth.CustomUserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/mypage")
 @RequiredArgsConstructor
 public class MyPageController {
+
     private final MyPageService myPageService;
     private final UserRepository userRepository;
 
     @GetMapping("/info")
-    public ResponseEntity<MyInfoResponseDto> getMyInfo(HttpServletRequest request) {
+    public ResponseEntity<MyInfoResponseDto> getMyInfo(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser) {
 
-        // 1. 세션에서 현재 로그인한 유저 객체 꺼내기
-        HttpSession session = request.getSession(false);
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-
-        // 2. 서비스에게 유저 ID를 넘겨서 최신 정보(DTO) 받아오기
-        MyInfoResponseDto responseDto = myPageService.getMyInfo(loginUser.getId());
-
-        // 3. 정상적으로 데이터 반환
+        MyInfoResponseDto responseDto = myPageService.getMyInfo(loginUser.getUserId());
         return ResponseEntity.ok(responseDto);
     }
 
     @PatchMapping("/info")
     public ResponseEntity<MyInfoResponseDto> updateMyInfo(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
-            @RequestBody MyInfoUpdateRequestDto requestDto,
-            HttpServletRequest request) {
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @RequestBody MyInfoUpdateRequestDto requestDto) {
 
-        MyInfoResponseDto responseDto = myPageService.updateMyInfo(loginUser.getId(), requestDto);
-
-        User dbUser = userRepository.findById(loginUser.getId()).orElseThrow();
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.setAttribute(SessionConst.LOGIN_USER, dbUser);
-        }
-
+        MyInfoResponseDto responseDto = myPageService.updateMyInfo(loginUser.getUserId(), requestDto);
         return ResponseEntity.ok(responseDto);
     }
 
-    // 이슈2
-    // 나의 의뢰 목록 조회
     @GetMapping("/requests")
     public ResponseEntity<Page<MyRequestResponseDto>> getMyRequests(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<MyRequestResponseDto> response = myPageService.getMyRequests(loginUser.getId(), pageable);
+        Page<MyRequestResponseDto> response = myPageService.getMyRequests(loginUser.getUserId(), pageable);
         return ResponseEntity.ok(response);
     }
 
-    // 찜한 헌터 목록 조회
     @GetMapping("/bookmarks/hunters")
     public ResponseEntity<Page<MySavedHunterResponseDto>> getMySavedHunters(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<MySavedHunterResponseDto> response = myPageService.getMySavedHunters(loginUser.getId(), pageable);
+        Page<MySavedHunterResponseDto> response = myPageService.getMySavedHunters(loginUser.getUserId(), pageable);
         return ResponseEntity.ok(response);
     }
 
-    // 리뷰 작성
     @PostMapping("/reviews")
     public ResponseEntity<String> createReview(
-            @RequestBody ReviewCreateRequestDto requestDto,
-            HttpServletRequest request) {
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @RequestBody ReviewCreateRequestDto requestDto) {
 
-        HttpSession session = request.getSession(false);
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-
-        myPageService.createReview(loginUser.getId(), requestDto);
+        myPageService.createReview(loginUser.getUserId(), requestDto);
         return ResponseEntity.ok("리뷰가 성공적으로 등록되었습니다.");
     }
 
-    // 리뷰 수정
     @PutMapping("/reviews/{reviewId}")
     public ResponseEntity<String> updateReview(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long reviewId,
-            @RequestBody ReviewUpdateRequestDto requestDto,
-            HttpServletRequest request) {
+            @RequestBody ReviewUpdateRequestDto requestDto) {
 
-        HttpSession session = request.getSession(false);
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-
-        myPageService.updateReview(loginUser.getId(), reviewId, requestDto);
+        myPageService.updateReview(loginUser.getUserId(), reviewId, requestDto);
         return ResponseEntity.ok("리뷰가 성공적으로 수정되었습니다.");
     }
 
-    // 리뷰 삭제
     @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<String> deleteReview(
-            @PathVariable Long reviewId,
-            HttpServletRequest request) {
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @PathVariable Long reviewId) {
 
-        HttpSession session = request.getSession(false);
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
-
-        myPageService.deleteReview(loginUser.getId(), reviewId);
+        myPageService.deleteReview(loginUser.getUserId(), reviewId);
         return ResponseEntity.ok("리뷰가 삭제되었습니다.");
     }
-    // 내가 작성한 리뷰 목록 조회
+
     @GetMapping("/reviews")
     public ResponseEntity<Page<ReviewResponseDto>> getMyReviews(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<ReviewResponseDto> response = myPageService.getMyReviews(loginUser.getId(), pageable);
+        Page<ReviewResponseDto> response = myPageService.getMyReviews(loginUser.getUserId(), pageable);
         return ResponseEntity.ok(response);
     }
 
-    // 헌터 신청 팝업에서 제출 버튼을 눌렀을 때 호출
     @PostMapping("/hunter/apply")
-    public ResponseEntity<String> applyForHunter(@RequestBody HunterApplyRequestDto requestDto, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        User loginUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+    public ResponseEntity<String> applyForHunter(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @RequestBody HunterApplyRequestDto requestDto) {
 
-        myPageService.applyForHunter(loginUser.getId(), requestDto);
+        myPageService.applyForHunter(loginUser.getUserId(), requestDto);
         return ResponseEntity.ok("헌터 신청이 성공적으로 접수되었습니다.");
     }
 
-    // 마이페이지 대시보드 접근 시 세션/권한 동기화
     @GetMapping("/dashboard")
-    public ResponseEntity<DashboardResponseDto> getMyPageDashboard(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        User sessionUser = (User) session.getAttribute(SessionConst.LOGIN_USER);
+    public ResponseEntity<DashboardResponseDto> getMyPageDashboard(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser) {
 
-        User dbUser = userRepository.findById(sessionUser.getId())
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+        User dbUser = userRepository.findById(loginUser.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        if (!sessionUser.getRole().equals(dbUser.getRole())) {
-            session.setAttribute(SessionConst.LOGIN_USER, dbUser);
-            sessionUser = dbUser;
-        }
-
-        DashboardResponseDto responseDto = new DashboardResponseDto(sessionUser.getRole(), sessionUser.getNickname());
+        DashboardResponseDto responseDto = new DashboardResponseDto(dbUser.getRole(), dbUser.getNickname());
         return ResponseEntity.ok(responseDto);
     }
-    //이슈 4
-    // 수행한 의뢰 목록 조회 (헌터 전용) - 페이징 추가
+
     @GetMapping("/hunter/tasks")
     public ResponseEntity<Page<HunterTaskResponseDto>> getHunterTasks(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<HunterTaskResponseDto> response = myPageService.getHunterTasks(loginUser.getId(), pageable);
+        Page<HunterTaskResponseDto> response = myPageService.getHunterTasks(loginUser.getUserId(), pageable);
         return ResponseEntity.ok(response);
     }
 
-    // 찜한 게시물 목록 조회 (헌터 전용) - 페이징 추가
     @GetMapping("/hunter/bookmarks/requests")
     public ResponseEntity<Page<HunterSavedRequestDto>> getHunterSavedRequests(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<HunterSavedRequestDto> response = myPageService.getHunterSavedRequests(loginUser.getId(), pageable);
+        Page<HunterSavedRequestDto> response = myPageService.getHunterSavedRequests(loginUser.getUserId(), pageable);
         return ResponseEntity.ok(response);
     }
 
-    // 헌터 등록 해제 (일반 유저로 돌아가기)
     @PostMapping("/hunter/resign")
     public ResponseEntity<String> resignHunter(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser,
-            HttpServletRequest request) {
+            @AuthenticationPrincipal CustomUserPrincipal loginUser) {
 
-        // 1. DB의 Role 강등 처리
-        myPageService.resignHunter(loginUser.getId());
-
-        // 2. 세션 동기화 (즉시 일반 유저 마이페이지로 바뀌도록 현재 세션도 갱신)
-        User dbUser = userRepository.findById(loginUser.getId()).orElseThrow();
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.setAttribute(SessionConst.LOGIN_USER, dbUser);
-        }
-
+        myPageService.resignHunter(loginUser.getUserId());
         return ResponseEntity.ok("헌터 등록이 성공적으로 해제되었습니다.");
     }
-    //내 헌터 정보 조회
+
     @GetMapping("/hunter/profile")
     public ResponseEntity<HunterProfileResponseDto> getMyHunterProfile(
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
+            @AuthenticationPrincipal CustomUserPrincipal loginUser) {
 
-        HunterProfileResponseDto response = myPageService.getMyHunterProfile(loginUser.getId());
+        HunterProfileResponseDto response = myPageService.getMyHunterProfile(loginUser.getUserId());
         return ResponseEntity.ok(response);
     }
 }

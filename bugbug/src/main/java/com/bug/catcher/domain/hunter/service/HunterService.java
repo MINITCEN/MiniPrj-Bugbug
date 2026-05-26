@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.bug.catcher.domain.hunter.dto.HunterListResponseDto;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -94,10 +95,12 @@ public class HunterService {//등급 산정 엔진과 외부 공개 프로필 �
         Page<Hunter> hunters = hunterRepository.findAll(pageable);
 
         // 2. 현재 로그인한 유저가 찜한 '헌터 ID 목록'만 한 번에 싹 가져와서 Set(바구니)에 담아둠 (성능 최적화)
-        Set<Long> myBookmarkedHunterIds = savedHunterRepository.findByUserId(userId)
-                .stream()
-                .map(saved -> saved.getHunter().getId())
-                .collect(Collectors.toSet());
+        Set<Long> myBookmarkedHunterIds = userId == null
+                ? Collections.emptySet()
+                : savedHunterRepository.findByUserId(userId)
+                        .stream()
+                        .map(saved -> saved.getHunter().getId())
+                        .collect(Collectors.toSet());
 
         // 3. 헌터 목록을 DTO로 변환하면서, 아까 담아둔 Set(바구니)에 이 헌터 ID가 있는지 확인하여 isBookmarked 설정
         return hunters.map(hunter -> new HunterListResponseDto(

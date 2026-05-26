@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 <header th:fragment="siteHeader(activePage)" class="site-header">
     <div class="site-header__inner">
@@ -21,11 +23,10 @@
             <a href="/api/requestView/list"
                class="site-header__nav-link"
                th:classappend="${activePage == 'request'} ? ' is-active' : ''">의뢰 등록하기</a>
-               
-            <!-- 관리자 로그인 시에만 노출되는 대시보드 버튼 -->
+
             <a href="/admin/users"
                class="site-header__nav-link"
-               th:if="${session.loginUser != null and session.loginUser.role == 'ADMIN'}"
+               sec:authorize="hasRole('ADMIN')"
                th:classappend="${activePage == 'admin'} ? ' is-active' : ''"
                style="color: var(--shell-brand);">관리자 대시보드</a>
         </nav>
@@ -34,11 +35,11 @@
             <a href="/mypage" class="site-header__icon-button" aria-label="마이페이지">
                 <span aria-hidden="true">♡</span>
             </a>
-            <div th:if="${session.loginUser != null}" class="site-header__session">
-                <span class="site-header__welcome" th:text="|${session.loginUser.nickname}님|">사용자님</span>
+            <div sec:authorize="isAuthenticated()" class="site-header__session">
+                <span class="site-header__welcome" sec:authentication="principal.nickname">사용자</span>
                 <button type="button" class="site-header__ghost-button js-logout-button">로그아웃</button>
             </div>
-            <div th:if="${session.loginUser == null}" class="site-header__session">
+            <div sec:authorize="isAnonymous()" class="site-header__session">
                 <a href="/login" class="site-header__ghost-button">로그인</a>
                 <a href="/signup" class="site-header__solid-button">회원가입</a>
             </div>
