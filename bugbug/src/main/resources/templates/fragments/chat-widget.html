@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <div th:fragment="chat" id="bugbug-chat-widget">
     
     <link rel="stylesheet" th:href="@{/css/chat.css}">
@@ -7,8 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     
     <!-- 위젯 스스로 세션에서 내 정보를 빼옵니다 (컨트롤러 불필요) -->
-    <input type="hidden" id="widget-user-id" th:value="${session.loginUser?.id}">
-    <input type="hidden" id="widget-user-role" th:value="${session.loginUser?.role}">
+    <input type="hidden" id="widget-user-id" sec:authorize="isAuthenticated()" th:value="${#authentication.principal.userId}">
+    <input type="hidden" id="widget-user-role" sec:authorize="isAuthenticated()" th:value="${#authentication.principal.role}">
 
     <!-- 팝업창 메인 컨테이너 -->
     <div id="bugbug-chat-window">

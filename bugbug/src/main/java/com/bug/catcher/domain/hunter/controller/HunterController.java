@@ -1,18 +1,22 @@
 package com.bug.catcher.domain.hunter.controller;
 
-import com.bug.catcher.domain.entity.User;
+import com.bug.catcher.domain.hunter.dto.HunterListResponseDto;
 import com.bug.catcher.domain.hunter.dto.HunterProfileResponseDto;
 import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.domain.review.dto.ReviewResponseDto;
-import com.bug.catcher.global.auth.SessionConst;
+import com.bug.catcher.global.auth.CustomUserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
-import com.bug.catcher.domain.hunter.dto.HunterListResponseDto;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/hunters")
@@ -21,31 +25,31 @@ public class HunterController {
 
     private final HunterService hunterService;
 
-    // 헌터의 공개 프로필 조회 (로그인 안 한 유저도 볼 수 있음)
     @GetMapping("/{hunterId}/profile")
     public ResponseEntity<HunterProfileResponseDto> getHunterProfile(@PathVariable Long hunterId) {
         HunterProfileResponseDto response = hunterService.getHunterProfile(hunterId);
         return ResponseEntity.ok(response);
     }
-    // 헌터 찜하기 / 찜 취소 토글
+
     @PostMapping("/{hunterId}/bookmarks")
     public ResponseEntity<String> toggleSavedHunter(
-            @PathVariable Long hunterId,
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @PathVariable Long hunterId) {
 
-        String message = hunterService.toggleSavedHunter(loginUser.getId(), hunterId);
+        String message = hunterService.toggleSavedHunter(loginUser.getUserId(), hunterId);
         return ResponseEntity.ok(message);
     }
-    // 전체 헌터 목록 조회 API
+
     @GetMapping
     public ResponseEntity<Page<HunterListResponseDto>> getHunters(
-            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
-            @SessionAttribute(SessionConst.LOGIN_USER) User loginUser) {
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
+            @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        Page<HunterListResponseDto> response = hunterService.getHunterList(loginUser.getId(), pageable);
+        Long loginUserId = loginUser != null ? loginUser.getUserId() : null;
+        Page<HunterListResponseDto> response = hunterService.getHunterList(loginUserId, pageable);
         return ResponseEntity.ok(response);
     }
-    // 특정 헌터가 받은 리뷰 목록 조회 (로그인 안 해도 볼 수 있음)
+
     @GetMapping("/{hunterId}/reviews")
     public ResponseEntity<Page<ReviewResponseDto>> getHunterReviews(
             @PathVariable Long hunterId,
