@@ -248,11 +248,7 @@ public class MyPageService {
         Hunter hunter = hunterRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
 
-        // 2. 헌터 ID를 이용해 완료 횟수 및 평균 평점 가져오기
-        long completionCount = reviewRepository.countByHunterId(hunter.getId());
-        float averageRating = reviewRepository.getAverageRatingByHunterId(hunter.getId());
-
-        return new HunterProfileResponseDto(hunter, completionCount, averageRating);
+        return hunterService.getHunterProfile(hunter.getId());
     }
 
     private void validateReviewRating(Float rating) {

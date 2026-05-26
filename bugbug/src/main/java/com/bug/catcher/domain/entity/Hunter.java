@@ -30,4 +30,10 @@ public class Hunter {
     public void updateGrade(String newGrade) {
         this.grade = newGrade;
     }
+
+    public void syncCompletionCount(long completionCount) {
+        int count = Math.toIntExact(completionCount);
+        this.requestCount = count;
+        this.responseCount = count;
+    }
 }

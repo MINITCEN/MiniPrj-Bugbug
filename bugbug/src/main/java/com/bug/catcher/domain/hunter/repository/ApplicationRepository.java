@@ -15,6 +15,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     // 같은 헌터가 같은 의뢰에 중복 지원하지 못하도록 확인한다.
     boolean existsByRequestIdAndHunterId(Long requestId, Long hunterId);
 
-    // 의뢰 완료 처리 화면에서 해당 의뢰에 지원한 헌터 후보를 보여주기 위해 사용한다.
+
     List<Application> findByRequestId(Long requestId);
+    long countByHunterIdAndRequest_Status(Long hunterId, String status);
 }
