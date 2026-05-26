@@ -33,6 +33,12 @@
                 <span id="bugbug-chat-close" onclick="toggleChatWindow()">✕</span>
             </div>
             
+            <!-- 예약 현황 바 -->
+            <div id="bugbug-chat-status-bar" style="display: none; justify-content: space-between; align-items: center; background-color: #FFFFFF; padding: 8px 15px; border-bottom: 1px solid #EAEAEA; font-size: 13px; color: #555555;">
+                <span id="bugbug-reservation-status">📌 매칭 상태: 대기 중</span>
+                <button id="bugbug-reserve-btn" onclick="confirmReservation()" style="display: none; background-color: #4e73df; color: #FFFFFF; border: none; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-size: 11px; font-weight: bold; transition: background-color 0.2s;">예약 완료하기</button>
+            </div>
+            
             <div id="bugbug-chat-messages">
                 <!-- 메시지가 동적 생성됨 -->
             </div>
@@ -44,7 +50,6 @@
                 <button id="bugbug-chat-send" onclick="sendChatMessage()">➤</button>
             </div>
         </div>
-        
     </div>
 
     <!-- 플로팅 버튼 -->

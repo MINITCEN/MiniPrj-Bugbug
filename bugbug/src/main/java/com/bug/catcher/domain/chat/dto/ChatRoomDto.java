@@ -27,6 +27,7 @@ public class ChatRoomDto {
         private String title;          // 의뢰 제목
         private String otherNickname;  // 상대방 닉네임 (유저에겐 헌터이름, 헌터에겐 유저이름)
         private LocalDateTime createdAt;
+        private LocalDateTime reservedAt; // 방문 예약 날짜/시간
     }
 
     // 3. 방문 날짜/시간 예약 요청 DTO
