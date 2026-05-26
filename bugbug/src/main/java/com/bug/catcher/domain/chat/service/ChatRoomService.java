@@ -10,6 +10,8 @@ import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.hunter.repository.HunterRepository;
 import com.bug.catcher.domain.request.repository.RequestRepository;
+import com.bug.catcher.domain.hunter.repository.ApplicationRepository;
+import com.bug.catcher.domain.entity.Application;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
     private final RequestRepository requestRepository;
     private final HunterRepository hunterRepository;
+    private final ApplicationRepository applicationRepository;
 
     /**
      * 헌터가 의뢰에 지원하여 채팅방을 생성합니다.
@@ -117,6 +120,18 @@ public class ChatRoomService {
         Request request = chatRoom.getRequest();
         if (request != null) {
             request.updateStatus("예약 완료");
+        }
+        
+        // 헌터 최근 활동 매칭을 위해 Application 엔티티 생성 및 저장
+        Hunter hunter = chatRoom.getHunter();
+        if (request != null && hunter != null) {
+            if (!applicationRepository.existsByRequestIdAndHunterId(request.getId(), hunter.getId())) {
+                Application application = Application.builder()
+                        .request(request)
+                        .hunter(hunter)
+                        .build();
+                applicationRepository.save(application);
+            }
         }
         // 별도의 save 호출 없이 더티 체킹(Dirty Checking)으로 업데이트됩니다.
     }
