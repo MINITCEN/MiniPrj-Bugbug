@@ -8,7 +8,7 @@ public class MySavedHunterResponseDto {//찜한 헌터 목록용
     private Long hunterId;
     private String hunterName;
     private String grade; // 헌터 등급
-    private Integer responseCount; // 헌터의 응답 횟수
+    private Integer responseCount; // 헌터의 완료 횟수
 
     public MySavedHunterResponseDto(SavedHunter savedHunter) {
         this.hunterId = savedHunter.getHunter().getId();

@@ -130,7 +130,7 @@
                     return;
                 }
                 items.slice(0, 3).forEach((hunter) => {
-                    list.append(activityItem(`${hunter.hunterName} 헌터`, `/hunters/${hunter.hunterId}`, hunter.grade, `${hunter.responseCount || 0}회 응답`));
+                    list.append(activityItem(`${hunter.hunterName} 헌터`, `/hunters/${hunter.hunterId}`, hunter.grade, `${hunter.responseCount || 0}회 완료`));
                 });
             });
     }
@@ -142,8 +142,7 @@
                 document.getElementById("hunter-grade").textContent = data.grade || "헌터";
                 document.getElementById("hunter-completion-cnt").textContent = `총 ${data.completionCount || 0}건 완료`;
                 document.getElementById("hunter-rating").textContent = Number(data.averageRating || 0).toFixed(1);
-                document.getElementById("hunter-req-count").textContent = `${data.requestCount || 0}회`;
-                document.getElementById("hunter-res-count").textContent = `${data.responseCount || 0}회`;
+                document.getElementById("hunter-res-count").textContent = `${data.completionCount || 0}회`;
             });
 
         fetch("/api/mypage/hunter/tasks?size=3")

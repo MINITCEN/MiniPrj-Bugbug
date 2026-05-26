@@ -10,6 +10,8 @@ import com.bug.catcher.domain.request.dto.RequestMediaFileUrlDto;
 import com.bug.catcher.domain.request.repository.RequestImageRepository;
 import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.domain.user.repository.UserRepository;
+import com.bug.catcher.domain.hunter.repository.ApplicationRepository;
+import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.global.file.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +31,8 @@ public class RequestService {
     private final UserRepository userRepository;
     private final RequestImageRepository requestImageRepository;
     private final FileStore fileStore;
+    private final ApplicationRepository applicationRepository;
+    private final HunterService hunterService;
 
     // create
     @Transactional
@@ -125,6 +129,7 @@ public class RequestService {
     public void updateRequest(Long requestId, Long loginUserId, RequestFormDto form, RequestMediaFileUrlDto mediaUrlDto) {
         Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
                 .orElseThrow(() -> new IllegalStateException("게시글이 없거나 수정 권한이 없습니다."));
+        String beforeStatus = request.getStatus();
         // 1. 사용자가 삭제한 기존 미디어 먼저 제거
         deleteMedia(requestId, loginUserId, mediaUrlDto);
 
@@ -158,6 +163,8 @@ public class RequestService {
             throw new IllegalStateException("게시글이 없거나 수정 권한이 없습니다.");
         }
 
+        updateMatchedHunterGradeIfCompletionChanged(requestId, beforeStatus, form.getStatus());
+
         // 5. 새 이미지 URL DB 저장
         saveImages(request, newImageUrls);
 
@@ -165,6 +172,19 @@ public class RequestService {
         if (newVideoUrl != null && !newVideoUrl.isBlank()) {
             requestRepository.updateVideoUrl(requestId, loginUserId, newVideoUrl);
         }
+    }
+
+    private void updateMatchedHunterGradeIfCompletionChanged(Long requestId, String beforeStatus, String afterStatus) {
+        if (isCompleted(beforeStatus) == isCompleted(afterStatus)) {
+            return;
+        }
+
+        applicationRepository.findByRequestId(requestId)
+                .forEach(application -> hunterService.updateHunterLevel(application.getHunter().getId()));
+    }
+
+    private boolean isCompleted(String status) {
+        return "완료".equals(status);
     }
 
     // delete request
