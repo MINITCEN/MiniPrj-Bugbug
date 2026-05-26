@@ -10,4 +10,9 @@ public class MainPageController {
     public String mainPage() {
         return "main";
     }
+
+    @GetMapping("/service-intro")
+    public String serviceIntroPage() {
+        return "service-intro";
+    }
 }

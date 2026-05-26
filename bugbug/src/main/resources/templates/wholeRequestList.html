@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>버그버그 - 헌터 구인</title>
@@ -101,6 +103,6 @@
 <script src="/js/common-layout.js"></script>
 <script src="/js/login.js"></script>
 <!-- 로그인한 유저에게만 채팅 위젯을 띄워줍니다 -->
-<div th:if="${session.loginUser != null}" th:replace="~{fragments/chat-widget :: chat}"></div>
+<div sec:authorize="isAuthenticated()" th:replace="~{fragments/chat-widget :: chat}"></div>
 </body>
 </html>

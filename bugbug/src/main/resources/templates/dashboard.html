@@ -14,6 +14,9 @@
         <h2 class="sidebar-title">마이페이지</h2>
 
         <a class="side-link active" href="/mypage/dashboard"><span class="mark">i</span>내 정보</a>
+        <button class="side-link side-button" type="button" onclick="openHunterGradeModal()">
+            <span class="mark">G</span>헌터 등급 제도
+        </button>
 
         <div th:if="${!isHunter}">
             <a class="side-link" href="/mypage/requests"><span class="mark">R</span>나의 의뢰 보기</a>
@@ -224,6 +227,90 @@
                 <button class="primary-btn" type="submit">저장</button>
             </div>
         </form>
+    </section>
+</div>
+
+<div class="modal-backdrop hunter-grade-backdrop" id="hunter-grade-modal" hidden>
+    <section class="modal hunter-grade-modal" role="dialog" aria-modal="true" aria-labelledby="hunter-grade-modal-title">
+        <div class="hunter-grade-head">
+            <div class="hunter-grade-title-wrap">
+                <span class="hunter-grade-icon">✓</span>
+                <div>
+                    <h2 id="hunter-grade-modal-title">헌터 등급제</h2>
+                    <p>활동 실적에 따라 성장하는 버그버그 헌터 등급 체계입니다.</p>
+                </div>
+            </div>
+            <button class="modal-close" type="button" onclick="closeHunterGradeModal()" aria-label="닫기">x</button>
+        </div>
+
+        <div class="hunter-grade-list">
+            <article class="hunter-grade-card">
+                <div class="rank-medal rank-rookie"><span>★</span></div>
+                <div class="rank-stars">*</div>
+                <div class="rank-content">
+                    <h3>루키 <small>Rookie · LV.1</small></h3>
+                    <p>버그버그에 첫발을 내디딘 신참 헌터. 가볍게 시작해 현장 경험을 쌓습니다.</p>
+                </div>
+                <div class="rank-condition">
+                    <span>달성 조건</span>
+                    <strong>✓ 가입 완료</strong>
+                </div>
+            </article>
+
+            <article class="hunter-grade-card">
+                <div class="rank-medal rank-bronze"><span>★</span></div>
+                <div class="rank-stars">**</div>
+                <div class="rank-content">
+                    <h3>브론즈 <small>Bronze · LV.2</small></h3>
+                    <p>기본 장비와 본사 도구를 마스터하고, 다소 안정거리를 확보하는 스마트한 헌터입니다.</p>
+                </div>
+                <div class="rank-condition">
+                    <span>달성 조건</span>
+                    <strong>✓ 퇴치 완료 3회</strong>
+                </div>
+            </article>
+
+            <article class="hunter-grade-card">
+                <div class="rank-medal rank-silver"><span>★</span></div>
+                <div class="rank-stars">***</div>
+                <div class="rank-content">
+                    <h3>실버 <small>Silver · LV.3</small></h3>
+                    <p>고전압 전기 제압 장비를 자유자재로 다루며, 찰나의 순간에 상황을 종결짓는 숙련된 요원.</p>
+                </div>
+                <div class="rank-condition">
+                    <span>달성 조건</span>
+                    <strong>✓ 퇴치 완료 10회</strong>
+                </div>
+            </article>
+
+            <article class="hunter-grade-card">
+                <div class="rank-medal rank-gold"><span>★</span></div>
+                <div class="rank-stars">****</div>
+                <div class="rank-content">
+                    <h3>골드 <small>Gold · LV.4</small></h3>
+                    <p>완벽한 차단과 복합 흡입 장비를 무장한 마스터. 해충뿐 아니라 환경과 유해 물질까지 지워버리는 전문가.</p>
+                </div>
+                <div class="rank-condition">
+                    <span>달성 조건</span>
+                    <strong>✓ 퇴치 완료 20회</strong>
+                </div>
+            </article>
+
+            <article class="hunter-grade-card">
+                <div class="rank-medal rank-legend"><span>★</span></div>
+                <div class="rank-stars">*****</div>
+                <div class="rank-content">
+                    <h3>레전드 <small>Legend · LV.5</small></h3>
+                    <p>수많은 현장을 평정한 최고의 해결사. 등장만으로 공간의 쾌적함을 보장하는 전설적인 존재.</p>
+                </div>
+                <div class="rank-condition">
+                    <span>달성 조건</span>
+                    <strong>✓ 퇴치 40회 · ★ 4.8 이상</strong>
+                </div>
+            </article>
+        </div>
+
+        <p class="hunter-grade-foot">더 많이 활동할수록 더 높은 등급과 특별한 보상이 기다리고 있어요.</p>
     </section>
 </div>
 

@@ -66,6 +66,14 @@
         document.getElementById("profile-modal").hidden = true;
     }
 
+    function openHunterGradeModal() {
+        document.getElementById("hunter-grade-modal").hidden = false;
+    }
+
+    function closeHunterGradeModal() {
+        document.getElementById("hunter-grade-modal").hidden = true;
+    }
+
     function submitProfileForm(event) {
         event.preventDefault();
 
@@ -213,6 +221,11 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("profile-form").addEventListener("submit", submitProfileForm);
+        document.getElementById("hunter-grade-modal").addEventListener("click", (event) => {
+            if (event.target.id === "hunter-grade-modal") {
+                closeHunterGradeModal();
+            }
+        });
 
         if (userRole === "HUNTER") {
             loadHunterDashboard();
@@ -221,8 +234,16 @@
         loadUserDashboard();
     });
 
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeHunterGradeModal();
+        }
+    });
+
     window.openProfileModal = openProfileModal;
     window.closeProfileModal = closeProfileModal;
+    window.openHunterGradeModal = openHunterGradeModal;
+    window.closeHunterGradeModal = closeHunterGradeModal;
     window.applyHunter = applyHunter;
     window.resignHunter = resignHunter;
     window.logout = logout;
