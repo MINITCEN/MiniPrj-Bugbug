@@ -113,7 +113,7 @@ public class RequestViewController {
         return "requestDetail";
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @GetMapping("/edit/{requestId}")
     public String editForm(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -131,7 +131,7 @@ public class RequestViewController {
         return "requestForm";
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @PostMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String updateRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -143,7 +143,7 @@ public class RequestViewController {
         return "redirect:/requestView/detail/" + requestId;
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @PostMapping("/remove/{requestId}")
     public String deleteRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,

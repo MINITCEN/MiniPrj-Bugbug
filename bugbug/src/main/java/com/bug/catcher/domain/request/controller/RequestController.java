@@ -49,7 +49,7 @@ public class RequestController {
         return requestService.readRequestDetail(id);
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @PatchMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public RequestDetailResponseDto updateRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -61,7 +61,7 @@ public class RequestController {
         return requestService.readRequestDetail(requestId);
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @DeleteMapping(value = "/remove/{requestId}")
     public List<Map<String, Object>> deleteRequestList(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
