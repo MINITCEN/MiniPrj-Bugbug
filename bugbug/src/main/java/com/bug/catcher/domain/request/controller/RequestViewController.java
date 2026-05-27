@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -70,28 +71,21 @@ public class RequestViewController {
         return "wholeRequestList";
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/new")
     public String requestForm(@AuthenticationPrincipal CustomUserPrincipal loginUser, Model model) {
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
-        if (!"USER".equals(loginUser.getRole())) {
-            return "redirect:/requestView/list?error=forbidden";
-        }
         model.addAttribute("mode", "create");
         model.addAttribute("form", new RequestFormDto());
         model.addAttribute("kakaoMapKey", kakaoMapApiKey);
         return "requestForm";
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String createRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @ModelAttribute RequestFormDto form) {
 
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
         requestService.createRequest(loginUser.getUserId(), form);
         return "redirect:/requestView/list";
     }
