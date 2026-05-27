@@ -135,15 +135,89 @@
             });
     }
 
+    function renderReviewBars(ratingCounts) {
+        const container = document.getElementById("hunter-review-bars");
+        if (!container) {
+            return;
+        }
+
+        container.replaceChildren();
+
+        if (typeof ratingCounts === "string") {
+            const message = document.createElement("p");
+            message.className = "empty";
+            message.textContent = ratingCounts;
+            container.append(message);
+            return;
+        }
+
+        const counts = ratingCounts || {};
+        const scores = [5, 4, 3, 2, 1];
+        const total = scores.reduce((sum, score) => sum + Number(counts[score] || 0), 0);
+
+        if (!total) {
+            const empty = document.createElement("p");
+            empty.className = "empty";
+            empty.textContent = "아직 받은 리뷰가 없습니다.";
+            container.append(empty);
+            return;
+        }
+
+        scores.forEach((score) => {
+            const count = Number(counts[score] || 0);
+            const percent = Math.round((count / total) * 100);
+
+            const label = document.createElement("span");
+            label.textContent = `${score}점`;
+
+            const bar = document.createElement("div");
+            bar.className = "bar";
+            bar.setAttribute("aria-label", `${score}점 리뷰 ${count}개`);
+
+            const fill = document.createElement("span");
+            fill.style.width = `${percent}%`;
+            bar.append(fill);
+
+            const countText = document.createElement("span");
+            countText.textContent = count;
+
+            container.append(label, bar, countText);
+        });
+    }
+
+    function updateHunterGradeView(data) {
+        const count = Number(data.completionCount || 0);
+        const grade = data.grade || "루키";
+        const gradeMarks = {
+            "루키": "R",
+            "브론즈": "B",
+            "실버": "S",
+            "골드": "G",
+            "레전드": "L"
+        };
+
+        document.getElementById("hunter-grade").textContent = grade;
+        document.getElementById("hunter-grade-mark").textContent = gradeMarks[grade] || "-";
+        document.getElementById("hunter-completion-cnt").textContent = `총 ${count}건 활동`;
+        document.getElementById("hunter-rating").textContent = Number(data.averageRating || 0).toFixed(1);
+        document.getElementById("hunter-res-count").textContent = `${count}건`;
+    }
+
     function loadHunterDashboard() {
         fetch("/api/mypage/hunter/profile")
             .then((res) => res.json())
-            .then((data) => {
-                document.getElementById("hunter-grade").textContent = data.grade || "헌터";
-                document.getElementById("hunter-completion-cnt").textContent = `총 ${data.completionCount || 0}건 완료`;
-                document.getElementById("hunter-rating").textContent = Number(data.averageRating || 0).toFixed(1);
-                document.getElementById("hunter-res-count").textContent = `${data.completionCount || 0}회`;
-            });
+            .then((data) => updateHunterGradeView(data));
+
+        fetch("/api/mypage/hunter/review-summary")
+            .then(async (res) => {
+                if (!res.ok) {
+                    const message = await res.text();
+                    throw new Error(message || "리뷰 요약을 불러오지 못했습니다.");
+                }
+                return res.json();
+            })
+            .then((data) => renderReviewBars(data))
+            .catch((error) => renderReviewBars(error.message || "리뷰 요약을 불러오지 못했습니다."));
 
         fetch("/api/mypage/hunter/tasks?size=3")
             .then((res) => res.json())

@@ -36,7 +36,7 @@ public class ChatRoomService {
     @Transactional
     public Long createChatRoom(Long requestId, Long hunterUserId) {
         // 헌터의 유저 ID로 헌터 정보를 찾습니다.
-        Hunter hunter = hunterRepository.findByUserId(hunterUserId)
+        Hunter hunter = hunterRepository.findTopByUserIdOrderByIdDesc(hunterUserId)
                 .orElseThrow(() -> new IllegalArgumentException("헌터 정보가 존재하지 않습니다."));
 
         // 1. 이미 방이 있는지 확인 (중복 방지)
