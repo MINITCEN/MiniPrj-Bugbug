@@ -15,13 +15,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/api/requestView")
+@RequestMapping("/requestView")
 @RequiredArgsConstructor
 public class RequestViewController {
 
@@ -29,6 +30,11 @@ public class RequestViewController {
 
     @Value("${kakao.api.key}")
     private String kakaoMapApiKey;
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public String handleAccessDenied() {
+        return "redirect:/requestView/list?error=forbidden";
+    }
 
     @GetMapping("/list")
     public String requestList(
@@ -65,7 +71,13 @@ public class RequestViewController {
     }
 
     @GetMapping("/new")
-    public String requestForm(Model model) {
+    public String requestForm(@AuthenticationPrincipal CustomUserPrincipal loginUser, Model model) {
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+        if (!"USER".equals(loginUser.getRole())) {
+            return "redirect:/requestView/list?error=forbidden";
+        }
         model.addAttribute("mode", "create");
         model.addAttribute("form", new RequestFormDto());
         model.addAttribute("kakaoMapKey", kakaoMapApiKey);
@@ -77,8 +89,11 @@ public class RequestViewController {
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @ModelAttribute RequestFormDto form) {
 
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
         requestService.createRequest(loginUser.getUserId(), form);
-        return "redirect:/api/requestView/list";
+        return "redirect:/requestView/list";
     }
 
     @GetMapping("/detail/{requestId}")
@@ -110,6 +125,10 @@ public class RequestViewController {
             @PathVariable Long requestId,
             Model model) {
 
+        // 비로그인 체크
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
         RequestEditFormDto editForm = requestService.getEditForm(requestId, loginUser.getUserId());
 
         model.addAttribute("mode", "edit");
@@ -128,8 +147,12 @@ public class RequestViewController {
             @ModelAttribute RequestFormDto form,
             @ModelAttribute RequestMediaFileUrlDto mediaUrlDto) {
 
+        // 비로그인 상태 방지
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
         requestService.updateRequest(requestId, loginUser.getUserId(), form, mediaUrlDto);
-        return "redirect:/api/requestView/detail/" + requestId;
+        return "redirect:/requestView/detail/" + requestId;
     }
 
     @PostMapping("/remove/{requestId}")
@@ -137,7 +160,11 @@ public class RequestViewController {
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId) {
 
+        // 비로그인 상태 방지
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
         requestService.deleteRequest(requestId, loginUser.getUserId());
-        return "redirect:/api/requestView/list";
+        return "redirect:/requestView/list";
     }
 }
