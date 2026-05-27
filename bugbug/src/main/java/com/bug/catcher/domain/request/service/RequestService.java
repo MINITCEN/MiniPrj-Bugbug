@@ -1,5 +1,7 @@
 package com.bug.catcher.domain.request.service;
 
+import com.bug.catcher.domain.chat.repository.ChatRoomRepository;
+import com.bug.catcher.domain.entity.ChatRoom;
 import com.bug.catcher.domain.entity.Request;
 import com.bug.catcher.domain.entity.RequestImage;
 import com.bug.catcher.domain.entity.User;
@@ -10,6 +12,8 @@ import com.bug.catcher.domain.request.dto.RequestMediaFileUrlDto;
 import com.bug.catcher.domain.request.repository.RequestImageRepository;
 import com.bug.catcher.domain.request.repository.RequestRepository;
 import com.bug.catcher.domain.user.repository.UserRepository;
+import com.bug.catcher.domain.hunter.repository.ApplicationRepository;
+import com.bug.catcher.domain.hunter.service.HunterService;
 import com.bug.catcher.global.file.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,7 +33,10 @@ public class RequestService {
     private final RequestRepository requestRepository;
     private final UserRepository userRepository;
     private final RequestImageRepository requestImageRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final FileStore fileStore;
+    private final ApplicationRepository applicationRepository;
+    private final HunterService hunterService;
 
     // user의 권한을 검증하기
     private void validateUserRole(User user) {
@@ -134,10 +141,13 @@ public class RequestService {
     @Transactional
     public void updateRequest(Long requestId, Long loginUserId, RequestFormDto form, RequestMediaFileUrlDto mediaUrlDto) {
         Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
+
                 .orElseThrow(() -> new AccessDeniedException("게시글이 없거나 수정 권한이 없습니다."));
 
         // 0. 우선 사용자 검증
         validateUserRole(request.getUser());
+        String beforeStatus = request.getStatus();
+
         // 1. 사용자가 삭제한 기존 미디어 먼저 제거
         deleteMedia(requestId, loginUserId, mediaUrlDto);
 
@@ -155,21 +165,24 @@ public class RequestService {
             newVideoUrl = fileStore.storeVideo(form.getVideoFile());
         }
 
-        int updatedCount = requestRepository.update(
+        request.updateDetails(
                 form.getTitle(),
                 form.getContent(),
                 form.getLocation(),
                 form.getDetailLocation(),
                 form.getOccurrenceTime(),
                 form.getDescription(),
-                form.getStatus(),
-                requestId,
-                loginUserId
+                form.getStatus()
         );
+        updateCompletedHunter(request, form);
+
 
         if (updatedCount == 0) {
             throw new AccessDeniedException("게시글이 없거나 수정 권한이 없습니다.");
         }
+
+        updateMatchedHunterGradeIfCompletionChanged(requestId, beforeStatus, form.getStatus());
+
 
         // 5. 새 이미지 URL DB 저장
         saveImages(request, newImageUrls);
@@ -178,6 +191,19 @@ public class RequestService {
         if (newVideoUrl != null && !newVideoUrl.isBlank()) {
             requestRepository.updateVideoUrl(requestId, loginUserId, newVideoUrl);
         }
+    }
+
+    private void updateMatchedHunterGradeIfCompletionChanged(Long requestId, String beforeStatus, String afterStatus) {
+        if (isCompleted(beforeStatus) == isCompleted(afterStatus)) {
+            return;
+        }
+
+        applicationRepository.findByRequestId(requestId)
+                .forEach(application -> hunterService.updateHunterLevel(application.getHunter().getId()));
+    }
+
+    private boolean isCompleted(String status) {
+        return "완료".equals(status);
     }
 
     // delete request
@@ -286,6 +312,7 @@ public class RequestService {
         form.setTitle(request.getTitle());
         form.setContent(request.getContent());
         form.setStatus(request.getStatus());
+        form.setCompletedHunterId(request.getCompletedHunter() != null ? request.getCompletedHunter().getId() : null);
         form.setLocation(request.getApproxLocation());
         form.setDetailLocation(request.getExactLocation());
         form.setOccurrenceTime(request.getOccurrenceTime());
@@ -307,6 +334,30 @@ public class RequestService {
         editForm.setMediaUrl(mediaUrl);
 
         return editForm;
+    }
+
+    private void updateCompletedHunter(Request request, RequestFormDto form) {
+        // 완료 상태가 아니면 이전에 저장된 완료 헌터 정보를 제거한다.
+        if (!"완료".equals(form.getStatus())) {
+            request.updateCompletedHunter(null);
+            return;
+        }
+
+        List<ChatRoom> reservedRooms = chatRoomRepository
+                .findByRequestIdAndReservedAtIsNotNullOrderByReservedAtDesc(request.getId());
+
+        // 완료 처리는 채팅방에서 예약 수락된 헌터가 있을 때만 가능하다.
+        if (reservedRooms.isEmpty()) {
+            throw new IllegalStateException("예약 완료된 헌터가 없어 의뢰를 완료 처리할 수 없습니다.");
+        }
+
+        ChatRoom reservedRoom = reservedRooms.get(0);
+        if (reservedRoom.getHunter() == null) {
+            throw new IllegalStateException("예약 완료된 채팅방에 헌터 정보가 없습니다.");
+        }
+
+        // 사용자가 헌터를 고르지 않고, 예약 완료 채팅방의 헌터를 완료 헌터로 자동 저장한다.
+        request.completeBy(reservedRoom.getHunter());
     }
 
 }

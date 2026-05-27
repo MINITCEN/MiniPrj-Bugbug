@@ -4,18 +4,22 @@ import com.bug.catcher.domain.entity.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
 import java.util.List;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
-    // 1. 의뢰인(일반 유저)이 자신이 참여한 채팅방 목록을 찾을 때 사용합니다.
     @Query("SELECT c FROM ChatRoom c WHERE c.user.id = :userId")
     List<ChatRoom> findByUser_Id(@Param("userId") Long userId);
 
-    // 2. 헌터가 자신이 참여한 채팅방 목록을 찾을 때 사용합니다.
     @Query("SELECT c FROM ChatRoom c WHERE c.hunter.user.id = :userId")
     List<ChatRoom> findByHunter_User_Id(@Param("userId") Long userId);
 
-    // 3. 특정 의뢰에 대해 특정 헌터가 이미 만들어둔 방이 있는지 확인합니다. (중복 방 생성 방지용)
     boolean existsByRequestIdAndHunterId(Long requestId, Long hunterId);
+
+    // 의뢰 완료 처리 시 예약 완료된 채팅방의 헌터를 완료 헌터로 자동 지정한다.
+    List<ChatRoom> findByRequestIdAndReservedAtIsNotNullOrderByReservedAtDesc(Long requestId);
+
+    // 한 의뢰에 예약 완료 채팅방이 여러 개 생기지 않게 막는다.
+    boolean existsByRequestIdAndReservedAtIsNotNullAndIdNot(Long requestId, Long roomId);
 }

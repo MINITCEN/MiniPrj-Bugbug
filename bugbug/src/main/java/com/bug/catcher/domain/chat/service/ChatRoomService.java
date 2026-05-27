@@ -124,6 +124,11 @@ public class ChatRoomService {
         if (request == null) {
             throw new EntityNotFoundException("채팅방에 매핑된 의뢰 정보가 존재하지 않습니다. ROOM_ID: " + roomId);
         }
+
+        // 한 의뢰는 한 명의 헌터와만 예약 완료될 수 있다.
+        if (chatRoomRepository.existsByRequestIdAndReservedAtIsNotNullAndIdNot(request.getId(), roomId)) {
+            throw new IllegalStateException("이미 다른 헌터와 예약 완료된 의뢰입니다.");
+        }
         
         // 4. 의뢰 상태 변경
         request.updateStatus("예약 완료");
