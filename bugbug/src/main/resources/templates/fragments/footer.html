@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 <footer th:fragment="siteFooter()" class="site-footer">
     <div class="site-footer__inner">
@@ -31,6 +31,8 @@
             </div>
         </div>
     </div>
+    <!-- 로그인한 유저에게만 실시간 채팅 위젯을 띄워줍니다 (공통 적용) -->
+    <div sec:authorize="isAuthenticated()" th:replace="~{fragments/chat-widget :: chat}"></div>
 </footer>
 </body>
 </html>
