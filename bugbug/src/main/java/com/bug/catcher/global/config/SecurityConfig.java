@@ -89,8 +89,8 @@ public class SecurityConfig {
                                 "/service-intro"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET,
-                                "/api/requestView/list",
-                                "/api/requestView/detail/**",
+                                "/requestView/list",
+                                "/requestView/detail/**",
                                 "/api/request/wholeList",
                                 "/api/request/detail/**",
                                 "/api/hunters",

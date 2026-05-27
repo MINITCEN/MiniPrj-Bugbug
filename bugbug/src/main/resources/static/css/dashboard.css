@@ -418,6 +418,11 @@
             color: #646d68;
         }
 
+        .review-bars .empty {
+            grid-column: 1 / -1;
+            margin: 0;
+        }
+
         .bar {
             height: 7px;
             border-radius: 999px;
@@ -430,12 +435,8 @@
             height: 100%;
             border-radius: inherit;
             background: var(--green);
+            transition: width 0.2s ease;
         }
-
-        .bar-fill-82 { width: 82%; }
-        .bar-fill-34 { width: 34%; }
-        .bar-fill-12 { width: 12%; }
-        .bar-fill-5 { width: 5%; }
 
         .safe-banner {
             display: flex;

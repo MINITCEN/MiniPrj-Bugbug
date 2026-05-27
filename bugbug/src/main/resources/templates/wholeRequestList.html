@@ -21,29 +21,31 @@
 
         <div class="top-line">
             <div class="tabs">
-                <a th:href="@{/api/requestView/list}"
+                <a th:href="@{/requestView/list}"
                    th:classappend="${status == null} ? 'active'">전체</a>
-                <a th:href="@{/api/requestView/list(status='대기 중')}"
+                <a th:href="@{/requestView/list(status='대기 중')}"
                    th:classappend="${status == '대기 중'} ? 'active'">대기 중</a>
-                <a th:href="@{/api/requestView/list(status='예약 중')}"
+                <a th:href="@{/requestView/list(status='예약 중')}"
                    th:classappend="${status == '예약 중'} ? 'active'">예약 중</a>
-                <a th:href="@{/api/requestView/list(status='완료')}"
+                <a th:href="@{/requestView/list(status='완료')}"
                    th:classappend="${status == '완료'} ? 'active'">완료</a>
             </div>
 
             <div class="board-actions">
                 <select name="sortType"
                         onchange="location.href=this.value">
-                    <option th:value="@{/api/requestView/list(status=${status}, sortType='latest')}"
+                    <option th:value="@{/requestView/list(status=${status}, sortType='latest')}"
                             th:selected="${sortType == null or sortType == 'latest'}">
                         최신 순
                     </option>
-                    <option th:value="@{/api/requestView/list(status=${status}, sortType='viewCount')}"
+                    <option th:value="@{/requestView/list(status=${status}, sortType='viewCount')}"
                             th:selected="${sortType == 'viewCount'}">
                         조회 수
                     </option>
                 </select>
-                <a href="/api/requestView/new" class="write-btn">+ 의뢰 등록하기</a>
+                <a href="/requestView/new" class="write-btn">
+                    + 의뢰 등록하기
+                </a>
             </div>
         </div>
 
@@ -62,7 +64,7 @@
             <tr th:each="request : ${requestList}">
                 <td th:text="${request.status}"></td>
                 <td class="title-cell">
-                    <a th:href="@{/api/requestView/detail/{id}(id=${request.requestId})}">
+                    <a th:href="@{/requestView/detail/{id}(id=${request.requestId})}">
                         <strong th:text="${request.title}">
                         </strong>
                         <p th:text="${request.description}"></p>
@@ -84,17 +86,17 @@
 
         <div class="pagination" th:if="${requestPage.totalPages > 0}">
             <a th:if="${requestPage.hasPrevious()}"
-               th:href="@{/api/requestView/list(page=${requestPage.number - 1}, size=${requestPage.size}, status=${status}, sortType=${sortType})}">
+               th:href="@{/requestView/list(page=${requestPage.number - 1}, size=${requestPage.size}, status=${status}, sortType=${sortType})}">
                 ＜
             </a>
             <a th:each="pageNum : ${#numbers.sequence(0, requestPage.totalPages - 1)}"
-               th:href="@{/api/requestView/list(page=${pageNum}, size=${requestPage.size}, status=${status}, sortType=${sortType})}"
+               th:href="@{/requestView/list(page=${pageNum}, size=${requestPage.size}, status=${status}, sortType=${sortType})}"
                th:text="${pageNum + 1}"
                th:classappend="${pageNum == requestPage.number} ? 'active'">
                 1
             </a>
             <a th:if="${requestPage.hasNext()}"
-               th:href="@{/api/requestView/list(page=${requestPage.number + 1}, size=${requestPage.size}, status=${status}, sortType=${sortType})}">
+               th:href="@{/requestView/list(page=${requestPage.number + 1}, size=${requestPage.size}, status=${status}, sortType=${sortType})}">
                 ＞
             </a>
         </div>

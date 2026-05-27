@@ -8,16 +8,12 @@ import com.bug.catcher.global.auth.CustomUserPrincipal;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/request")
@@ -26,11 +22,20 @@ public class RequestController {
 
     private final RequestService requestService;
 
+    // Rest API 403 에러 처리
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("message", e.getMessage()));
+    }
+
     @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public List<Map<String, Object>> createRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @ModelAttribute RequestFormDto form) {
-
+        if (loginUser == null) {
+            throw new AccessDeniedException("로그인이 필요합니다.");
+        }
         requestService.createRequest(loginUser.getUserId(), form);
         return requestService.readRequestList();
     }
@@ -52,6 +57,9 @@ public class RequestController {
             @ModelAttribute RequestFormDto form,
             @ModelAttribute RequestMediaFileUrlDto mediaUrlDto) {
 
+        if (loginUser == null) {
+            throw new AccessDeniedException("로그인이 필요합니다.");
+        }
         requestService.updateRequest(requestId, loginUser.getUserId(), form, mediaUrlDto);
         return requestService.readRequestDetail(requestId);
     }
@@ -60,7 +68,9 @@ public class RequestController {
     public List<Map<String, Object>> deleteRequestList(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId) {
-
+        if (loginUser == null) {
+            throw new AccessDeniedException("로그인이 필요합니다.");
+        }
         requestService.deleteRequest(requestId, loginUser.getUserId());
         return requestService.readRequestList();
     }

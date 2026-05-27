@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/mypage")
 @RequiredArgsConstructor
@@ -164,6 +166,14 @@ public class MyPageController {
             @AuthenticationPrincipal CustomUserPrincipal loginUser) {
 
         HunterProfileResponseDto response = myPageService.getMyHunterProfile(loginUser.getUserId());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/hunter/review-summary")
+    public ResponseEntity<Map<Integer, Long>> getMyHunterReviewSummary(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser) {
+
+        Map<Integer, Long> response = myPageService.getMyHunterReviewSummary(loginUser.getUserId());
         return ResponseEntity.ok(response);
     }
 }

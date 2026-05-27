@@ -18,6 +18,7 @@ import com.bug.catcher.global.file.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,12 +38,21 @@ public class RequestService {
     private final ApplicationRepository applicationRepository;
     private final HunterService hunterService;
 
+    // user의 권한을 검증하기
+    private void validateUserRole(User user) {
+        if (!"USER".equals(user.getRole())) {
+            throw new AccessDeniedException("의뢰인만 의뢰를 등록/수정/삭제할 수 있습니다.");
+        }
+    }
+
     // create
     @Transactional
     public void createRequest(Long loginUserId, RequestFormDto form) {
         User loginUser = userRepository.findById(loginUserId)
                 .orElseThrow(() -> new IllegalArgumentException("로그인 사용자를 찾을 수 없습니다."));
 
+        // 파일 저장보다 먼저 Role을 검증해야 함.
+        validateUserRole(loginUser);
         List<String> imageUrls = fileStore.storeImages(form.getImageFiles());
         String videoUrl = fileStore.storeVideo(form.getVideoFile());
 
@@ -131,8 +141,13 @@ public class RequestService {
     @Transactional
     public void updateRequest(Long requestId, Long loginUserId, RequestFormDto form, RequestMediaFileUrlDto mediaUrlDto) {
         Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
-                .orElseThrow(() -> new IllegalStateException("게시글이 없거나 수정 권한이 없습니다."));
+
+                .orElseThrow(() -> new AccessDeniedException("게시글이 없거나 수정 권한이 없습니다."));
+
+        // 0. 우선 사용자 검증
+        validateUserRole(request.getUser());
         String beforeStatus = request.getStatus();
+
         // 1. 사용자가 삭제한 기존 미디어 먼저 제거
         deleteMedia(requestId, loginUserId, mediaUrlDto);
 
@@ -163,6 +178,7 @@ public class RequestService {
 
         updateMatchedHunterGradeIfCompletionChanged(requestId, beforeStatus, form.getStatus());
 
+
         // 5. 새 이미지 URL DB 저장
         saveImages(request, newImageUrls);
 
@@ -189,8 +205,10 @@ public class RequestService {
     @Transactional
     public void deleteRequest(Long requestId, Long loginUserId) {
         Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
-                .orElseThrow(() -> new IllegalStateException("게시글이 없거나 삭제 권한이 없습니다."));
+                .orElseThrow(() -> new AccessDeniedException("게시글이 없거나 삭제 권한이 없습니다."));
 
+        // 사용자 검증
+        validateUserRole(request.getUser());
         List<String> imageUrls = request.getRequestImages()
                 .stream()
                 .map(RequestImage::getImageUrl)
@@ -211,7 +229,7 @@ public class RequestService {
         }
 
         Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
-                .orElseThrow(() -> new IllegalStateException("게시글이 없거나 삭제 권한이 없습니다."));
+                .orElseThrow(() -> new AccessDeniedException("게시글이 없거나 삭제 권한이 없습니다."));
 
         deleteImages(requestId, dto.getImageUrls());
 
@@ -268,7 +286,7 @@ public class RequestService {
         int updatedCount = requestRepository.updateVideoUrl(requestId, loginUserId, null);
 
         if (updatedCount == 0) {
-            throw new IllegalStateException("게시글이 없거나 삭제 권한이 없습니다.");
+            throw new IllegalStateException("동영상 삭제 처리 중 게시글 상태가 변경되었습니다.");
         }
         fileStore.deleteVideoByUrl(videoUrl);
     }
@@ -279,8 +297,10 @@ public class RequestService {
                 .orElseThrow(() -> new IllegalArgumentException("의뢰글을 찾을 수 없습니다."));
 
         if (!request.getUser().getId().equals(loginUserId)) {
-            throw new IllegalStateException("수정 권한이 없습니다.");
+            throw new AccessDeniedException("수정 권한이 없습니다.");
         }
+        // 사용자 검증
+        validateUserRole(request.getUser());
 
         RequestFormDto form = new RequestFormDto();
 

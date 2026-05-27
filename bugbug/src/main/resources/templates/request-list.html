@@ -69,7 +69,7 @@
                 <section class="review-box">
                     <div class="review-head">
                         <p class="review-title">내가 남긴 리뷰</p>
-                        <span class="rating">별점 ${Number(req.reviewRating || 0).toFixed(1)} / 5.0</span>
+                        <span class="rating">별점 ${Math.round(Number(req.reviewRating || 0))} / 5</span>
                     </div>
                     <p class="meta">작성일: ${escapeHtml(formatDate(req.reviewCreatedAt))}</p>
                     <p class="review-content">${escapeHtml(req.reviewContent)}</p>
@@ -135,12 +135,16 @@
     }
 
     function readReviewInput(defaultRating = "", defaultContent = "") {
-        const ratingInput = prompt("별점을 입력하세요. 0.5점 단위, 최대 5점입니다. 예: 4.5", defaultRating);
+        const ratingInput = prompt("별점을 입력하세요. 1점 단위, 최대 5점입니다. 예: 4", defaultRating);
         if (ratingInput === null) {
             return null;
         }
 
         const rating = Number(ratingInput);
+        if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+            alert("별점은 1점부터 5점까지 정수로 입력해 주세요.");
+            return null;
+        }
         const content = prompt("리뷰 내용을 입력하세요.", defaultContent);
         if (content === null) {
             return null;
@@ -169,7 +173,7 @@
     }
 
     function openReviewEditPrompt(reviewId, currentRating, encodedContent) {
-        const payload = readReviewInput(currentRating.toFixed(1), decodeURIComponent(encodedContent));
+        const payload = readReviewInput(String(Math.round(currentRating)), decodeURIComponent(encodedContent));
         if (!payload) {
             return;
         }

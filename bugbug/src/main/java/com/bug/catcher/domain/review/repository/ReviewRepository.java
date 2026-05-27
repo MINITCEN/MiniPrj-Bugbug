@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
@@ -24,6 +25,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT COALESCE(AVG(r.rating), 0.0) FROM Review r WHERE r.hunter.id = :hunterId")
     Float getAverageRatingByHunterId(@Param("hunterId") Long hunterId);
 
+    @Query("SELECT COALESCE(AVG(r.rating), 0.0) FROM Review r WHERE r.hunter.user.id = :userId")
+    Float getAverageRatingByHunterUserId(@Param("userId") Long userId);
+
     // 의뢰인이 본인이 작성한 리뷰를 조회할 때 사용한다.
     @Query("SELECT r FROM Review r WHERE r.request.user.id = :userId")
     Page<Review> findByUserId(@Param("userId") Long userId, Pageable pageable);
@@ -33,4 +37,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // 헌터 로그인 계정 기준으로 본인이 받은 리뷰를 조회한다.
     Page<Review> findByHunterUserId(Long userId, Pageable pageable);
+
+    // 헌터 로그인 계정 기준으로 본인이 받은 리뷰 평점만 조회한다.
+    @Query("SELECT r.rating FROM Review r WHERE r.hunter.user.id = :userId")
+    List<Float> findRatingsByHunterUserId(@Param("userId") Long userId);
 }

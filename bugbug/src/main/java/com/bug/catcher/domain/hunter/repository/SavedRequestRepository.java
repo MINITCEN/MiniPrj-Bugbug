@@ -9,4 +9,5 @@ import java.util.List;
 public interface SavedRequestRepository extends JpaRepository<SavedRequest, Long> {
     // List -> Page로 변경, Pageable 추가
     Page<SavedRequest> findByHunterId(Long hunterId, Pageable pageable);
+    Page<SavedRequest> findByHunterUserId(Long userId, Pageable pageable);
 }
