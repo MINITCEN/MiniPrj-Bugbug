@@ -16,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class MyPageService {
@@ -251,15 +253,32 @@ public class MyPageService {
         return hunterService.getHunterProfile(hunter.getId());
     }
 
-    private void validateReviewRating(Float rating) {
-        // 별점은 0.5점 단위이며 최대 5점까지만 허용한다.
-        if (rating == null || rating < 0.5f || rating > 5.0f) {
-            throw new IllegalArgumentException("별점은 0.5점 이상 5점 이하로 입력해 주세요.");
+    @Transactional(readOnly = true)
+    public Map<Integer, Long> getMyHunterReviewSummary(Long userId) {
+        hunterRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
+
+        Map<Integer, Long> ratingCounts = new LinkedHashMap<>();
+        for (int score = 5; score >= 1; score--) {
+            ratingCounts.put(score, 0L);
         }
 
-        float doubled = rating * 2;
-        if (Math.abs(doubled - Math.round(doubled)) > 0.0001f) {
-            throw new IllegalArgumentException("별점은 0.5점 단위로만 입력할 수 있습니다.");
+        reviewRepository.findRatingsByHunterUserId(userId).stream()
+                .filter(rating -> rating != null && rating > 0)
+                .map(rating -> Math.max(1, Math.min(5, Math.round(rating))))
+                .forEach(score -> ratingCounts.compute(score, (key, count) -> count + 1));
+
+        return ratingCounts;
+    }
+
+    private void validateReviewRating(Float rating) {
+        // 별점은 1점 단위이며 최대 5점까지만 허용한다.
+        if (rating == null || rating < 1.0f || rating > 5.0f) {
+            throw new IllegalArgumentException("별점은 1점 이상 5점 이하로 입력해 주세요.");
+        }
+
+        if (Math.abs(rating - Math.round(rating)) > 0.0001f) {
+            throw new IllegalArgumentException("별점은 1점 단위로만 입력할 수 있습니다.");
         }
     }
 }

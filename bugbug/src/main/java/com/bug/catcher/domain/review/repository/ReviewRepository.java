@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
@@ -33,4 +34,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // 헌터 로그인 계정 기준으로 본인이 받은 리뷰를 조회한다.
     Page<Review> findByHunterUserId(Long userId, Pageable pageable);
+
+    // 헌터 로그인 계정 기준으로 본인이 받은 리뷰 평점만 조회한다.
+    @Query("SELECT r.rating FROM Review r WHERE r.hunter.user.id = :userId")
+    List<Float> findRatingsByHunterUserId(@Param("userId") Long userId);
 }

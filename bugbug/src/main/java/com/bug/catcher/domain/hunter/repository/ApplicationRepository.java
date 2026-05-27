@@ -17,5 +17,6 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
 
     List<Application> findByRequestId(Long requestId);
+    long countByHunterId(Long hunterId);
     long countByHunterIdAndRequest_Status(Long hunterId, String status);
 }
