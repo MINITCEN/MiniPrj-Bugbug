@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,6 +40,7 @@ public class ChatRoomController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Operation(summary = "채팅방 생성", description = "요청에 지원하면 새 채팅방을 생성합니다.")
+    @PreAuthorize("hasRole('HUNTER')")
     @PostMapping("/requests/{requestId}/apply")
     public ResponseEntity<Long> applyAndCreateRoom(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,

@@ -15,6 +15,7 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     int increaseViewCount(Long requestId);
 
     Optional<Request> findByIdAndUser_Id(Long requestId, Long userId);
+    boolean existsByIdAndUser_Id(Long requestId, Long userId);
 
     //상태별 페이지 조회
     Page<Request> findByStatus(String status, Pageable pageable);

@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,6 +61,7 @@ public class MyPageController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/requests")
     public ResponseEntity<Page<MyRequestResponseDto>> getMyRequests(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -69,6 +71,7 @@ public class MyPageController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/bookmarks/hunters")
     public ResponseEntity<Page<MySavedHunterResponseDto>> getMySavedHunters(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -78,6 +81,7 @@ public class MyPageController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/reviews")
     public ResponseEntity<String> createReview(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -87,6 +91,7 @@ public class MyPageController {
         return ResponseEntity.ok("리뷰가 성공적으로 등록되었습니다.");
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PutMapping("/reviews/{reviewId}")
     public ResponseEntity<String> updateReview(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -97,6 +102,7 @@ public class MyPageController {
         return ResponseEntity.ok("리뷰가 성공적으로 수정되었습니다.");
     }
 
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/reviews/{reviewId}")
     public ResponseEntity<String> deleteReview(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -106,6 +112,7 @@ public class MyPageController {
         return ResponseEntity.ok("리뷰가 삭제되었습니다.");
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/reviews")
     public ResponseEntity<Page<ReviewResponseDto>> getMyReviews(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -115,6 +122,7 @@ public class MyPageController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/hunter/apply")
     public ResponseEntity<String> applyForHunter(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -135,6 +143,7 @@ public class MyPageController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @PreAuthorize("hasRole('HUNTER')")
     @GetMapping("/hunter/tasks")
     public ResponseEntity<Page<HunterTaskResponseDto>> getHunterTasks(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -144,6 +153,7 @@ public class MyPageController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('HUNTER')")
     @GetMapping("/hunter/bookmarks/requests")
     public ResponseEntity<Page<HunterSavedRequestDto>> getHunterSavedRequests(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -153,6 +163,7 @@ public class MyPageController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('HUNTER')")
     @PostMapping("/hunter/resign")
     public ResponseEntity<String> resignHunter(
             @AuthenticationPrincipal CustomUserPrincipal loginUser) {
@@ -161,6 +172,7 @@ public class MyPageController {
         return ResponseEntity.ok("헌터 등록이 성공적으로 해제되었습니다.");
     }
 
+    @PreAuthorize("hasRole('HUNTER')")
     @GetMapping("/hunter/profile")
     public ResponseEntity<HunterProfileResponseDto> getMyHunterProfile(
             @AuthenticationPrincipal CustomUserPrincipal loginUser) {

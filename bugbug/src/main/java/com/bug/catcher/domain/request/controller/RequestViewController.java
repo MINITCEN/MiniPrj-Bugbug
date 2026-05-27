@@ -20,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -83,28 +84,21 @@ public class RequestViewController {
         return "wholeRequestList";
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/new")
     public String requestForm(@AuthenticationPrincipal CustomUserPrincipal loginUser, Model model) {
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
-        if (!"USER".equals(loginUser.getRole())) {
-            return "redirect:/requestView/list?error=forbidden";
-        }
         model.addAttribute("mode", "create");
         model.addAttribute("form", new RequestFormDto());
         model.addAttribute("kakaoMapKey", kakaoMapApiKey);
         return "requestForm";
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String createRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @ModelAttribute RequestFormDto form) {
 
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
         requestService.createRequest(loginUser.getUserId(), form);
         return "redirect:/requestView/list";
     }
@@ -132,16 +126,13 @@ public class RequestViewController {
         return "requestDetail";
     }
 
+    @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @GetMapping("/edit/{requestId}")
     public String editForm(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId,
             Model model) {
 
-        // 비로그인 체크
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
         RequestEditFormDto editForm = requestService.getEditForm(requestId, loginUser.getUserId());
 
         model.addAttribute("mode", "edit");
@@ -153,6 +144,7 @@ public class RequestViewController {
         return "requestForm";
     }
 
+    @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @PostMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String updateRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -160,23 +152,16 @@ public class RequestViewController {
             @ModelAttribute RequestFormDto form,
             @ModelAttribute RequestMediaFileUrlDto mediaUrlDto) {
 
-        // 비로그인 상태 방지
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
         requestService.updateRequest(requestId, loginUser.getUserId(), form, mediaUrlDto);
         return "redirect:/requestView/detail/" + requestId;
     }
 
+    @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @PostMapping("/remove/{requestId}")
     public String deleteRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId) {
 
-        // 비로그인 상태 방지
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
         requestService.deleteRequest(requestId, loginUser.getUserId());
         return "redirect:/requestView/list";
     }
