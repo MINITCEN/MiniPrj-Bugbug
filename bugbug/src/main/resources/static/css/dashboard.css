@@ -618,8 +618,7 @@
 
         .hunter-grade-card {
             display: grid;
-            grid-template-columns: 64px minmax(0, 1fr) auto;
-            grid-template-rows: auto auto;
+            grid-template-columns: 80px minmax(0, 1fr) auto;
             column-gap: 18px;
             align-items: center;
             min-height: 92px;
@@ -630,40 +629,23 @@
         }
 
         .rank-medal {
-            grid-row: 1 / 2;
-            width: 48px;
-            height: 46px;
-            display: grid;
-            place-items: center;
-            color: #fff;
-            font-size: 16px;
-            clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none !important;
+            clip-path: none !important;
         }
 
-        .rank-medal span {
-            transform: translateY(-2px);
-        }
-
-        .rank-rookie { background: linear-gradient(135deg, #b8bbb3, #777b73); }
-        .rank-bronze { background: linear-gradient(135deg, #dca02e, #b2761e); }
-        .rank-silver { background: linear-gradient(135deg, #c3d0d8, #8799a5); }
-        .rank-gold { background: linear-gradient(135deg, #ecd95b, #c3a81f); }
-        .rank-legend { background: linear-gradient(135deg, #26945f, #0c5538); }
-
-        .rank-stars {
-            grid-column: 1;
-            grid-row: 2;
-            width: 48px;
-            margin-top: 4px;
-            color: #111;
-            font-size: 13px;
-            font-weight: 900;
-            letter-spacing: 0;
-            text-align: center;
+        .rank-medal-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .rank-content {
-            grid-row: 1 / 3;
+            /* 단일 행으로 자동 정렬 */
         }
 
         .rank-content h3 {
@@ -691,7 +673,6 @@
         }
 
         .rank-condition {
-            grid-row: 1 / 3;
             display: grid;
             gap: 8px;
             justify-items: start;
@@ -747,9 +728,13 @@
             .hunter-grade-head { align-items: flex-start; padding: 22px 18px 18px; }
             .hunter-grade-list { padding: 16px 14px 18px; }
             .hunter-grade-card {
-                grid-template-columns: 54px minmax(0, 1fr);
+                grid-template-columns: 68px minmax(0, 1fr);
                 row-gap: 12px;
                 padding: 16px;
+            }
+            .rank-medal {
+                width: 56px;
+                height: 56px;
             }
             .rank-condition {
                 grid-column: 2;
