@@ -188,16 +188,22 @@
     function updateHunterGradeView(data) {
         const count = Number(data.completionCount || 0);
         const grade = data.grade || "루키";
-        const gradeMarks = {
-            "루키": "R",
-            "브론즈": "B",
-            "실버": "S",
-            "골드": "G",
-            "레전드": "L"
+        const gradeImages = {
+            "루키": "/image/bugbug_rookie.png",
+            "브론즈": "/image/bugbug_bronze.png",
+            "실버": "/image/bugbug_silver.png",
+            "골드": "/image/bugbug_gold.png",
+            "레전드": "/image/bugbug_legend.png"
         };
 
         document.getElementById("hunter-grade").textContent = grade;
-        document.getElementById("hunter-grade-mark").textContent = gradeMarks[grade] || "-";
+        
+        const gradeImgElement = document.getElementById("hunter-grade-img");
+        if (gradeImgElement) {
+            gradeImgElement.src = gradeImages[grade] || "/image/bugbug_rookie.png";
+            gradeImgElement.alt = `${grade} 등급 훈장`;
+        }
+        
         document.getElementById("hunter-completion-cnt").textContent = `총 ${count}건 활동`;
         document.getElementById("hunter-rating").textContent = Number(data.averageRating || 0).toFixed(1);
         document.getElementById("hunter-res-count").textContent = `${count}건`;
