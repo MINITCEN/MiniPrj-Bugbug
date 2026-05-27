@@ -69,7 +69,8 @@
                     </a>
                 </td>
                 <td th:text="${request.approxLocation}"></td>
-                <td th:text="${#temporals.format(request.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <!-- 절대 날짜/시간 포맷과 계산된 상대 시간(timeAgo)을 예시 A 포맷(절대시간 (상대시간))으로 병행하여 노출합니다 -->
+                <td th:text="|${#temporals.format(request.createdAt, 'yyyy-MM-dd HH:mm')} (${request.timeAgo})|"></td>
                 <td th:text="${request.viewCount}"></td>
             </tr>
 

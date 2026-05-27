@@ -6,6 +6,10 @@ import com.bug.catcher.domain.request.dto.RequestFormDto;
 import com.bug.catcher.domain.request.dto.RequestMediaFileUrlDto;
 import com.bug.catcher.domain.request.service.RequestService;
 import com.bug.catcher.global.auth.CustomUserPrincipal;
+import com.bug.catcher.global.common.TimeAgoFormatter;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -59,7 +63,16 @@ public class RequestViewController {
         model.addAttribute("sortType", sortType);
         model.addAttribute("status", status);
         model.addAttribute("requestPage", requestPage);
-        model.addAttribute("requestList", requestPage.getContent());
+        
+        // 각 의뢰 데이터에 공통 시간 계산 유틸리티를 적용하여 상대 시간(timeAgo)을 계산 및 주입합니다.
+        List<Map<String, Object>> requestListWithTimeAgo = requestPage.getContent().stream().map(req -> {
+            Map<String, Object> newReq = new HashMap<>(req);
+            LocalDateTime createdAt = (LocalDateTime) req.get("createdAt");
+            newReq.put("timeAgo", TimeAgoFormatter.format(createdAt));
+            return newReq;
+        }).toList();
+        
+        model.addAttribute("requestList", requestListWithTimeAgo);
 
         return "wholeRequestList";
     }
