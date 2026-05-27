@@ -4,6 +4,7 @@ import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.user.repository.UserRepository;
 import com.bug.catcher.global.auth.CustomUserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -50,11 +51,13 @@ public class MyPageViewController {
         return "bookmark-list";
     }
 
+    @PreAuthorize("hasRole('HUNTER')")
     @GetMapping("/hunter/tasks")
     public String hunterTaskListView() {
         return "hunter-task-list";
     }
 
+    @PreAuthorize("hasRole('HUNTER')")
     @GetMapping("/hunter/bookmarks/requests")
     public String hunterBookmarkListView() {
         return "hunter-bookmark-list";
