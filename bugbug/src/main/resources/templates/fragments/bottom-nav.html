@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="mobileBottomNav(activePage)" class="mobile-nav" aria-label="모바일 하단 메뉴">
+    <a href="/"
+       class="mobile-nav__item"
+       th:classappend="${activePage == 'home'} ? ' is-active' : ''">
+        <svg class="mobile-nav__icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span class="mobile-nav__label">홈</span>
+    </a>
+
+    <a href="/hunter"
+       class="mobile-nav__item"
+       th:classappend="${activePage == 'hunter'} ? ' is-active' : ''">
+        <svg class="mobile-nav__icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span class="mobile-nav__label">헌터 찾기</span>
+    </a>
+
+    <a href="/requestView/list"
+       class="mobile-nav__item"
+       th:classappend="${activePage == 'request'} ? ' is-active' : ''">
+        <svg class="mobile-nav__icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"></path>
+        </svg>
+        <span class="mobile-nav__label">의뢰하기</span>
+    </a>
+
+    <a href="/mypage"
+       class="mobile-nav__item"
+       th:classappend="${activePage == 'mypage' || activePage == 'admin'} ? ' is-active' : ''">
+        <svg class="mobile-nav__icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span class="mobile-nav__label">마이페이지</span>
+    </a>
+</nav>
+</body>
+</html>

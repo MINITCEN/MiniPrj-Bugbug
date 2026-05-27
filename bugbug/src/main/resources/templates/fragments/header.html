@@ -43,8 +43,42 @@
                 <a href="/login" class="site-header__ghost-button">로그인</a>
                 <a href="/signup" class="site-header__solid-button">회원가입</a>
             </div>
+            <!-- 모바일 전용 햄버거 메뉴 열기 단추 -->
+            <button type="button" class="mobile-hamburger-btn" onclick="openMobileDrawer()" aria-label="메뉴 열기">☰</button>
         </div>
     </div>
 </header>
+
+<!-- 모바일 슬라이드 드로어 (하이브리드 앱 대응 사이드 서브 메뉴판) -->
+<div class="mobile-drawer" id="mobile-drawer">
+    <div class="mobile-drawer__overlay" onclick="closeMobileDrawer()"></div>
+    <div class="mobile-drawer__content">
+        <div class="mobile-drawer__header">
+            <span class="mobile-drawer__logo">버그버그</span>
+            <button class="mobile-drawer__close" onclick="closeMobileDrawer()" aria-label="메뉴 닫기">×</button>
+        </div>
+        <div class="mobile-drawer__nav">
+            <a href="/service-intro" class="mobile-drawer__link" th:classappend="${activePage == 'service-intro'} ? ' is-active' : ''">서비스 소개</a>
+            <a href="/mosquito-map" class="mobile-drawer__link" th:classappend="${activePage == 'mosquito-map'} ? ' is-active' : ''">모기지수 지도</a>
+            <div sec:authorize="hasRole('ADMIN')">
+                <a href="/admin/users" class="mobile-drawer__link" th:classappend="${activePage == 'admin'} ? ' is-active' : ''" style="color: var(--shell-brand);">관리자 대시보드</a>
+            </div>
+        </div>
+        <div class="mobile-drawer__footer">
+            <div sec:authorize="isAuthenticated()">
+                <div class="mobile-drawer__user-info">
+                    <span class="mobile-drawer__welcome" sec:authentication="principal.nickname">사용자</span>님 반갑습니다! 🛡️
+                </div>
+                <button type="button" class="site-header__ghost-button js-logout-button" style="width: 100%; min-height: 48px; border-radius: 12px; margin-top: 12px;">로그아웃</button>
+            </div>
+            <div sec:authorize="isAnonymous()" style="display: grid; gap: 10px;">
+                <a href="/login" class="site-header__ghost-button" style="width: 100%; min-height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;">로그인</a>
+                <a href="/signup" class="site-header__solid-button" style="width: 100%; min-height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center;">회원가입</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 모바일 전용 바텀 네비게이션 자동 내장 (하이브리드 앱 대응) -->
+<nav th:replace="~{fragments/bottom-nav :: mobileBottomNav(activePage)}"></nav>
 </body>
 </html>
