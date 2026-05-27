@@ -113,16 +113,13 @@ public class RequestViewController {
         return "requestDetail";
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/edit/{requestId}")
     public String editForm(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId,
             Model model) {
 
-        // 비로그인 체크
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
         RequestEditFormDto editForm = requestService.getEditForm(requestId, loginUser.getUserId());
 
         model.addAttribute("mode", "edit");
@@ -134,6 +131,7 @@ public class RequestViewController {
         return "requestForm";
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public String updateRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -141,23 +139,16 @@ public class RequestViewController {
             @ModelAttribute RequestFormDto form,
             @ModelAttribute RequestMediaFileUrlDto mediaUrlDto) {
 
-        // 비로그인 상태 방지
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
         requestService.updateRequest(requestId, loginUser.getUserId(), form, mediaUrlDto);
         return "redirect:/requestView/detail/" + requestId;
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/remove/{requestId}")
     public String deleteRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId) {
 
-        // 비로그인 상태 방지
-        if (loginUser == null) {
-            return "redirect:/login";
-        }
         requestService.deleteRequest(requestId, loginUser.getUserId());
         return "redirect:/requestView/list";
     }

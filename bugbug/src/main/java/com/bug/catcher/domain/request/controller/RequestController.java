@@ -35,9 +35,6 @@ public class RequestController {
     public List<Map<String, Object>> createRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @ModelAttribute RequestFormDto form) {
-        if (loginUser == null) {
-            throw new AccessDeniedException("로그인이 필요합니다.");
-        }
         requestService.createRequest(loginUser.getUserId(), form);
         return requestService.readRequestList();
     }
@@ -52,6 +49,7 @@ public class RequestController {
         return requestService.readRequestDetail(id);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PatchMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public RequestDetailResponseDto updateRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -59,20 +57,15 @@ public class RequestController {
             @ModelAttribute RequestFormDto form,
             @ModelAttribute RequestMediaFileUrlDto mediaUrlDto) {
 
-        if (loginUser == null) {
-            throw new AccessDeniedException("로그인이 필요합니다.");
-        }
         requestService.updateRequest(requestId, loginUser.getUserId(), form, mediaUrlDto);
         return requestService.readRequestDetail(requestId);
     }
 
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping(value = "/remove/{requestId}")
     public List<Map<String, Object>> deleteRequestList(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId) {
-        if (loginUser == null) {
-            throw new AccessDeniedException("로그인이 필요합니다.");
-        }
         requestService.deleteRequest(requestId, loginUser.getUserId());
         return requestService.readRequestList();
     }
