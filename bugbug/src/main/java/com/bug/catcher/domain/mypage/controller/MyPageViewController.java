@@ -36,16 +36,19 @@ public class MyPageViewController {
         return "dashboard";
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/requests")
     public String requestListView() {
         return "request-list";
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/reviews")
     public String reviewListView() {
         return "review-list";
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/bookmarks/hunters")
     public String bookmarkListView() {
         return "bookmark-list";
