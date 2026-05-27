@@ -24,7 +24,6 @@
                 <p class="description">의뢰를 등록하면 전문 헌터가 수락하고 빠르고 안전하게 해결해 드립니다.</p>
 
                 <div class="hero-actions">
-                    <a class="primary-cta" href="/login"><span>✎</span>의뢰 등록하기</a>
                     <a class="secondary-cta" href="/hunter"><span>⌕</span>헌터 찾기</a>
                 </div>
 
@@ -60,39 +59,32 @@
             <aside class="live-card">
                 <div class="card-head">
                     <h2>실시간 의뢰글</h2>
-                    <a href="/mypage/requests">더보기 ›</a>
+                    <a href="/api/requestView/list">더보기 ›</a>
                 </div>
                 <ul class="request-list">
-                    <li>
-                        <span class="tag urgent">긴급</span>
-                        <div><strong>주방에 바퀴벌레가 나타났어요!</strong><small>서울 강남구 역삼동</small></div>
-                        <time>5분 전</time>
-                        <a href="/login">상세보기</a>
+                    <!-- 등록된 최근 의뢰글 4건을 동적으로 루프 돌며 출력합니다 -->
+                    <li th:each="req : ${recentRequests}">
+                        <!-- 상태에 따라 알맞은 색상 클래스(빨강:urgent / 주황:hurry / 초록:normal)를 추가합니다 -->
+                        <span class="tag"
+                              th:classappend="${req.status == '대기 중' ? 'urgent' : (req.status == '완료' ? 'normal' : 'hurry')}"
+                              th:text="${req.status}">대기 중</span>
+                        <div>
+                            <strong th:text="${req.title}">주방에 바퀴벌레가 나타났어요!</strong>
+                            <small th:text="${req.approxLocation}">서울 강남구 역삼동</small>
+                        </div>
+                        <!-- 서버에서 실시간 계산하여 보낸 상대 경과 시간("N분 전") 표기 -->
+                        <time th:text="${req.timeAgo}">5분 전</time>
+                        
+                        <!-- 로그인 유저는 상세 보기로 바로 이동, 비로그인 유저는 로그인 유도 -->
+                        <a sec:authorize="isAuthenticated()" th:href="@{/api/requestView/detail/{id}(id=${req.requestId})}">상세보기</a>
+                        <a sec:authorize="!isAuthenticated()" href="/login">상세보기</a>
                     </li>
-                    <li>
-                        <span class="tag hurry">급해요</span>
-                        <div><strong>화장실에 작은 벌레가 생겼어요</strong><small>서울 서초구 반포동</small></div>
-                        <time>12분 전</time>
-                        <a href="/login">상세보기</a>
-                    </li>
-                    <li>
-                        <span class="tag normal">일반</span>
-                        <div><strong>베란다에 날벌레가 자꾸 들어와요</strong><small>서울 송파구 잠실동</small></div>
-                        <time>20분 전</time>
-                        <a href="/login">상세보기</a>
-                    </li>
-                    <li>
-                        <span class="tag normal">일반</span>
-                        <div><strong>방 안에 개미가 보여요 ㅠㅠ</strong><small>서울 마포구 연남동</small></div>
-                        <time>32분 전</time>
-                        <a href="/login">상세보기</a>
+                    
+                    <!-- 의뢰 데이터가 단 한 건도 없는 경우 노출되는 예외 안내 처리를 적용하여 안정성을 확보합니다 -->
+                    <li th:if="${recentRequests == null or #lists.isEmpty(recentRequests)}" style="justify-content: center; color: #888; padding: 25px 0; font-size: 14px; border: none;">
+                        현재 등록된 방역 의뢰글이 없습니다.
                     </li>
                 </ul>
-                <div class="live-notice">
-                    <span>⚡</span>
-                    <p>의뢰를 등록하면 헌터들이 확인하고 수락합니다.</p>
-                    <a href="/login">의뢰 등록하기</a>
-                </div>
             </aside>
         </div>
     </section>
@@ -133,7 +125,5 @@
 
 <div th:replace="~{fragments/footer :: siteFooter()}"></div>
 <script src="/js/common-layout.js"></script>
-<!-- 로그인한 유저에게만 채팅 위젯을 띄워줍니다 -->
-<div sec:authorize="isAuthenticated()" th:replace="~{fragments/chat-widget :: chat}"></div>
 </body>
 </html>
