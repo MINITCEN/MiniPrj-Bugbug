@@ -25,9 +25,6 @@ public class SavedRequestController {
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId
     ) {
-        if (loginUser == null) {
-            throw new AccessDeniedException("로그인이 필요합니다.");
-        }
         boolean bookmarked = savedRequestService.toggleSavedRequest(
                 loginUser.getUserId(),
                 requestId
