@@ -117,7 +117,7 @@
                             : "";
 
                         listContainer.innerHTML += `
-                            <article class="request-card" data-detail-url="/api/requestView/detail/${req.requestId}" tabindex="0">
+                            <article class="request-card" data-detail-url="/requestView/detail/${req.requestId}" tabindex="0">
                                 <h3><span class="status">${escapeHtml(req.status)}</span>${escapeHtml(req.title)}</h3>
                                 <p class="meta">작성일: ${escapeHtml(formatDate(req.createdAt))}</p>
                                 ${completedHunterText}
