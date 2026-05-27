@@ -38,21 +38,12 @@ public class RequestService {
     private final ApplicationRepository applicationRepository;
     private final HunterService hunterService;
 
-    // user의 권한을 검증하기
-    private void validateUserRole(User user) {
-        if (!"USER".equals(user.getRole())) {
-            throw new AccessDeniedException("의뢰인만 의뢰를 등록/수정/삭제할 수 있습니다.");
-        }
-    }
-
     // create
     @Transactional
     public void createRequest(Long loginUserId, RequestFormDto form) {
         User loginUser = userRepository.findById(loginUserId)
                 .orElseThrow(() -> new IllegalArgumentException("로그인 사용자를 찾을 수 없습니다."));
 
-        // 파일 저장보다 먼저 Role을 검증해야 함.
-        validateUserRole(loginUser);
         List<String> imageUrls = fileStore.storeImages(form.getImageFiles());
         String videoUrl = fileStore.storeVideo(form.getVideoFile());
 
@@ -144,8 +135,6 @@ public class RequestService {
 
                 .orElseThrow(() -> new AccessDeniedException("게시글이 없거나 수정 권한이 없습니다."));
 
-        // 0. 우선 사용자 검증
-        validateUserRole(request.getUser());
         String beforeStatus = request.getStatus();
 
         // 1. 사용자가 삭제한 기존 미디어 먼저 제거
@@ -207,8 +196,6 @@ public class RequestService {
         Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
                 .orElseThrow(() -> new AccessDeniedException("게시글이 없거나 삭제 권한이 없습니다."));
 
-        // 사용자 검증
-        validateUserRole(request.getUser());
         List<String> imageUrls = request.getRequestImages()
                 .stream()
                 .map(RequestImage::getImageUrl)
@@ -299,9 +286,6 @@ public class RequestService {
         if (!request.getUser().getId().equals(loginUserId)) {
             throw new AccessDeniedException("수정 권한이 없습니다.");
         }
-        // 사용자 검증
-        validateUserRole(request.getUser());
-
         RequestFormDto form = new RequestFormDto();
 
         form.setTitle(request.getTitle());

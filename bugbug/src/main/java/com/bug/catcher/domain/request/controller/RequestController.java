@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,13 +30,11 @@ public class RequestController {
                 .body(Map.of("message", e.getMessage()));
     }
 
+    @PreAuthorize("hasRole('USER')")
     @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public List<Map<String, Object>> createRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @ModelAttribute RequestFormDto form) {
-        if (loginUser == null) {
-            throw new AccessDeniedException("로그인이 필요합니다.");
-        }
         requestService.createRequest(loginUser.getUserId(), form);
         return requestService.readRequestList();
     }
@@ -50,6 +49,7 @@ public class RequestController {
         return requestService.readRequestDetail(id);
     }
 
+    @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @PatchMapping(value = "/edit/{requestId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public RequestDetailResponseDto updateRequest(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -57,20 +57,15 @@ public class RequestController {
             @ModelAttribute RequestFormDto form,
             @ModelAttribute RequestMediaFileUrlDto mediaUrlDto) {
 
-        if (loginUser == null) {
-            throw new AccessDeniedException("로그인이 필요합니다.");
-        }
         requestService.updateRequest(requestId, loginUser.getUserId(), form, mediaUrlDto);
         return requestService.readRequestDetail(requestId);
     }
 
+    @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @DeleteMapping(value = "/remove/{requestId}")
     public List<Map<String, Object>> deleteRequestList(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId) {
-        if (loginUser == null) {
-            throw new AccessDeniedException("로그인이 필요합니다.");
-        }
         requestService.deleteRequest(requestId, loginUser.getUserId());
         return requestService.readRequestList();
     }

@@ -63,7 +63,7 @@
                                 <h3>${escapeHtml(review.requestTitle || "의뢰")}</h3>
                                 <p class="meta">의뢰인: ${escapeHtml(review.userName)} | 헌터: ${escapeHtml(review.hunterName)}</p>
                                 <p class="meta">작성일: ${escapeHtml(formatDate(review.createdAt))}</p>
-                                <p class="rating">별점 ${Number(review.rating || 0).toFixed(1)} / 5.0</p>
+                                <p class="rating">별점 ${Math.round(Number(review.rating || 0))} / 5</p>
                                 <p>${escapeHtml(review.content)}</p>
                             </div>
                         `;

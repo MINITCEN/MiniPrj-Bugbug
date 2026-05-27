@@ -49,7 +49,6 @@ public class Request {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "completed_hunter_id")
     private Hunter completedHunter;
-    private String content;
   
     // --- 댓글 연관관계 추가 ---
     @OneToMany(mappedBy = "request", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

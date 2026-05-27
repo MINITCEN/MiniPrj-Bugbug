@@ -69,15 +69,16 @@ public class AdminService {
         User user = application.getUser();
         user.updateRole("HUNTER");
 
-        // 3. [추가됨] 승인과 동시에 헌터 전용 프로필(엔티티) 생성
-        Hunter hunter = Hunter.builder()
-                .user(user)
-                .name(application.getName())
-                .pledgeAgreed(application.getPledgeAgreed())
-                .grade("루키")
-                .requestCount(0)
-                .responseCount(0)
-                .build();
+        // 3. 헌터 전용 프로필 생성 또는 재사용
+        Hunter hunter = hunterRepository.findTopByUserIdOrderByIdDesc(user.getId())
+                .orElseGet(() -> Hunter.builder()
+                        .user(user)
+                        .grade("루키")
+                        .requestCount(0)
+                        .responseCount(0)
+                        .build());
+
+        hunter.updateProfile(application.getName(), application.getPledgeAgreed());
         hunterRepository.save(hunter);
     }
 
