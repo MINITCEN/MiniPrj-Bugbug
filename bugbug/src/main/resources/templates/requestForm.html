@@ -19,7 +19,7 @@
 
     <form class="form-card"
           method="post"
-          th:action="${mode == 'edit'} ? @{/api/requestView/edit/{id}(id=${requestId})} : @{/api/requestView/new}"
+          th:action="${mode == 'edit'} ? @{/requestView/edit/{id}(id=${requestId})} : @{/requestView/new}"
           enctype="multipart/form-data">
 
         <input type="hidden"
@@ -218,7 +218,7 @@
                 다시 작성
             </button>
 
-            <a href="/api/requestView/list" class="btn cancel-btn">
+            <a href="/requestView/list" class="btn cancel-btn">
                 목록으로
             </a>
         </div>
