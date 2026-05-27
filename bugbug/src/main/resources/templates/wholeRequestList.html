@@ -43,7 +43,7 @@
                         조회 수
                     </option>
                 </select>
-                <a href="/requestView/new" class="write-btn">
+                <a href="/requestView/new" class="write-btn" sec:authorize="hasRole('USER')">
                     + 의뢰 등록하기
                 </a>
             </div>
