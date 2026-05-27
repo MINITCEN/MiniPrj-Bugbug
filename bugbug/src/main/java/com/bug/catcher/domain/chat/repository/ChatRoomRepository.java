@@ -17,6 +17,9 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     boolean existsByRequestIdAndHunterId(Long requestId, Long hunterId);
 
+    @Query("SELECT COUNT(c) > 0 FROM ChatRoom c WHERE c.id = :roomId AND (c.user.id = :userId OR c.hunter.user.id = :userId)")
+    boolean existsParticipant(@Param("roomId") Long roomId, @Param("userId") Long userId);
+
     // 의뢰 완료 처리 시 예약 완료된 채팅방의 헌터를 완료 헌터로 자동 지정한다.
     List<ChatRoom> findByRequestIdAndReservedAtIsNotNullOrderByReservedAtDesc(Long requestId);
 

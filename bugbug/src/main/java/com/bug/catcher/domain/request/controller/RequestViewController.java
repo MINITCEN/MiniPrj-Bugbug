@@ -88,7 +88,7 @@ public class RequestViewController {
 
     @PreAuthorize("hasRole('USER')")
     @GetMapping("/new")
-    public String requestForm(@AuthenticationPrincipal CustomUserPrincipal loginUser, Model model) {
+    public String requestForm(Model model) {
         model.addAttribute("mode", "create");
         model.addAttribute("form", new RequestFormDto());
         model.addAttribute("kakaoMapKey", kakaoMapApiKey);

@@ -16,6 +16,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     // 댓글이 특정 게시글에 속해 있는지 함께 검증하면서 댓글을 조회한다.
     Optional<Comment> findByIdAndRequestId(Long commentId, Long requestId);
+    boolean existsByIdAndRequestIdAndUser_Id(Long commentId, Long requestId, Long userId);
 
     // 특정 댓글에 자식 댓글이 하나 이상 존재하는지 확인한다.
     boolean existsByParentCommentId(Long parentCommentId);

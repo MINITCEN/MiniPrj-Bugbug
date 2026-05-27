@@ -44,6 +44,7 @@ public class MyPageController {
     private final MyPageService myPageService;
     private final UserRepository userRepository;
 
+    @PreAuthorize("hasAnyRole('USER', 'HUNTER')")
     @GetMapping("/info")
     public ResponseEntity<MyInfoResponseDto> getMyInfo(
             @AuthenticationPrincipal CustomUserPrincipal loginUser) {
@@ -52,6 +53,7 @@ public class MyPageController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'HUNTER')")
     @PatchMapping("/info")
     public ResponseEntity<MyInfoResponseDto> updateMyInfo(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -132,6 +134,7 @@ public class MyPageController {
         return ResponseEntity.ok("헌터 신청이 성공적으로 접수되었습니다.");
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'HUNTER')")
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardResponseDto> getMyPageDashboard(
             @AuthenticationPrincipal CustomUserPrincipal loginUser) {
@@ -181,6 +184,7 @@ public class MyPageController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('HUNTER')")
     @GetMapping("/hunter/review-summary")
     public ResponseEntity<Map<Integer, Long>> getMyHunterReviewSummary(
             @AuthenticationPrincipal CustomUserPrincipal loginUser) {
