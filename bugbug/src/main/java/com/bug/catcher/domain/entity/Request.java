@@ -54,6 +54,7 @@ public class Request {
     @OneToMany(mappedBy = "request", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Comment> comments = new ArrayList<>();
+    private String content;
 
     // 의뢰 수정 화면에서 입력된 기본 정보와 상태를 엔티티에 반영한다.
     public void updateDetails(
