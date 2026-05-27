@@ -218,20 +218,18 @@ public class MyPageService {
     // 1. 수행(수락)한 의뢰 목록 보기 (페이징 적용)
     @Transactional(readOnly = true)
     public Page<HunterTaskResponseDto> getHunterTasks(Long userId, Pageable pageable) {
-        Hunter hunter = hunterRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
+        validateHunterProfileExists(userId);
 
-        return applicationRepository.findByHunterId(hunter.getId(), pageable)
+        return applicationRepository.findByHunterUserId(userId, pageable)
                 .map(HunterTaskResponseDto::new); // Page 객체의 map() 활용
     }
 
     // 2. 찜한 의뢰(게시물) 목록 보기 (페이징 적용)
     @Transactional(readOnly = true)
     public Page<HunterSavedRequestDto> getHunterSavedRequests(Long userId, Pageable pageable) {
-        Hunter hunter = hunterRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
+        validateHunterProfileExists(userId);
 
-        return savedRequestRepository.findByHunterId(hunter.getId(), pageable)
+        return savedRequestRepository.findByHunterUserId(userId, pageable)
                 .map(HunterSavedRequestDto::new);
     }
 
@@ -244,19 +242,25 @@ public class MyPageService {
         // 유저의 권한을 다시 USER로 강등
         user.updateRole("USER");
     }
-    @Transactional(readOnly = true)
+    @Transactional
     public HunterProfileResponseDto getMyHunterProfile(Long userId) {
-        // 1. 유저 ID로 내 헌터 엔티티 찾기
-        Hunter hunter = hunterRepository.findByUserId(userId)
+        // 1. 유저 ID로 최신 헌터 엔티티 찾기
+        Hunter hunter = hunterRepository.findTopByUserIdOrderByIdDesc(userId)
                 .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
 
-        return hunterService.getHunterProfile(hunter.getId());
+        long applicationCount = applicationRepository.countByHunterUserId(userId);
+        float averageRating = reviewRepository.getAverageRatingByHunterUserId(userId);
+        String grade = hunterService.calculateGrade(applicationCount, averageRating);
+
+        hunter.updateGrade(grade);
+        hunter.syncCompletionCount(applicationCount);
+
+        return new HunterProfileResponseDto(hunter, applicationCount, averageRating);
     }
 
     @Transactional(readOnly = true)
     public Map<Integer, Long> getMyHunterReviewSummary(Long userId) {
-        hunterRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
+        validateHunterProfileExists(userId);
 
         Map<Integer, Long> ratingCounts = new LinkedHashMap<>();
         for (int score = 5; score >= 1; score--) {
@@ -269,6 +273,11 @@ public class MyPageService {
                 .forEach(score -> ratingCounts.compute(score, (key, count) -> count + 1));
 
         return ratingCounts;
+    }
+
+    private void validateHunterProfileExists(Long userId) {
+        hunterRepository.findTopByUserIdOrderByIdDesc(userId)
+                .orElseThrow(() -> new IllegalArgumentException("헌터 등록 정보가 없습니다."));
     }
 
     private void validateReviewRating(Float rating) {

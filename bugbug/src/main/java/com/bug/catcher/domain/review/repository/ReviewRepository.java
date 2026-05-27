@@ -25,6 +25,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT COALESCE(AVG(r.rating), 0.0) FROM Review r WHERE r.hunter.id = :hunterId")
     Float getAverageRatingByHunterId(@Param("hunterId") Long hunterId);
 
+    @Query("SELECT COALESCE(AVG(r.rating), 0.0) FROM Review r WHERE r.hunter.user.id = :userId")
+    Float getAverageRatingByHunterUserId(@Param("userId") Long userId);
+
     // 의뢰인이 본인이 작성한 리뷰를 조회할 때 사용한다.
     @Query("SELECT r FROM Review r WHERE r.request.user.id = :userId")
     Page<Review> findByUserId(@Param("userId") Long userId, Pageable pageable);

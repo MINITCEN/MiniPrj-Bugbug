@@ -31,6 +31,11 @@ public class Hunter {
         this.grade = newGrade;
     }
 
+    public void updateProfile(String name, Boolean pledgeAgreed) {
+        this.name = name;
+        this.pledgeAgreed = pledgeAgreed;
+    }
+
     public void syncCompletionCount(long completionCount) {
         int count = Math.toIntExact(completionCount);
         this.requestCount = count;
