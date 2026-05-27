@@ -43,7 +43,6 @@ public class Request {
     private String videoUrl;
     private Integer viewCount;
     private String status;
-    private String content;
     private LocalDateTime occurrenceTime;
 
 
