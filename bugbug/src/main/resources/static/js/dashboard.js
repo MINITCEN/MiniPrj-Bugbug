@@ -115,7 +115,7 @@
                     return;
                 }
                 items.forEach((req) => {
-                    list.append(activityItem(req.title, `/request/detail/${req.requestId}`, req.status, shortDate(req.createdAt)));
+                    list.append(activityItem(req.title, `/api/requestView/detail/${req.requestId}`, req.status, shortDate(req.createdAt)));
                 });
             });
 
@@ -130,7 +130,7 @@
                     return;
                 }
                 items.slice(0, 3).forEach((hunter) => {
-                    list.append(activityItem(`${hunter.hunterName} 헌터`, `/hunters/${hunter.hunterId}`, hunter.grade, `${hunter.responseCount || 0}회 완료`));
+                    list.append(activityItem(`${hunter.hunterName} 헌터`, "/hunter", hunter.grade, `${hunter.responseCount || 0}회 완료`));
                 });
             });
     }
@@ -156,7 +156,7 @@
                     return;
                 }
                 items.forEach((task) => {
-                    list.append(activityItem(task.title, `/request/detail/${task.requestId}`, task.status, task.approxLocation));
+                    list.append(activityItem(task.title, `/api/requestView/detail/${task.requestId}`, task.status, task.approxLocation));
                 });
             });
 
@@ -171,7 +171,7 @@
                     return;
                 }
                 items.forEach((saved) => {
-                    list.append(activityItem(saved.title, `/request/detail/${saved.requestId}`, null, saved.approxLocation));
+                    list.append(activityItem(saved.title, `/api/requestView/detail/${saved.requestId}`, null, saved.approxLocation));
                 });
             });
     }

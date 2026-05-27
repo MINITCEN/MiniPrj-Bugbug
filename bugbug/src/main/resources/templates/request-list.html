@@ -9,7 +9,8 @@
         .page-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
         .page-head h1 { margin: 0; font-size: 28px; }
         .back-link { color: #2f6f45; text-decoration: none; font-weight: 700; }
-        .request-card { background: #fff; border: 1px solid #dfe8e2; padding: 20px; margin-bottom: 16px; border-radius: 8px; }
+        .request-card { background: #fff; border: 1px solid #dfe8e2; padding: 20px; margin-bottom: 16px; border-radius: 8px; cursor: pointer; }
+        .request-card:hover { border-color: #9fc8aa; }
         .request-card h3 { margin: 0 0 8px; font-size: 20px; }
         .meta { margin: 4px 0; color: #637066; font-size: 14px; }
         .status { display: inline-block; padding: 3px 8px; margin-right: 8px; border-radius: 999px; background: #edf6ef; color: #216739; font-size: 12px; font-weight: 800; }
@@ -116,7 +117,7 @@
                             : "";
 
                         listContainer.innerHTML += `
-                            <article class="request-card">
+                            <article class="request-card" data-detail-url="/api/requestView/detail/${req.requestId}" tabindex="0">
                                 <h3><span class="status">${escapeHtml(req.status)}</span>${escapeHtml(req.title)}</h3>
                                 <p class="meta">작성일: ${escapeHtml(formatDate(req.createdAt))}</p>
                                 ${completedHunterText}
@@ -209,6 +210,29 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         loadPage(0);
+
+        document.getElementById("list-container").addEventListener("click", (event) => {
+            if (event.target.closest("button")) {
+                return;
+            }
+
+            const card = event.target.closest(".request-card");
+            if (card?.dataset.detailUrl) {
+                window.location.href = card.dataset.detailUrl;
+            }
+        });
+
+        document.getElementById("list-container").addEventListener("keydown", (event) => {
+            if (event.key !== "Enter" && event.key !== " ") {
+                return;
+            }
+
+            const card = event.target.closest(".request-card");
+            if (card?.dataset.detailUrl) {
+                event.preventDefault();
+                window.location.href = card.dataset.detailUrl;
+            }
+        });
     });
 </script>
 
