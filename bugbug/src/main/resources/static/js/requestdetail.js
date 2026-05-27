@@ -428,3 +428,38 @@ if (typeof kakao !== "undefined" && kakao.maps) {
 document.addEventListener("DOMContentLoaded", function () {
     initComments();
 });
+
+function bindSavedRequestButton() {
+    const button = document.querySelector(".like-btn");
+
+    if (!button) {
+        return;
+    }
+
+    button.addEventListener("click", async function () {
+        const requestId = button.dataset.requestId;
+
+        try {
+            const response = await fetch(`/api/hunters/requests/${requestId}/bookmarks`, {
+                method: "POST"
+            });
+
+            if (!response.ok) {
+                alert("찜 처리 중 오류가 발생했습니다.");
+                return;
+            }
+
+            const result = await response.json();
+            button.classList.toggle("is-active", result.bookmarked);
+            button.textContent = result.bookmarked ? "♥ 찜 취소" : "♡ 찜하기";
+        } catch (error) {
+            console.error(error);
+            alert("찜 처리 중 오류가 발생했습니다.");
+        }
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    initComments();
+    bindSavedRequestButton();
+});

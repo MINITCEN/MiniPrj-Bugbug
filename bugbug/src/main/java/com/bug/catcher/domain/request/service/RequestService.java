@@ -176,11 +176,6 @@ public class RequestService {
         );
         updateCompletedHunter(request, form);
 
-
-        if (updatedCount == 0) {
-            throw new AccessDeniedException("게시글이 없거나 수정 권한이 없습니다.");
-        }
-
         updateMatchedHunterGradeIfCompletionChanged(requestId, beforeStatus, form.getStatus());
 
 

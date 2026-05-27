@@ -1,5 +1,6 @@
 package com.bug.catcher.domain.request.controller;
 
+import com.bug.catcher.domain.hunter.service.SavedRequestService;
 import com.bug.catcher.domain.request.dto.RequestDetailResponseDto;
 import com.bug.catcher.domain.request.dto.RequestEditFormDto;
 import com.bug.catcher.domain.request.dto.RequestFormDto;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 public class RequestViewController {
 
     private final RequestService requestService;
+    private final SavedRequestService savedRequestService;
 
     @Value("${kakao.api.key}")
     private String kakaoMapApiKey;
@@ -108,12 +110,15 @@ public class RequestViewController {
                 && request.getUserId().equals(loginUser.getUserId())
                 && "USER".equals(loginUser.getRole());
 
+        boolean liked = loginUser != null
+                && "HUNTER".equals(loginUser.getRole())
+                && savedRequestService.isSavedRequest(loginUser.getUserId(), requestId);
         model.addAttribute("request", request);
         model.addAttribute("role", role);
         model.addAttribute("editable", editable);
         model.addAttribute("loginUserId", loginUser != null ? loginUser.getUserId() : null);
         model.addAttribute("loginUserNickname", loginUser != null ? loginUser.getNickname() : null);
-        model.addAttribute("liked", false);
+        model.addAttribute("liked", liked);
         model.addAttribute("kakaoMapKey", kakaoMapApiKey);
 
         return "requestDetail";

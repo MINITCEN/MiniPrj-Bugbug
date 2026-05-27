@@ -153,8 +153,10 @@
                 <th:block th:if="${role == 'HUNTER' or role == 'hunter'}">
 
                     <button type="button"
-                            class="btn-outline like-btn">
-                        ♡ 찜하기
+                            class="btn-outline like-btn"
+                            th:classappend="${liked} ? ' is-active'"
+                            th:data-request-id="${request.requestId}"
+                            th:text="${liked} ? '♥ 찜 취소' : '♡ 찜하기'">
                     </button>
 
                     <button type="button"
