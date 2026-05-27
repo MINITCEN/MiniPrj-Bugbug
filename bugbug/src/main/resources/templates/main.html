@@ -85,13 +85,6 @@
                         현재 등록된 방역 의뢰글이 없습니다.
                     </li>
                 </ul>
-                <div class="live-notice">
-                    <span>⚡</span>
-                    <p>의뢰를 등록하면 헌터들이 확인하고 수락합니다.</p>
-                    <!-- 로그인 유저는 즉시 의뢰 작성 폼으로 이동하고, 비로그인 유저는 로그인 유도 -->
-                    <a sec:authorize="isAuthenticated()" href="/api/requestView/new">의뢰 등록하기</a>
-                    <a sec:authorize="!isAuthenticated()" href="/login">의뢰 등록하기</a>
-                </div>
             </aside>
         </div>
     </section>
