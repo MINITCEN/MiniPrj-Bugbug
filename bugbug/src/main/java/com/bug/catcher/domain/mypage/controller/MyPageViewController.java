@@ -42,7 +42,7 @@ public class MyPageViewController {
         return "request-list";
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'HUNTER')")
     @GetMapping("/reviews")
     public String reviewListView() {
         return "review-list";

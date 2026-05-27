@@ -112,7 +112,7 @@ public class MyPageController {
         return ResponseEntity.ok("리뷰가 삭제되었습니다.");
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'HUNTER')")
     @GetMapping("/reviews")
     public ResponseEntity<Page<ReviewResponseDto>> getMyReviews(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,

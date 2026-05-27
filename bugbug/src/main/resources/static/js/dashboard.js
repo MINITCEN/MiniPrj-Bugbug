@@ -115,7 +115,7 @@
                     return;
                 }
                 items.forEach((req) => {
-                    list.append(activityItem(req.title, `/api/requestView/detail/${req.requestId}`, req.status, shortDate(req.createdAt)));
+                    list.append(activityItem(req.title, `/requestView/detail/${req.requestId}`, req.status, shortDate(req.createdAt)));
                 });
             });
 
@@ -230,7 +230,7 @@
                     return;
                 }
                 items.forEach((task) => {
-                    list.append(activityItem(task.title, `/api/requestView/detail/${task.requestId}`, task.status, task.approxLocation));
+                    list.append(activityItem(task.title, `/requestView/detail/${task.requestId}`, task.status, task.approxLocation));
                 });
             });
 
@@ -245,7 +245,7 @@
                     return;
                 }
                 items.forEach((saved) => {
-                    list.append(activityItem(saved.title, `/api/requestView/detail/${saved.requestId}`, null, saved.approxLocation));
+                    list.append(activityItem(saved.title, `/requestView/detail/${saved.requestId}`, null, saved.approxLocation));
                 });
             });
     }

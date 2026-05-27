@@ -76,7 +76,7 @@
                         <time th:text="${req.timeAgo}">5분 전</time>
                         
                         <!-- 로그인 유저는 상세 보기로 바로 이동, 비로그인 유저는 로그인 유도 -->
-                        <a sec:authorize="isAuthenticated()" th:href="@{/api/requestView/detail/{id}(id=${req.requestId})}">상세보기</a>
+                        <a sec:authorize="isAuthenticated()" th:href="@{/requestView/detail/{id}(id=${req.requestId})}">상세보기</a>
                         <a sec:authorize="!isAuthenticated()" href="/login">상세보기</a>
                     </li>
                     
