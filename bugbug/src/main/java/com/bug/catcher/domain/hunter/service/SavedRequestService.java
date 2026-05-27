@@ -20,7 +20,7 @@ public class SavedRequestService {
 
     @Transactional
     public boolean toggleSavedRequest(Long userId, Long requestId) {
-        Hunter hunter = hunterRepository.findByUserId(userId)
+        Hunter hunter = hunterRepository.findTopByUserIdOrderByIdDesc(userId)
                 .orElseThrow(() -> new AccessDeniedException("헌터만 의뢰를 찜할 수 있습니다."));
 
         if (savedRequestRepository.existsByHunterIdAndRequestId(hunter.getId(), requestId)) {
@@ -42,7 +42,7 @@ public class SavedRequestService {
 
     @Transactional(readOnly = true)
     public boolean isSavedRequest(Long userId, Long requestId) {
-        return hunterRepository.findByUserId(userId)
+        return hunterRepository.findTopByUserIdOrderByIdDesc(userId)
                 .map(hunter -> savedRequestRepository.existsByHunterIdAndRequestId(hunter.getId(), requestId))
                 .orElse(false);
     }
