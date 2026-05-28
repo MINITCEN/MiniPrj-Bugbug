@@ -23,12 +23,12 @@ public class ChatMessageService {
      * 프론트에서 넘어온 메시지를 DB에 저장하고 응답 형태로 반환합니다.
      */
     @Transactional
-    public ChatMessageDto.Response saveMessage(ChatMessageDto.SendRequest requestDto) {
+    public ChatMessageDto.Response saveMessage(ChatMessageDto.SendRequest requestDto, Long senderId) {
         ChatRoom chatRoom = chatRoomRepository.findById(requestDto.getRoomId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 채팅방입니다."));
 
         // DB에서 실제 유저 정보를 조회하여 진짜 닉네임을 가져옵니다.
-        User sender = userRepository.findById(requestDto.getSenderId())
+        User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         ChatMessage chatMessage = ChatMessage.builder()

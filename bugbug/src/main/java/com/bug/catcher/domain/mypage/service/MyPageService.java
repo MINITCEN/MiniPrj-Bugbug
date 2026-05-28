@@ -33,6 +33,18 @@ public class MyPageService {
     private final HunterService hunterService;
 
     @Transactional(readOnly = true)
+    public User getDashboardUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardResponseDto getDashboard(Long userId) {
+        User user = getDashboardUser(userId);
+        return new DashboardResponseDto(user.getRole(), user.getNickname());
+    }
+
+    @Transactional(readOnly = true)
     public MyInfoResponseDto getMyInfo(Long userId) {
         //  DB에서 가장 최신의 유저 상태 조회
         User user = userRepository.findById(userId)

@@ -1,7 +1,7 @@
 package com.bug.catcher.domain.mypage.controller;
 
 import com.bug.catcher.domain.entity.User;
-import com.bug.catcher.domain.user.repository.UserRepository;
+import com.bug.catcher.domain.mypage.service.MyPageService;
 import com.bug.catcher.global.auth.CustomUserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class MyPageViewController {
 
-    private final UserRepository userRepository;
+    private final MyPageService myPageService;
 
     @GetMapping
     public String myPage() {
@@ -28,8 +28,7 @@ public class MyPageViewController {
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
             Model model) {
 
-        User currentUser = userRepository.findById(loginUser.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        User currentUser = myPageService.getDashboardUser(loginUser.getUserId());
 
         model.addAttribute("user", currentUser);
         model.addAttribute("isHunter", "HUNTER".equals(currentUser.getRole()));

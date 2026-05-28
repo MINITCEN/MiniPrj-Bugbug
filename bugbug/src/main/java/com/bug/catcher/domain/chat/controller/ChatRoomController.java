@@ -66,9 +66,7 @@ public class ChatRoomController {
     @PreAuthorize("@chatRoomPermissionChecker.isParticipant(#roomId, principal.userId)")
     @GetMapping("/chats/{roomId}/messages")
     public ResponseEntity<List<ChatMessageDto.Response>> getMessages(
-            @PathVariable Long roomId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @PathVariable Long roomId) {
 
         List<ChatMessageDto.Response> response = chatRoomService.getMessages(roomId);
         return ResponseEntity.ok(response);
