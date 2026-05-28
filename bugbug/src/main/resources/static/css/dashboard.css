@@ -707,7 +707,7 @@
 
         @media (max-width: 980px) {
             .page { grid-template-columns: 1fr; }
-            .sidebar { order: 2; }
+            .sidebar, .side-cta { display: none !important; } /* 모바일 스크롤 붕괴 사이드바 은폐 */
             .public-grid { grid-template-columns: 1fr 1fr; row-gap: 18px; }
             .grade-block { grid-column: 1 / -1; }
             .stat:nth-child(2) { border-left: 0; }
@@ -715,28 +715,51 @@
 
         @media (max-width: 720px) {
             .page { padding: 0 14px; margin-top: 16px; }
-            .content-header { flex-direction: column; }
+            .content-header { 
+                flex-direction: column; 
+                align-items: stretch !important; /* 버튼 가로 가득 채우기 */
+                gap: 12px;
+            }
+            .content-header .outline-btn {
+                width: 100% !important;
+                min-height: 44px;
+            }
+            .section-head {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            .section-head .danger-btn {
+                width: 100% !important;
+                min-height: 40px;
+            }
             .profile-row { grid-template-columns: 1fr; }
             .info-grid { grid-template-columns: 1fr; }
             .public-grid, .two-column { grid-template-columns: 1fr; }
+            .grade-block {
+                padding-right: 0 !important; /* 가로 가용 영토 22px 획득 */
+                gap: 12px !important;       /* 뱃지-텍스트 간격 밀착화 */
+            }
             .stat { border-left: 0; border-top: 1px solid var(--line); padding-top: 18px; }
             .safe-banner { align-items: flex-start; flex-direction: column; }
             .hunter-grade-modal { max-height: calc(100vh - 28px); }
             .hunter-grade-head { align-items: flex-start; padding: 22px 18px 18px; }
             .hunter-grade-list { padding: 16px 14px 18px; }
             .hunter-grade-card {
-                grid-template-columns: 68px minmax(0, 1fr);
-                row-gap: 12px;
-                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 18px 16px;
             }
             .rank-medal {
-                width: 56px;
-                height: 56px;
+                width: 48px;
+                height: 48px;
             }
             .rank-condition {
-                grid-column: 2;
-                grid-row: 3;
-                min-width: 0;
+                width: 100%;
+                border-top: 1px dashed var(--line);
+                padding-top: 10px;
+                margin-top: 4px;
             }
         }
 

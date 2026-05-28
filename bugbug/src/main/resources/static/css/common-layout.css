@@ -267,13 +267,19 @@
     }
 }
 
+/* --- 글로벌 모바일 클릭 하이라이트 제거 --- */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
 /* --- 모바일 바텀 네비게이션 (하이브리드 앱 최적화) --- */
 .mobile-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 64px;
+    height: calc(64px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
     background: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -336,8 +342,22 @@
 
     .site-header__inner {
         min-height: 56px;
-        padding-left: 16px;
-        padding-right: 16px;
+        padding-left: 12px; /* 16px -> 12px 밀착화 */
+        padding-right: 12px; /* 16px -> 12px 밀착화 */
+    }
+
+    .site-header__brand {
+        gap: 6px !important; /* 이미지와 텍스트 간격 콤팩트 */
+    }
+
+    .site-header__brand-badge {
+        width: 32px !important;   /* 36px -> 32px 꺾임 방지 수축 */
+        height: 32px !important;  /* 36px -> 32px 꺾임 방지 수축 */
+        font-size: 16px !important;
+    }
+
+    .site-header__brand-text {
+        font-size: 17px !important; /* 20px -> 17px 꺾임 방지 수축 */
     }
 
     .site-header__actions {
@@ -356,145 +376,13 @@
         display: none !important; /* 모바일 헤더 내 로그인/회원가입/로그아웃 싹 가려 간소화 */
     }
 
-    .mobile-hamburger-btn {
-        display: block !important; /* 모바일에서 햄버거 버튼 노출 */
+    /* 바텀 탭바 초소형 모바일 대응 */
+    .mobile-nav__item {
+        font-size: 10px !important;
+        gap: 2px !important;
     }
-}
-
-/* --- 모바일 햄버거 버튼 --- */
-.mobile-hamburger-btn {
-    display: none; /* 데스크탑에서는 숨김 */
-    background: none;
-    border: none;
-    font-size: 26px;
-    color: var(--shell-text);
-    cursor: pointer;
-    padding: 4px 8px;
-    line-height: 1;
-    transition: transform 0.1s ease;
-}
-
-.mobile-hamburger-btn:active {
-    transform: scale(0.9);
-}
-
-/* --- 모바일 슬라이드 드로어 --- */
-.mobile-drawer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 2000;
-    display: none; /* 기본 숨김 */
-}
-
-/* 드로어 오픈 상태 클래스 */
-.mobile-drawer.is-open {
-    display: block;
-}
-
-/* 배경 어두운 딤드 레이어 */
-.mobile-drawer__overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.mobile-drawer.is-open .mobile-drawer__overlay {
-    opacity: 1;
-}
-
-/* 슬라이드 서브 메뉴판 본체 */
-.mobile-drawer__content {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 280px;
-    background: #ffffff;
-    display: flex;
-    flex-direction: column;
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
-    transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.mobile-drawer.is-open .mobile-drawer__content {
-    transform: translateX(0);
-}
-
-/* 드로어 헤더 */
-.mobile-drawer__header {
-    height: 56px;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--shell-line);
-}
-
-.mobile-drawer__logo {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--shell-brand);
-}
-
-.mobile-drawer__close {
-    background: none;
-    border: none;
-    font-size: 28px;
-    color: var(--shell-muted);
-    cursor: pointer;
-    padding: 4px;
-}
-
-/* 드로어 네비게이션 링크 목록 */
-.mobile-drawer__nav {
-    flex: 1;
-    padding: 24px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.mobile-drawer__link {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--shell-text);
-    text-decoration: none;
-    padding: 10px 14px;
-    border-radius: 10px;
-    transition: background 0.2s, color 0.2s;
-}
-
-.mobile-drawer__link:active,
-.mobile-drawer__link.is-active {
-    background: var(--shell-brand-soft);
-    color: var(--shell-brand);
-}
-
-/* 드로어 푸터 세션 영역 */
-.mobile-drawer__footer {
-    padding: 24px 20px 88px; /* 바텀 탭바 높이 64px 감안하여 가려짐 방지 여백 추가 */
-    border-top: 1px solid var(--shell-line);
-    background: #f7f9f7;
-}
-
-.mobile-drawer__user-info {
-    font-size: 14px;
-    color: var(--shell-muted);
-    font-weight: 600;
-}
-
-.mobile-drawer__welcome {
-    color: var(--shell-text);
-    font-weight: 800;
+    .mobile-nav__icon {
+        width: 20px !important;
+        height: 20px !important;
+    }
 }

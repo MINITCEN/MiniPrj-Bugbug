@@ -168,6 +168,18 @@
             </div>
         </section>
 
+        <!-- 더보기 (기타 서비스 바로가기) 섹션 신설 -->
+        <section class="section">
+            <div class="section-head">
+                <h2 class="section-title">더보기 <small>(기타 서비스)</small></h2>
+            </div>
+            <div class="more-service-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px;">
+                <a href="/service-intro" class="outline-btn" style="text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 12px; font-weight: 700; color: var(--shell-brand);">서비스 소개</a>
+                <a href="/mosquito-map" class="outline-btn" style="text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 12px; font-weight: 700; color: var(--shell-brand);">모기지수 지도</a>
+                <a sec:authorize="hasRole('ADMIN')" href="/admin/users" class="primary-btn" style="text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 12px; font-weight: 700; background: var(--shell-brand); color: #fff; border: none;">관리자 대시보드</a>
+            </div>
+        </section>
+
         <div class="safe-banner">
             <p>
                 <strong>버그버그는 안전하고 신뢰할 수 있는 서비스를 제공합니다.</strong>
