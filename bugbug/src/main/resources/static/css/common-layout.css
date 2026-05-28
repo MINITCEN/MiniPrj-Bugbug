@@ -373,7 +373,15 @@
     }
 
     .site-header__session {
-        display: none !important; /* 모바일 헤더 내 로그인/회원가입/로그아웃 싹 가려 간소화 */
+        display: flex !important; /* 모바일에서도 세션 버튼(로그인/로그아웃) 콤팩트 노출 */
+        gap: 6px !important;
+    }
+    .site-header__session .site-header__ghost-button,
+    .site-header__session .site-header__solid-button {
+        min-height: 36px !important;
+        padding: 0 10px !important;
+        font-size: 13px !important;
+        border-radius: 8px !important;
     }
 
     /* 바텀 탭바 초소형 모바일 대응 */

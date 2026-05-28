@@ -17,6 +17,7 @@ body {
     color: var(--ink);
     background: #f8fbf8;
     font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
+    overflow-x: hidden; /* 가로 스크롤 흔들림 원천 차단 */
 }
 
 a {
@@ -652,7 +653,7 @@ a {
     margin: 0 auto 46px;
     padding: 0 34px;
     display: grid;
-    grid-template-columns: 1.3fr 0.9fr;
+    grid-template-columns: 1fr; /* 신뢰 데이터 삭제에 맞춰 단일 꽉 찬 1열로 리디자인 */
     gap: 22px;
 }
 
@@ -980,33 +981,42 @@ a {
         padding: 0 18px;
     }
 
-    /* --- 의뢰 진행 과정: 모바일 전용 가로 스와이프 슬라이더 (Swipe Carousel) --- */
+    /* --- 의뢰 진행 과정: 모바일 전용 세로형 타임라인 순서도 리스트 --- */
     .process-list {
         display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        gap: 14px;
-        padding: 16px 4px 20px;
-        scrollbar-width: none; /* Firefox */
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .process-list::-webkit-scrollbar {
-        display: none; /* Chrome/Safari */
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px 0;
+        overflow-x: visible; /* 가로 스크롤 완전 해제 */
     }
 
     .process-list li {
-        flex: 0 0 230px;
-        scroll-snap-align: start;
+        flex: 1 1 auto; /* 고정 가로 폭(230px)을 해제하고 100% 폭으로 확장 */
+        display: grid;
+        grid-template-columns: auto 1fr; /* 왼쪽 동그라미 숫자, 우측 텍스트 정렬 */
+        gap: 16px;
+        align-items: center;
+        text-align: left; /* 좌측 정렬로 가독성 극대화 */
         background: #ffffff;
         border: 1px solid var(--line);
         border-radius: 12px;
-        padding: 24px 16px;
+        padding: 16px;
         box-shadow: 0 4px 12px rgba(24, 72, 44, 0.02);
     }
 
     .process-list li + li::before {
         display: none;
+    }
+
+    .process-list span {
+        margin: 0; /* 가운데 정렬 마진 해제 */
+        width: 44px;
+        height: 44px;
+        font-size: 15px;
+    }
+
+    .process-list li p {
+        margin: 4px 0 0;
     }
 
     /* --- 신뢰 데이터: 모바일 2x2 콤팩트 카드 격자 배열 --- */
