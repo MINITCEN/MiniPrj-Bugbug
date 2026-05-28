@@ -519,3 +519,96 @@ textarea:focus {
 .form-group.full > .detail-row.full > .content-editor-box {
     width: 100%;
 }
+
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        margin: 16px auto 40px;
+    }
+    .page-title {
+        padding: 0 14px;
+        margin-bottom: 18px;
+    }
+    .page-title h1 {
+        font-size: 24px;
+    }
+    .form-card {
+        padding: 20px 16px;
+        border-radius: 12px;
+        border-left: 0;
+        border-right: 0;
+    }
+    .form-section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+    }
+    .section-title {
+        font-size: 17px;
+    }
+    .status-box {
+        justify-content: space-between;
+        width: 100%;
+    }
+    .status-select {
+        flex: 1;
+        max-width: 60%;
+    }
+    .form-grid {
+        gap: 16px;
+    }
+    .detail-row {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        align-items: stretch !important;
+    }
+    .detail-row.full {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+    .detail-row label {
+        width: 100% !important;
+    }
+    .detail-input-box {
+        padding: 12px;
+        border-radius: 8px;
+        gap: 12px;
+    }
+    .location-search-box {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .location-search-box button {
+        width: 100%;
+        min-height: 42px;
+    }
+    .map-box {
+        height: 240px;
+    }
+    .media-upload-section {
+        padding: 12px;
+    }
+    .upload-toolbar {
+        gap: 6px;
+    }
+    .upload-file-btn {
+        width: 100%;
+    }
+    .media-preview-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    .button-area {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 24px;
+        width: 100%;
+    }
+    .btn {
+        width: 100%;
+        min-height: 48px;
+    }
+}
+

@@ -277,16 +277,13 @@
         }
 
         .badge-shield {
-            width: 68px;
-            height: 76px;
-            display: grid;
-            place-items: center;
-            border-radius: 18px 18px 24px 24px;
-            background: linear-gradient(160deg, #c77b2a, #f0bd6f);
-            color: #fff;
-            font-size: 28px;
-            font-weight: 900;
-            box-shadow: inset 0 0 0 4px rgba(255,255,255,0.28);
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none !important;
+            box-shadow: none !important;
         }
 
         .progress {
@@ -618,8 +615,7 @@
 
         .hunter-grade-card {
             display: grid;
-            grid-template-columns: 64px minmax(0, 1fr) auto;
-            grid-template-rows: auto auto;
+            grid-template-columns: 80px minmax(0, 1fr) auto;
             column-gap: 18px;
             align-items: center;
             min-height: 92px;
@@ -630,40 +626,23 @@
         }
 
         .rank-medal {
-            grid-row: 1 / 2;
-            width: 48px;
-            height: 46px;
-            display: grid;
-            place-items: center;
-            color: #fff;
-            font-size: 16px;
-            clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none !important;
+            clip-path: none !important;
         }
 
-        .rank-medal span {
-            transform: translateY(-2px);
-        }
-
-        .rank-rookie { background: linear-gradient(135deg, #b8bbb3, #777b73); }
-        .rank-bronze { background: linear-gradient(135deg, #dca02e, #b2761e); }
-        .rank-silver { background: linear-gradient(135deg, #c3d0d8, #8799a5); }
-        .rank-gold { background: linear-gradient(135deg, #ecd95b, #c3a81f); }
-        .rank-legend { background: linear-gradient(135deg, #26945f, #0c5538); }
-
-        .rank-stars {
-            grid-column: 1;
-            grid-row: 2;
-            width: 48px;
-            margin-top: 4px;
-            color: #111;
-            font-size: 13px;
-            font-weight: 900;
-            letter-spacing: 0;
-            text-align: center;
+        .rank-medal-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .rank-content {
-            grid-row: 1 / 3;
+            /* 단일 행으로 자동 정렬 */
         }
 
         .rank-content h3 {
@@ -691,7 +670,6 @@
         }
 
         .rank-condition {
-            grid-row: 1 / 3;
             display: grid;
             gap: 8px;
             justify-items: start;
@@ -729,7 +707,7 @@
 
         @media (max-width: 980px) {
             .page { grid-template-columns: 1fr; }
-            .sidebar { order: 2; }
+            .sidebar, .side-cta { display: none !important; } /* 모바일 스크롤 붕괴 사이드바 은폐 */
             .public-grid { grid-template-columns: 1fr 1fr; row-gap: 18px; }
             .grade-block { grid-column: 1 / -1; }
             .stat:nth-child(2) { border-left: 0; }
@@ -737,24 +715,51 @@
 
         @media (max-width: 720px) {
             .page { padding: 0 14px; margin-top: 16px; }
-            .content-header { flex-direction: column; }
+            .content-header { 
+                flex-direction: column; 
+                align-items: stretch !important; /* 버튼 가로 가득 채우기 */
+                gap: 12px;
+            }
+            .content-header .outline-btn {
+                width: 100% !important;
+                min-height: 44px;
+            }
+            .section-head {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            .section-head .danger-btn {
+                width: 100% !important;
+                min-height: 40px;
+            }
             .profile-row { grid-template-columns: 1fr; }
             .info-grid { grid-template-columns: 1fr; }
             .public-grid, .two-column { grid-template-columns: 1fr; }
+            .grade-block {
+                padding-right: 0 !important; /* 가로 가용 영토 22px 획득 */
+                gap: 12px !important;       /* 뱃지-텍스트 간격 밀착화 */
+            }
             .stat { border-left: 0; border-top: 1px solid var(--line); padding-top: 18px; }
             .safe-banner { align-items: flex-start; flex-direction: column; }
             .hunter-grade-modal { max-height: calc(100vh - 28px); }
             .hunter-grade-head { align-items: flex-start; padding: 22px 18px 18px; }
             .hunter-grade-list { padding: 16px 14px 18px; }
             .hunter-grade-card {
-                grid-template-columns: 54px minmax(0, 1fr);
-                row-gap: 12px;
-                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 18px 16px;
+            }
+            .rank-medal {
+                width: 48px;
+                height: 48px;
             }
             .rank-condition {
-                grid-column: 2;
-                grid-row: 3;
-                min-width: 0;
+                width: 100%;
+                border-top: 1px dashed var(--line);
+                padding-top: 10px;
+                margin-top: 4px;
             }
         }
 

@@ -857,35 +857,98 @@ a {
     }
 
     .hero-copy h1 {
-        font-size: 44px;
+        font-size: clamp(28px, 8vw, 36px);
     }
 
+    /* --- 마스코트 및 말풍선 최적화 (모바일 뷰포트 맞춤 대칭 정렬) --- */
     .mascot-zone {
-        min-height: 320px;
+        min-height: 270px;
+        margin-bottom: 16px;
     }
 
     .mascot {
-        bottom: -8px;
-        transform: translateX(-50%) scale(0.78) rotate(-5deg);
+        bottom: 0;
+        transform: translateX(-50%) scale(0.75) rotate(-5deg);
     }
 
     .bubble {
-        transform: scale(0.86);
+        transform: scale(0.8);
+        min-width: 125px;
+        padding: 10px 14px;
+        box-shadow: 0 10px 24px rgba(24, 72, 44, 0.08);
     }
 
-    .bubble-fast,
-    .bubble-hunter,
+    .bubble-fast {
+        left: 4%;
+        top: 15px;
+        right: auto;
+    }
+
+    .bubble-hunter {
+        right: 4%;
+        top: 100px;
+        left: auto;
+    }
+
     .bubble-safe {
-        right: 8px;
+        left: 6%;
+        bottom: 10px;
+        right: auto;
     }
 
+    /* --- 실시간 의뢰 리스트 모바일 전용 프리미엄 피드 카드 뷰 --- */
     .request-list li {
-        grid-template-columns: auto 1fr;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 14px;
+        box-shadow: 0 4px 12px rgba(24, 72, 44, 0.03);
+        gap: 12px;
     }
 
-    .request-list time,
+    .request-list li > .tag {
+        align-self: flex-start;
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+
+    .request-list li > div {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .request-list li strong {
+        font-size: 16px;
+        color: var(--ink);
+        margin-bottom: 2px;
+    }
+
+    .request-list li small {
+        color: var(--muted);
+        font-size: 13px;
+    }
+
+    .request-list li time {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--green);
+        align-self: flex-start;
+    }
+
     .request-list li > a {
-        justify-self: start;
+        width: 100%;
+        text-align: center;
+        min-height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
     }
 
     .live-notice {
@@ -917,22 +980,52 @@ a {
         padding: 0 18px;
     }
 
-    .process-list,
-    .trust-grid {
-        grid-template-columns: 1fr;
+    /* --- 의뢰 진행 과정: 모바일 전용 가로 스와이프 슬라이더 (Swipe Carousel) --- */
+    .process-list {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 14px;
+        padding: 16px 4px 20px;
+        scrollbar-width: none; /* Firefox */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .process-list::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+    }
+
+    .process-list li {
+        flex: 0 0 230px;
+        scroll-snap-align: start;
+        background: #ffffff;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 24px 16px;
+        box-shadow: 0 4px 12px rgba(24, 72, 44, 0.02);
     }
 
     .process-list li + li::before {
         display: none;
     }
 
+    /* --- 신뢰 데이터: 모바일 2x2 콤팩트 카드 격자 배열 --- */
+    .trust-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+    }
+
     .trust-grid div {
-        padding: 16px 0;
         border-right: 0;
-        border-bottom: 1px solid var(--line);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px 12px;
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(24, 72, 44, 0.02);
     }
 
     .trust-grid div:last-child {
-        border-bottom: 0;
+        border-bottom: 1px solid var(--line);
     }
 }

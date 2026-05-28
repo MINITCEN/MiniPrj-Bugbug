@@ -6,7 +6,7 @@
 <header th:fragment="siteHeader(activePage)" class="site-header">
     <div class="site-header__inner">
         <a href="/" class="site-header__brand" aria-label="버그버그 홈">
-            <span class="site-header__brand-badge" aria-hidden="true">◆</span>
+            <img class="site-header__brand-badge" src="/image/favicon.svg" alt="버그버그 로고" aria-hidden="true" style="background: none; padding: 0; border: none; width: 36px; height: 36px; border-radius: 8px; display: inline-block;">
             <span class="site-header__brand-text">버그버그</span>
         </a>
 
@@ -32,8 +32,8 @@
         </nav>
 
         <div class="site-header__actions">
-            <a href="/mypage" class="site-header__icon-button" aria-label="마이페이지">
-                <span aria-hidden="true">♡</span>
+            <a href="/mypage" class="site-header__icon-button" aria-label="마이페이지" style="overflow: hidden; padding: 0;">
+                <img src="/image/mypage_logo.png" alt="마이페이지 로고" aria-hidden="true" style="width: 100%; height: 100%; object-fit: cover; border: none; display: block;">
             </a>
             <div sec:authorize="isAuthenticated()" class="site-header__session">
                 <span class="site-header__welcome" sec:authentication="principal.nickname">사용자</span>
@@ -46,5 +46,8 @@
         </div>
     </div>
 </header>
+
+<!-- 모바일 전용 바텀 네비게이션 자동 내장 (하이브리드 앱 대응) -->
+<nav th:replace="~{fragments/bottom-nav :: mobileBottomNav(activePage)}"></nav>
 </body>
 </html>

@@ -363,3 +363,152 @@ a {
 .level.red {
     background-color: #e94343;
 }
+
+@media (max-width: 768px) {
+    .container {
+        padding: 16px 14px 40px;
+    }
+    .title-box h1 {
+        font-size: 24px;
+    }
+    .title-box p {
+        margin-bottom: 20px;
+    }
+    .top-line {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+    .tabs {
+        gap: 10px;
+        justify-content: space-between;
+        width: 100%;
+        border-bottom: 1px solid #e5e5e5;
+        padding-bottom: 2px;
+    }
+    .tabs a {
+        flex: 1;
+        text-align: center;
+        padding-bottom: 10px;
+    }
+    .board-actions {
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+    .board-actions select {
+        flex: 1;
+        max-width: 50%;
+        min-height: 40px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 0 10px;
+    }
+    .write-btn {
+        flex: 1;
+        max-width: 50%;
+        text-align: center;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px !important;
+    }
+    .request-table {
+        display: block;
+        border: 0;
+    }
+    .request-table thead {
+        display: none;
+    }
+    .request-table tbody {
+        display: block;
+    }
+    .request-table tr {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        background-color: #ffffff;
+        border: 1px solid #e5ece7;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 14px;
+        box-shadow: 0 4px 12px rgba(24, 72, 44, 0.02);
+        gap: 10px;
+        position: relative;
+    }
+    .request-table td {
+        display: block;
+        padding: 0;
+        border: 0;
+        width: 100%;
+        text-align: left;
+    }
+    /* 상태 뱃지 정렬 */
+    .request-table td:nth-child(1) {
+        align-self: flex-start;
+        margin-bottom: 4px;
+    }
+    /* 제목 및 상세 설명 */
+    .request-table td.title-cell {
+        order: 2;
+    }
+    .title-cell strong {
+        font-size: 16px;
+        margin-bottom: 6px;
+        color: #222;
+        white-space: normal;
+        word-break: break-all;
+    }
+    .title-cell p {
+        font-size: 13px;
+        color: #666;
+        line-height: 1.5;
+        white-space: normal;
+        word-break: break-all;
+    }
+    /* 위치 정보 */
+    .request-table td:nth-child(3) {
+        order: 3;
+        font-size: 13px;
+        color: #555;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .request-table td:nth-child(3)::before {
+        content: "📍 ";
+    }
+    /* 등록 시간 */
+    .request-table td:nth-child(4) {
+        order: 4;
+        font-size: 12px;
+        color: #888;
+    }
+    /* 조회 수 */
+    .request-table td:nth-child(5) {
+        position: absolute;
+        right: 16px;
+        top: 16px;
+        width: auto;
+        font-size: 12px;
+        color: #888;
+    }
+    .request-table td:nth-child(5)::before {
+        content: "👁️ ";
+        margin-right: 2px;
+    }
+    .pagination {
+        gap: 6px;
+        margin-top: 24px;
+    }
+    .pagination a, .pagination span {
+        min-width: 28px;
+        height: 28px;
+        padding: 5px 8px;
+        font-size: 12px;
+    }
+}
+

@@ -252,17 +252,137 @@
 
 @media (max-width: 720px) {
     .site-header__actions {
-        width: 100%;
+        width: auto;
         justify-content: flex-end;
     }
 
     .site-header__session {
-        width: 100%;
+        width: auto;
         justify-content: flex-end;
     }
 
     .site-footer__meta {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+/* --- 글로벌 모바일 클릭 하이라이트 제거 --- */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* --- 모바일 바텀 네비게이션 (하이브리드 앱 최적화) --- */
+.mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(64px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--shell-line);
+    display: none; /* 데스크탑 뷰에서는 숨김 */
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.mobile-nav__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    height: 100%;
+    color: var(--shell-muted);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 700;
+    transition: color 0.2s ease, transform 0.1s ease;
+    gap: 4px;
+}
+
+.mobile-nav__icon {
+    width: 22px;
+    height: 22px;
+    stroke-width: 2;
+    transition: transform 0.2s ease;
+}
+
+.mobile-nav__item.is-active {
+    color: var(--shell-brand);
+}
+
+.mobile-nav__item.is-active .mobile-nav__icon {
+    transform: translateY(-2px);
+    stroke-width: 2.5;
+}
+
+.mobile-nav__item:active {
+    transform: scale(0.95);
+}
+
+/* 모바일 뷰 반응형 개편 */
+@media (max-width: 768px) {
+    .mobile-nav {
+        display: flex; /* 모바일에서 탭바 노출 */
+    }
+
+    body {
+        padding-bottom: 64px !important; /* 바텀 탭바 높이만큼 콘텐츠 공간 확보 */
+    }
+
+    .site-header__nav {
+        display: none !important; /* 모바일 헤더 메뉴 숨김 */
+    }
+
+    .site-header__inner {
+        min-height: 56px;
+        padding-left: 12px; /* 16px -> 12px 밀착화 */
+        padding-right: 12px; /* 16px -> 12px 밀착화 */
+    }
+
+    .site-header__brand {
+        gap: 6px !important; /* 이미지와 텍스트 간격 콤팩트 */
+    }
+
+    .site-header__brand-badge {
+        width: 32px !important;   /* 36px -> 32px 꺾임 방지 수축 */
+        height: 32px !important;  /* 36px -> 32px 꺾임 방지 수축 */
+        font-size: 16px !important;
+    }
+
+    .site-header__brand-text {
+        font-size: 17px !important; /* 20px -> 17px 꺾임 방지 수축 */
+    }
+
+    .site-header__actions {
+        gap: 8px;
+    }
+
+    .site-header__welcome {
+        display: none !important; /* 모바일 웰컴 텍스트 숨김 */
+    }
+
+    .site-header__icon-button {
+        display: none !important; /* 중복 마이페이지 아이콘 숨김 */
+    }
+
+    .site-header__session {
+        display: none !important; /* 모바일 헤더 내 로그인/회원가입/로그아웃 싹 가려 간소화 */
+    }
+
+    /* 바텀 탭바 초소형 모바일 대응 */
+    .mobile-nav__item {
+        font-size: 10px !important;
+        gap: 2px !important;
+    }
+    .mobile-nav__icon {
+        width: 20px !important;
+        height: 20px !important;
     }
 }

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -89,7 +89,9 @@
             </div>
             <div class="public-grid">
                 <div class="grade-block">
-                    <div class="badge-shield" id="hunter-grade-mark">-</div>
+                    <div class="badge-shield" id="hunter-grade-mark">
+                        <img src="/image/bugbug_rookie.png" alt="헌터 등급 훈장" id="hunter-grade-img" style="width: 100%; height: 100%; object-fit: contain; display: block;">
+                    </div>
                     <div>
                         <p class="value" id="hunter-grade">불러오는 중</p>
                         <p class="label" id="hunter-completion-cnt">총 0건 활동</p>
@@ -166,6 +168,18 @@
             </div>
         </section>
 
+        <!-- 더보기 (기타 서비스 바로가기) 섹션 신설 -->
+        <section class="section">
+            <div class="section-head">
+                <h2 class="section-title">더보기 <small>(기타 서비스)</small></h2>
+            </div>
+            <div class="more-service-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-top: 16px;">
+                <a href="/service-intro" class="outline-btn" style="text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 12px; font-weight: 700; color: var(--shell-brand);">서비스 소개</a>
+                <a href="/mosquito-map" class="outline-btn" style="text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 12px; font-weight: 700; color: var(--shell-brand);">모기지수 지도</a>
+                <a sec:authorize="hasRole('ADMIN')" href="/admin/users" class="primary-btn" style="text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 12px; font-weight: 700; background: var(--shell-brand); color: #fff; border: none;">관리자 대시보드</a>
+            </div>
+        </section>
+
         <div class="safe-banner">
             <p>
                 <strong>버그버그는 안전하고 신뢰할 수 있는 서비스를 제공합니다.</strong>
@@ -226,8 +240,7 @@
 
         <div class="hunter-grade-list">
             <article class="hunter-grade-card">
-                <div class="rank-medal rank-rookie"><span>★</span></div>
-                <div class="rank-stars">*</div>
+                <div class="rank-medal rank-rookie"><img src="/image/bugbug_rookie.png" alt="루키 훈장" class="rank-medal-img"></div>
                 <div class="rank-content">
                     <h3>루키 <small>Rookie · LV.1</small></h3>
                     <p>버그버그에 첫발을 내디딘 신참 헌터. 가볍게 시작해 현장 경험을 쌓습니다.</p>
@@ -239,8 +252,7 @@
             </article>
 
             <article class="hunter-grade-card">
-                <div class="rank-medal rank-bronze"><span>★</span></div>
-                <div class="rank-stars">**</div>
+                <div class="rank-medal rank-bronze"><img src="/image/bugbug_bronze.png" alt="브론즈 훈장" class="rank-medal-img"></div>
                 <div class="rank-content">
                     <h3>브론즈 <small>Bronze · LV.2</small></h3>
                     <p>기본 장비와 본사 도구를 마스터하고, 다소 안전거리를 확보하는 스마트한 헌터입니다.</p>
@@ -252,8 +264,7 @@
             </article>
 
             <article class="hunter-grade-card">
-                <div class="rank-medal rank-silver"><span>★</span></div>
-                <div class="rank-stars">***</div>
+                <div class="rank-medal rank-silver"><img src="/image/bugbug_silver.png" alt="실버 훈장" class="rank-medal-img"></div>
                 <div class="rank-content">
                     <h3>실버 <small>Silver · LV.3</small></h3>
                     <p>고전압 전기 제압 장비를 자유자재로 다루며, 찰나의 순간에 상황을 종결짓는 숙련된 요원.</p>
@@ -265,8 +276,7 @@
             </article>
 
             <article class="hunter-grade-card">
-                <div class="rank-medal rank-gold"><span>★</span></div>
-                <div class="rank-stars">****</div>
+                <div class="rank-medal rank-gold"><img src="/image/bugbug_gold.png" alt="골드 훈장" class="rank-medal-img"></div>
                 <div class="rank-content">
                     <h3>골드 <small>Gold · LV.4</small></h3>
                     <p>완벽한 차단과 복합 흡입 장비를 무장한 마스터. 해충뿐 아니라 환경과 유해 물질까지 지워버리는 전문가.</p>
@@ -278,8 +288,7 @@
             </article>
 
             <article class="hunter-grade-card">
-                <div class="rank-medal rank-legend"><span>★</span></div>
-                <div class="rank-stars">*****</div>
+                <div class="rank-medal rank-legend"><img src="/image/bugbug_legend.png" alt="레전드 훈장" class="rank-medal-img"></div>
                 <div class="rank-content">
                     <h3>레전드 <small>Legend · LV.5</small></h3>
                     <p>수많은 현장을 평정한 최고의 해결사. 등장만으로 공간의 쾌적함을 보장하는 전설적인 존재.</p>

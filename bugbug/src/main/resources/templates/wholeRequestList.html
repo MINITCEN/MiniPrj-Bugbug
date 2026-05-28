@@ -62,7 +62,7 @@
 
             <tbody>
             <tr th:each="request : ${requestList}">
-                <td th:text="${request.status}"></td>
+                <td th:text="${request.status}" th:classappend="${request.status == '대기 중' ? 'status progress' : (request.status == '예약 중' ? 'status open' : 'status done')}"></td>
                 <td class="title-cell">
                     <a th:href="@{/requestView/detail/{id}(id=${request.requestId})}">
                         <strong th:text="${request.title}">
