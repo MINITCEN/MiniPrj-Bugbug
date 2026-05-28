@@ -18,7 +18,6 @@ import com.bug.catcher.global.file.FileStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -131,9 +130,7 @@ public class RequestService {
     // update
     @Transactional
     public void updateRequest(Long requestId, Long loginUserId, RequestFormDto form, RequestMediaFileUrlDto mediaUrlDto) {
-        Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
-
-                .orElseThrow(() -> new AccessDeniedException("게시글이 없거나 수정 권한이 없습니다."));
+        Request request = getRequest(requestId);
 
         String beforeStatus = request.getStatus();
 
@@ -190,11 +187,15 @@ public class RequestService {
         return "완료".equals(status);
     }
 
+    private Request getRequest(Long requestId) {
+        return requestRepository.findById(requestId)
+                .orElseThrow(() -> new IllegalArgumentException("의뢰를 찾을 수 없습니다."));
+    }
+
     // delete request
     @Transactional
-    public void deleteRequest(Long requestId, Long loginUserId) {
-        Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
-                .orElseThrow(() -> new AccessDeniedException("게시글이 없거나 삭제 권한이 없습니다."));
+    public void deleteRequest(Long requestId) {
+        Request request = getRequest(requestId);
 
         List<String> imageUrls = request.getRequestImages()
                 .stream()
@@ -215,8 +216,7 @@ public class RequestService {
             return;
         }
 
-        Request request = requestRepository.findByIdAndUser_Id(requestId, loginUserId)
-                .orElseThrow(() -> new AccessDeniedException("게시글이 없거나 삭제 권한이 없습니다."));
+        Request request = getRequest(requestId);
 
         deleteImages(requestId, dto.getImageUrls());
 
@@ -279,13 +279,10 @@ public class RequestService {
     }
 
     @Transactional(readOnly = true)
-    public RequestEditFormDto getEditForm(Long requestId, Long loginUserId) {
+    public RequestEditFormDto getEditForm(Long requestId) {
         Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new IllegalArgumentException("의뢰글을 찾을 수 없습니다."));
 
-        if (!request.getUser().getId().equals(loginUserId)) {
-            throw new AccessDeniedException("수정 권한이 없습니다.");
-        }
         RequestFormDto form = new RequestFormDto();
 
         form.setTitle(request.getTitle());

@@ -16,7 +16,6 @@ public class ChatMessageDto {
     @AllArgsConstructor
     public static class SendRequest {
         private Long roomId;
-        private Long senderId;
         private String content;
         private ChatMessage.MessageType messageType;
     }

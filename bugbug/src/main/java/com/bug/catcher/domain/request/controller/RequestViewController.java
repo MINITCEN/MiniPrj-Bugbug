@@ -20,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -37,11 +36,6 @@ public class RequestViewController {
 
     @Value("${kakao.api.key}")
     private String kakaoMapApiKey;
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public String handleAccessDenied() {
-        return "redirect:/requestView/list?error=forbidden";
-    }
 
     @GetMapping("/list")
     public String requestList(
@@ -134,11 +128,10 @@ public class RequestViewController {
     @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @GetMapping("/edit/{requestId}")
     public String editForm(
-            @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId,
             Model model) {
 
-        RequestEditFormDto editForm = requestService.getEditForm(requestId, loginUser.getUserId());
+        RequestEditFormDto editForm = requestService.getEditForm(requestId);
 
         model.addAttribute("mode", "edit");
         model.addAttribute("requestId", requestId);
@@ -164,10 +157,9 @@ public class RequestViewController {
     @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @PostMapping("/remove/{requestId}")
     public String deleteRequest(
-            @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId) {
 
-        requestService.deleteRequest(requestId, loginUser.getUserId());
+        requestService.deleteRequest(requestId);
         return "redirect:/requestView/list";
     }
 }

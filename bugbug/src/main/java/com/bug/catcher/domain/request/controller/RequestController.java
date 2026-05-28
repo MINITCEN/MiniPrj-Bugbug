@@ -8,10 +8,7 @@ import com.bug.catcher.global.auth.CustomUserPrincipal;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,13 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class RequestController {
 
     private final RequestService requestService;
-
-    // Rest API 403 에러 처리
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Map.of("message", e.getMessage()));
-    }
 
     @PreAuthorize("hasRole('USER')")
     @PostMapping(value = "/new", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -64,9 +54,8 @@ public class RequestController {
     @PreAuthorize("hasRole('USER') and @requestPermissionChecker.isOwner(#requestId, principal.userId)")
     @DeleteMapping(value = "/remove/{requestId}")
     public List<Map<String, Object>> deleteRequestList(
-            @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long requestId) {
-        requestService.deleteRequest(requestId, loginUser.getUserId());
+        requestService.deleteRequest(requestId);
         return requestService.readRequestList();
     }
 }

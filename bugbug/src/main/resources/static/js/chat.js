@@ -149,7 +149,6 @@ function sendChatMessage() {
     if (content && stompClient) {
         const chatMessage = {
             roomId: currentRoomId,
-            senderId: currentUserId,
             content: content,
             messageType: "TEXT"
         };
@@ -219,7 +218,6 @@ async function uploadChatFile() {
     const file = fileInput.files[0];
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("senderId", currentUserId);
 
     let messageType = 'IMAGE';
     if (file.type.startsWith('video/')) messageType = 'VIDEO';
