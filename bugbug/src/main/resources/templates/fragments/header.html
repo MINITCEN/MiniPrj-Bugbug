@@ -32,7 +32,11 @@
         </nav>
 
         <div class="site-header__actions">
-            <a href="/mypage" class="site-header__icon-button" aria-label="마이페이지" style="overflow: hidden; padding: 0;">
+            <a href="/mypage"
+               class="site-header__icon-button"
+               aria-label="마이페이지"
+               sec:authorize="isAuthenticated()"
+               style="overflow: hidden; padding: 0;">
                 <img src="/image/mypage_logo.png" alt="마이페이지 로고" aria-hidden="true" style="width: 100%; height: 100%; object-fit: cover; border: none; display: block;">
             </a>
             <div sec:authorize="isAuthenticated()" class="site-header__session">
