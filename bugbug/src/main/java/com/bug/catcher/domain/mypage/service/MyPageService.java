@@ -217,6 +217,10 @@ public class MyPageService {
              throw new IllegalArgumentException("이미 심사 대기 중인 신청서가 있습니다.");
          }
 
+        if (hunterApplicationRepository.existsByUserAndStatus(user, ApplicationStatus.REJECTED)) {
+            throw new IllegalArgumentException("승인 거절로 인해 헌터 등록을 다시 신청할 수 없습니다.");
+        }
+
         HunterApplication application = HunterApplication.builder()
                 .user(user)
                 .name(user.getNickname()) // 팝업에서 따로 실명을 받는다면 requestDto에서 가져오기

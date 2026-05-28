@@ -285,6 +285,26 @@
             .catch(() => alert("헌터 자격 해제 중 문제가 발생했습니다."));
     }
 
+    function applyHunterWithServerMessage() {
+        if (!confirm("헌터 등록 신청을 진행할까요?")) {
+            return;
+        }
+
+        fetch("/api/mypage/hunter/apply", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pledgeAgreed: true })
+        })
+            .then(async (res) => {
+                if (!res.ok) {
+                    const message = await res.text();
+                    throw new Error(message || "헌터 신청 처리 중 문제가 발생했습니다.");
+                }
+                alert("헌터 신청이 접수되었습니다.");
+            })
+            .catch((error) => alert(error.message));
+    }
+
     function logout() {
         fetch("/api/auth/logout", { method: "POST" })
             .finally(() => {
@@ -317,7 +337,7 @@
     window.closeProfileModal = closeProfileModal;
     window.openHunterGradeModal = openHunterGradeModal;
     window.closeHunterGradeModal = closeHunterGradeModal;
-    window.applyHunter = applyHunter;
+    window.applyHunter = applyHunterWithServerMessage;
     window.resignHunter = resignHunter;
     window.logout = logout;
 }());

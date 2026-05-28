@@ -153,7 +153,7 @@
                 button.setAttribute("aria-label", active ? "찜 취소" : "찜하기");
             })
             .catch(() => {
-                alert("찜 상태를 변경하지 못했습니다.");
+                alert("헌터는 찜하기를 할 수 없습니다.");
             })
             .finally(() => {
                 button.disabled = false;
