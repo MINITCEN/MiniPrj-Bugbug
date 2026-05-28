@@ -86,9 +86,8 @@ public class CommentService {
      * 댓글을 soft delete 처리한다.
      */
     @Transactional
-    public void deleteComment(Long requestId, Long commentId, Long loginUserId) {
+    public void deleteComment(Long requestId, Long commentId) {
         Comment comment = getCommentInRequest(commentId, requestId);
-        validateCommentOwner(comment, loginUserId);
         comment.markDeleted();
     }
 
@@ -96,9 +95,8 @@ public class CommentService {
      * 댓글 내용을 수정한다.
      */
     @Transactional
-    public CommentDto.Response updateComment(Long requestId, Long commentId, Long loginUserId, CommentDto.UpdateRequest requestDto) {
+    public CommentDto.Response updateComment(Long requestId, Long commentId, CommentDto.UpdateRequest requestDto) {
         Comment comment = getCommentInRequest(commentId, requestId);
-        validateCommentOwner(comment, loginUserId);
         comment.updateContent(requestDto.getContent());
         return CommentDto.Response.fromEntity(comment);
     }
@@ -121,12 +119,6 @@ public class CommentService {
     private void validateRequestExists(Long requestId) {
         if (!requestRepository.existsById(requestId)) {
             throw new IllegalArgumentException("존재하지 않는 게시글입니다.");
-        }
-    }
-
-    private void validateCommentOwner(Comment comment, Long loginUserId) {
-        if (!comment.getUser().getId().equals(loginUserId)) {
-            throw new IllegalArgumentException("본인이 작성한 댓글만 삭제할 수 있습니다.");
         }
     }
 

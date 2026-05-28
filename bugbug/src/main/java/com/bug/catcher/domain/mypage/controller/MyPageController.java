@@ -1,6 +1,5 @@
 package com.bug.catcher.domain.mypage.controller;
 
-import com.bug.catcher.domain.entity.User;
 import com.bug.catcher.domain.hunter.dto.HunterProfileResponseDto;
 import com.bug.catcher.domain.mypage.dto.DashboardResponseDto;
 import com.bug.catcher.domain.mypage.dto.HunterApplyRequestDto;
@@ -14,7 +13,6 @@ import com.bug.catcher.domain.mypage.dto.ReviewCreateRequestDto;
 import com.bug.catcher.domain.mypage.dto.ReviewUpdateRequestDto;
 import com.bug.catcher.domain.mypage.service.MyPageService;
 import com.bug.catcher.domain.review.dto.ReviewResponseDto;
-import com.bug.catcher.domain.user.repository.UserRepository;
 import com.bug.catcher.global.auth.CustomUserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -42,8 +40,8 @@ import java.util.Map;
 public class MyPageController {
 
     private final MyPageService myPageService;
-    private final UserRepository userRepository;
 
+    @PreAuthorize("hasAnyRole('USER', 'HUNTER')")
     @GetMapping("/info")
     public ResponseEntity<MyInfoResponseDto> getMyInfo(
             @AuthenticationPrincipal CustomUserPrincipal loginUser) {
@@ -52,6 +50,7 @@ public class MyPageController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'HUNTER')")
     @PatchMapping("/info")
     public ResponseEntity<MyInfoResponseDto> updateMyInfo(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
@@ -132,14 +131,12 @@ public class MyPageController {
         return ResponseEntity.ok("헌터 신청이 성공적으로 접수되었습니다.");
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'HUNTER')")
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardResponseDto> getMyPageDashboard(
             @AuthenticationPrincipal CustomUserPrincipal loginUser) {
 
-        User dbUser = userRepository.findById(loginUser.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-        DashboardResponseDto responseDto = new DashboardResponseDto(dbUser.getRole(), dbUser.getNickname());
+        DashboardResponseDto responseDto = myPageService.getDashboard(loginUser.getUserId());
         return ResponseEntity.ok(responseDto);
     }
 
@@ -181,6 +178,7 @@ public class MyPageController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('HUNTER')")
     @GetMapping("/hunter/review-summary")
     public ResponseEntity<Map<Integer, Long>> getMyHunterReviewSummary(
             @AuthenticationPrincipal CustomUserPrincipal loginUser) {

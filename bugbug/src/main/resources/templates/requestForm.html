@@ -10,7 +10,7 @@
 
 <body>
 <script th:src="@{https://dapi.kakao.com/v2/maps/sdk.js(appkey=${kakaoMapKey},libraries='services',autoload=false)}"></script>
-<div th:replace="~{fragments/header :: siteHeader('none')}"></div>
+<div th:replace="~{fragments/header :: siteHeader('request')}"></div>
 <main class="container">
     <div class="page-title">
         <h1 th:text="${mode == 'edit'} ? '의뢰 수정하기' : '의뢰 등록하기'">의뢰 등록하기</h1>

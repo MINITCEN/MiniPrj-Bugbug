@@ -7,14 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.Optional;
-
 public interface RequestRepository extends JpaRepository<Request, Long> {
     @Modifying
     @Query("update Request r set r.viewCount = r.viewCount + 1 where r.id = :requestId")
     int increaseViewCount(Long requestId);
 
-    Optional<Request> findByIdAndUser_Id(Long requestId, Long userId);
     boolean existsByIdAndUser_Id(Long requestId, Long userId);
 
     //상태별 페이지 조회

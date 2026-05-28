@@ -63,17 +63,17 @@ public class ChatRoomController {
     }
 
     @Operation(summary = "채팅방 메시지 내역 조회", description = "특정 채팅방의 과거 메시지를 조회합니다.")
+    @PreAuthorize("@chatRoomPermissionChecker.isParticipant(#roomId, principal.userId)")
     @GetMapping("/chats/{roomId}/messages")
     public ResponseEntity<List<ChatMessageDto.Response>> getMessages(
-            @PathVariable Long roomId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @PathVariable Long roomId) {
 
         List<ChatMessageDto.Response> response = chatRoomService.getMessages(roomId);
         return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "방문 날짜 예약", description = "채팅방에서 합의한 방문 날짜와 시간을 예약합니다.")
+    @PreAuthorize("@chatRoomPermissionChecker.isParticipant(#roomId, principal.userId)")
     @PostMapping("/chats/{roomId}/reservation")
     public ResponseEntity<Void> updateReservation(
             @PathVariable Long roomId,
@@ -84,16 +84,17 @@ public class ChatRoomController {
     }
 
     @Operation(summary = "채팅 파일 전송", description = "사진, 동영상, 음성 파일을 전송합니다.")
+    @PreAuthorize("@chatRoomPermissionChecker.isParticipant(#roomId, principal.userId)")
     @PostMapping(value = "/chats/{roomId}/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadChatFile(
+            @AuthenticationPrincipal CustomUserPrincipal loginUser,
             @PathVariable Long roomId,
             @RequestPart("file") MultipartFile file,
-            @RequestParam("messageType") ChatMessage.MessageType messageType,
-            @RequestParam("senderId") Long senderId) {
+            @RequestParam("messageType") ChatMessage.MessageType messageType) {
 
         try {
             String fileUrl = fileService.storeFile(file, messageType);
-            ChatMessageDto.Response savedMessage = chatMessageService.saveFileMessage(roomId, senderId, fileUrl, messageType);
+            ChatMessageDto.Response savedMessage = chatMessageService.saveFileMessage(roomId, loginUser.getUserId(), fileUrl, messageType);
             messagingTemplate.convertAndSend("/topic/chat/room/" + roomId, savedMessage);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {

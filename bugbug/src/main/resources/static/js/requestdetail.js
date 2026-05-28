@@ -394,6 +394,11 @@ function bindCommentForm() {
         return;
     }
 
+    if (form.dataset.bound === "true") {
+        return;
+    }
+    form.dataset.bound = "true";
+
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
@@ -403,11 +408,23 @@ function bindCommentForm() {
             return;
         }
 
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton?.disabled) {
+            return;
+        }
+
         try {
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
             await createComment(content);
             textarea.value = "";
         } catch (error) {
             alert(error.message);
+        } finally {
+            if (submitButton) {
+                submitButton.disabled = false;
+            }
         }
     });
 }
@@ -424,10 +441,6 @@ if (typeof kakao !== "undefined" && kakao.maps) {
 } else {
     console.error("카카오 지도 SDK가 로딩되지 않았습니다.");
 }
-
-document.addEventListener("DOMContentLoaded", function () {
-    initComments();
-});
 
 function bindSavedRequestButton() {
     const button = document.querySelector(".like-btn");
