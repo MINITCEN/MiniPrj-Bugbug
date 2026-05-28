@@ -18,11 +18,13 @@ public class MyPageViewController {
 
     private final MyPageService myPageService;
 
+    @PreAuthorize("hasAnyRole('USER', 'HUNTER')")
     @GetMapping
     public String myPage() {
         return "redirect:/mypage/dashboard";
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'HUNTER')")
     @GetMapping("/dashboard")
     public String dashboardView(
             @AuthenticationPrincipal CustomUserPrincipal loginUser,
